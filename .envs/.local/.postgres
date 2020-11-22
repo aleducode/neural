@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=neural
+POSTGRES_USER=btotaLkKrBzggzpQOToOMLmCuZkHDUIh
+POSTGRES_PASSWORD=8GT5WhO8kyU1yDl8x8IEIV2u76nUOZMEes3t8mkuJeEg8lZXP5XEVwIg0bJIEOCe
