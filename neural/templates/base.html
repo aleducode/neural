@@ -6,30 +6,30 @@
 <head>
 
 	<meta charset="utf-8"/>
-	<title>Un convite por Abejorral{% block title %}{% endblock %}</title>
+    <title>Neural Consciente{% block title %}{% endblock %}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta property="og:locale" content="es_CO" />
 	<!-- Primary Meta Tags -->
-    <meta name="title" content="Un convite por Abejorral">
-    <meta name="description" content="Esta es una plataforma ciudadana sin ánimo de lucro, que opera gracias al aporte voluntario de personas como tú, que buscan transformar la vida de niños y jóvenes del municipio de Abejorral.">
+    <meta name="title" content="Neural Consciente">
+    <meta name="description" content="Neural consciente, agenda tu entrenamiento.">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://unconviteporabejorral.org">
-    <meta property="og:title" content="Un convite por Abejorral">
-    <meta property="og:description" content="Esta es una plataforma ciudadana sin ánimo de lucro, que opera gracias al aporte voluntario de personas como tú, que buscan transformar la vida de niños y jóvenes del municipio de Abejorral.">
-    <meta property="og:image" content="{% static 'images/banner1.png'%}">
+    <meta property="og:url" content="https://neural.com.co">
+    <meta property="og:title" content="Neural Consciente">
+    <meta property="og:description" content="Neural consciente, agenda tu entrenamiento.">
+    <meta property="og:image" content="{% static 'images/fixed_logo.png' %}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://unconviteporabejorral.org">
-    <meta property="twitter:title" content="Un convite por Abejorral">
-    <meta property="twitter:description" content="Esta es una plataforma ciudadana sin ánimo de lucro, que opera gracias al aporte voluntario de personas como tú, que buscan transformar la vida de niños y jóvenes del municipio de Abejorral.">
-    <meta property="twitter:image" content="{% static 'images/banner1.png'%}">
+    <meta property="twitter:url" content="https://neural.com.co">
+    <meta property="twitter:title" content="Neural Consciente">
+    <meta property="twitter:description" content="Neural consciente, agenda tu entrenamiento.">
+    <meta property="twitter:image" content="{% static 'images/fixed_logo.png' %}">
 
 
 	<!-- App favicon -->
-	<link rel="shortcut icon" href="{% static 'images/abeja.png' %}">
+    <link rel="shortcut icon" href="{% static '/images/brain.png' %}">
      <!-- Sweet Alert-->
      <link href="{% static 'backoffice/assets/libs/sweetalert2/sweetalert2.min.css' %}" rel="stylesheet" type="text/css" />
 
@@ -39,7 +39,7 @@
 	<link href="{% static 'backoffice/assets/css/icons.min.css' %}" rel="stylesheet"/>
 	<!-- App Css-->
 	<link href="{% static 'backoffice/assets/css/app.min.css' %}" rel="stylesheet"/>
-    <!-- Hotjar Tracking Code for unconviteporabejorral.org -->
+    <!-- Hotjar Tracking Code for neural.com.co -->
     
 
 	{% block styles %}{% endblock %}
@@ -49,19 +49,38 @@
     #page-header-notifications-dropdown {
         width: 56px;
     }
-
+    .footer > div:nth-child(1) {
+        max-width: 100%;
+        }
 </style>
 <body data-topbar="dark" data-layout="horizontal">
 
     <!-- Begin page -->
     <div id="layout-wrapper">
         <header id="page-topbar" class="text-center">
-            <a class="logo" href="/">
-                <img src="{% static 'images/abeja.png' %}" alt="" height="60">
-            </a>
-            <button onclick="window.location='/'" class="btn header-item waves-effect" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false" style="font-size: large;">
-                Neural Consciente
-            </button>
+            <div class="row">
+            <div class="col-6 offset-3">
+                <a class="logo" href="/">
+                    <img src="{% static 'images/fixed_logo.png' %}" alt="" class="img-fluid" style="max-height:75px">
+                </a>
+            </div>
+            <div class="col-3 text-right">
+            <div class="dropdown d-inline-block">
+                <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img class="rounded-circle header-profile-user" src="{% static 'images/brain.png' %}"
+                        alt="Header Avatar">
+                    <span class="d-none d-xl-inline-block ml-1">Alejandro Duque</span>
+                    <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <!-- item-->
+                    <a class="dropdown-item" href="#"><i class="bx bx-user font-size-16 align-middle mr-1"></i> Perfil</a>
+                    <a class="dropdown-item text-danger" href="{% url 'users:logout' %}"><i class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i> Cerrar sesión</a>
+                </div>
+            </div>
+            </div>
+        </div>
             
         </header>
 
@@ -70,14 +89,14 @@
             
         {% endblock content %}
         </div>
-            <footer class="footer">
-                <div class="container-fluid">
-                    <div class="row text-center">
+            <footer class="footer" >
+                <div class="container-fluid" class="m-0 p-0" style="background-color:#f2f2f5">
+                    <div class="row text-center" >
                         <div class="col-12">
-                            <i class="bx bxl-github  text-primary display-5" style="font-size: xx-large;"></i>
+                            <img src="{% static 'images/brain.png' %}" width="60" class="img-fluid">
                             <p class="mt-0 pt-0 mb-0">Código fuente libre bajo licencia <a href="https://github.com/aleducode/help-abejorral/blob/master/LICENSE" target="_blank">MIT License</a></p>
-                            <p class="mt-0 pt-0 mb-0">Desarrollado por: <a href="https://github.com/aleducode" target="_blank">Alejandro Duque</a> | <a href="https://github.com/feloeche" target="_blank">Felipe Echeverri</a></p>
-                            <p class="mt-0 pt-0 mb-0"> Revisá el código <a href="https://github.com/aleducode/help-abejorral" target="_blank">acá</a></p>
+                            <p class="mt-0 pt-0 mb-0">Desarrollado por: <a href="https://github.com/aleducode" target="_blank">Alejandro Duque</a></p>
+                            <p class="mt-0 pt-0 mb-0"> Revisá el código <a href="https://github.com/aleducode/neural" target="_blank">acá</a></p>
                             <p class="mt-0 pt-0 mb-0"> © 2020 Todos los derechos reservados</p>
                 
                         </div>
