@@ -34,77 +34,76 @@
 							<div class="row">
 								<div class="col-7">
 									<div class="text-primary p-4">
-										<h5 class="text-primary">Bienvenidx !</h5>
-										<p>Neural consciente.</p>
+										<h5 class="text-primary">Registrate en Neural</h5>
+										<p></p>
 									</div>
 								</div>
 								<div class="col-5 align-self-end">
 									<img src="{% static 'backoffice/assets/images/profile-img.png' %}" alt=""
-										class="img-fluid">
+									class="img-fluid">
 								</div>
 							</div>
 						</div>
-						<div class="card-body pt-0">
+						<div class="card-body pt-0"> 
 							<div>
-								<a href="">
+								<a href="/">
 									<div class="avatar-md profile-user-wid mb-4">
 										<span class="avatar-title rounded-circle bg-light">
-											<img src="{% static '/images/brain.png' %}" alt="" class="rounded-circle"
-												height="54">
+											<img src="{% static '/images/brain.png' %}" alt="" class="rounded-circle" height="54">
 										</span>
 									</div>
 								</a>
 							</div>
 							<div class="p-2">
 								<form class="form-horizontal" method="post">
+									{% csrf_token %}
 									{% if form.errors %}
-									<p class="alert alert-danger">Bad Credencials, didn't match. Try Again</p>
+									<p class="alert alert-danger">
+										
+										{% for key, value in form.errors.items  %}
+											{{value.0}}
+										{% endfor %}
+											
+									</p>
 
 									{% endif %}
-									{% csrf_token %}
 									<div class="form-group">
-										<label for="username">{{form.email.label}}</label>
-										{{form.email}}
+										<label for="username">Nombres</label>
+										{{form.first_name}} 
 									</div>
-
 									<div class="form-group">
-										<label for="userpassword">{{form.password.label}}</label>
-										{{form.password}}
+										<label for="userpassword">Apellidos</label>
+										{{form.last_name}}   
 									</div>
-
-									<div class="custom-control custom-checkbox">
-										<input type="checkbox" class="custom-control-input" id="customControlInline">
-										<label class="custom-control-label" for="customControlInline">Recordarme</label>
+									<div class="form-group">
+										<label for="useremail">Email</label>
+										{{form.email}} 
 									</div>
-
-
-
-									<div class="mt-3">
-										<button class="btn btn-primary btn-block waves-effect waves-light"
-											type="submit">
-											Iniciar Sesión
-										</button>
-										<a class="btn btn-light btn-block waves-effect waves-light"
-										href="{% url 'users:signup' %}">
-										Registrarme 💪
-									</a>
+									<div class="form-group">
+										<label for="useremail">Número de whatsapp</label>
+										{{form.phone_number}} 
 									</div>
-
-									<div class="mt-4 text-center">
-										<a href="" class="text-muted"><i class="mdi mdi-lock mr-1"></i>
-											¿Olvidaste tu contraseña?
-										</a>
+									<div class="form-group">
+										<label for="useremail">Contraseña</label>
+										{{form.password}} 
+									</div>
+									<div class="form-group">
+										<label for="useremail">Confirmar contraseña</label>
+										{{form.password_confirmation}} 
+									</div>
+									<div class="mt-4">
+										<button class="btn btn-primary btn-block waves-effect waves-light" type="submit">Registrarme</button>
 									</div>
 								</form>
 							</div>
-
+		
 						</div>
 					</div>
 					<div class="mt-5 text-center">
-
+						
 						<div>
-							<p>© 2020 Neural. Creado en Medallo con <i class="mdi mdi-heart text-info"></i>
-							</p>
+							<p>Ya tenés cuenta ? <a href="{% url 'users:login' %}" class="font-weight-medium text-primary"> Inicia sesión</a> </p>
+							<p>© 2020. Creado en medallo con  <i class="mdi mdi-heart text-info"></i></p>
 						</div>
 					</div>
 

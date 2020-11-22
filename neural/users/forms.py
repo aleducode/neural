@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import (
     authenticate, get_user_model,
 )
+from django.core.validators import RegexValidator
 from django.contrib.auth import forms as admin_forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -51,12 +52,6 @@ class CustomAuthenticationForm(forms.Form):
         self.request = request
         self.user_cache = None
         super().__init__(*args, **kwargs)
-
-        # Set the max length and label for the "username" field.
-        self.username_field = UserModel._meta.get_field(UserModel.USERNAME_FIELD)
-        self.fields['username'].max_length = self.username_field.max_length or 254
-        if self.fields['username'].label is None:
-            self.fields['username'].label = capfirst(self.username_field.verbose_name)
 
     email = forms.EmailField(
         label="Correo electrónico",
@@ -121,5 +116,67 @@ class CustomAuthenticationForm(forms.Form):
         return forms.ValidationError(
             self.error_messages['invalid_login'],
             code='invalid_login',
-            params={'email': self.email.verbose_name},
         )
+
+
+class SignUpForms(forms.Form):
+    """Sign up form."""
+
+    password = forms.CharField(
+        max_length=70,
+        label='',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password_confirmation = forms.CharField(
+        max_length=70,
+        label='',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+    first_name = forms.CharField(
+        min_length=2,
+        max_length=50,
+        label='',
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(
+        min_length=2,
+        max_length=50,
+        label='',
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    phone_regex = RegexValidator(
+        regex=r'\+?1?\d{9,15}$',
+        message='el numero de teléfono debe estár en el formato +573000000000'
+    )
+
+    phone_number = forms.CharField(
+        validators=[phone_regex],
+        min_length=2,
+        max_length=50,
+        label='',
+        initial='+57',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ejemplo +57 300 000 00 00'}))
+
+    email = forms.CharField(
+        min_length=6,
+        max_length=70,
+        label='',
+        widget=forms.EmailInput(
+            attrs={'class': 'form-control'})
+    )
+
+    def clean(self):
+        """Veirify password confirmation match."""
+        data = super().clean()
+        password = data['password']
+        password_confirmation = data['password_confirmation']
+
+        if password != password_confirmation:
+            raise forms.ValidationError('Las contraseñas no coinciden')
+        return data
+
+    def save(self):
+        """Create user and profile."""
+        data = self.cleaned_data
+        data.pop('password_confirmation')
+        data['username'] = data['email']
+        user = User.objects.create_user(**data)
+        return user

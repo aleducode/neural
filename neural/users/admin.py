@@ -12,7 +12,7 @@ class UserAdmin(auth_admin.UserAdmin):
 
     form = UserChangeForm
     add_form = UserCreationForm
-    fieldsets = (("User", {"fields": ("phone_number",)}),) + tuple(
+    fieldsets = (("User", {"fields": ("phone_number", 'is_verified')}),) + tuple(
         auth_admin.UserAdmin.fieldsets
     )
-    list_display = ["email", "phone_number", "is_superuser"]
+    list_display = ["email", "phone_number", "is_client", 'is_verified']

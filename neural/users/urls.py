@@ -9,6 +9,16 @@ urlpatterns = [
         name='index'
     ),
     path(
+        route="pending",
+        view=user_views.PendingView.as_view(),
+        name='pending'
+    ),
+    path(
+        route='signup',
+        view=user_views.SignUpView.as_view(),
+        name='signup'
+    ),
+    path(
         route='login/',
         view=user_views.LoginView.as_view(),
         name='login'
