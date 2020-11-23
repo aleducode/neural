@@ -18,5 +18,15 @@ urlpatterns = [
         view=training_views.ScheduleView.as_view(),
         name='schedule'
     ),
+    path(
+        route='my-schedule',
+        view=training_views.MyScheduleView.as_view(),
+        name='my_schedule'
+    ),
+     path(
+        route='info',
+        view=training_views.InfoView.as_view(),
+        name='info'
+    ),
 
 ]

@@ -13,5 +13,5 @@ class UserTrainingInline(admin.TabularInline):
 @admin.register(Slot)
 class SlotAdmin(admin.ModelAdmin):
     list_filter = ['date', 'hour_init']
-    list_display = ['__str__', 'date', 'hour_init']
+    list_display = ['__str__', 'date', 'hour_init', 'available_places']
     inlines = [UserTrainingInline]

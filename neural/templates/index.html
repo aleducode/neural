@@ -36,7 +36,7 @@
             </a>
             </div>
             <div class="col-lg-4">
-                <a href="/">
+                <a href="{% url 'training:info' %}">
                 <div class="card border border-info">
                     <div class="card-header bg-transparent border-info">
                         <h5 class="my-0 text-info" style="font-size: x-large;"><i
@@ -53,14 +53,14 @@
         <div class="row">
 
             <div class="col-lg-4 offset-lg-2">
-                <a href="{% url 'training:schedule' %}">
+                <a href="{% url 'training:my_schedule' %}">
                 <div class="card border border-info">
                     <div class="card-header bg-transparent border-info">
                         <h5 class="my-0 text-info" style="font-size: x-large;"><i
-                                class="mdi mdi-calendar mr-3"></i>Ver mis Agendas</h5>
+                                class="mdi mdi-calendar mr-3"></i>Ver mi Agenda</h5>
                     </div>
                     <div class="card-body mt-0 pt-0">
-                        <h5>Selecciona horario y espacio de preferencia para tu entrenamiento.</h5>
+                        <h5>Tus entrenamientos programados para la semana.</h5>
                     </div>
                 </div>
             </a>

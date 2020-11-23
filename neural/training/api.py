@@ -25,7 +25,7 @@ class TrainingViewSet(viewsets.GenericViewSet):
         now = timezone.localtime()
         gap_acceptance = now + timedelta(minutes=20)
         date = request.data.get('date')
-        slots = Slot.objects.filter(date=date, hour_init__gte=gap_acceptance)
+        slots = Slot.objects.filter(date=date, hour_init__gte=gap_acceptance).order_by('hour_init').distinct('hour_init')
         if slots:
             data = SlotModelSerializer(slots, many=True).data
             status_code = status.HTTP_200_OK

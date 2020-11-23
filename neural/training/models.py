@@ -1,6 +1,7 @@
 """User model."""
 
 # Django
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
@@ -8,6 +9,17 @@ from django.core.validators import RegexValidator
 from neural.users.models import User
 # Utils
 from neural.utils.models import NeuralBaseModel
+
+
+class Space(NeuralBaseModel):
+    slug_name = models.SlugField(max_length=50)
+    name = models.CharField(max_length=255)
+    description = models.CharField(null=True, blank=True, max_length=255)
+
+    def save(self, *args, **kwargs):
+        from unidecode import unidecode
+        self.slug_name = unidecode(self.name).replace(" ", "_").lower()
+        return super().save(*args, **kwargs)
 
 
 class Slot(NeuralBaseModel):
@@ -57,7 +69,21 @@ class UserTraining(NeuralBaseModel):
         choices=Status.choices,
         default=Status.CONFIRMED,
     )
+    #space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name='user_trainings')
 
     def __str__(self):
         return f'Entrenamiento: {self.user}'
+
+
+    @property
+    def random_icon(self):
+        import random
+        icons = ['bx bx-cycling', 'bx bx-football', 'bx bx-dumbbell']
+        index = random.randint(0, len(icons)-1)
+        return icons[index]
+    
+    @property
+    def is_now(self):
+        return self.slot.date == timezone.localdate()
+
 
