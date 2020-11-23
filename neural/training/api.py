@@ -23,9 +23,13 @@ class TrainingViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['post'])
     def get_slots(self, request):
         now = timezone.localtime()
+        now_date = timezone.localdate()
         gap_acceptance = now + timedelta(minutes=20)
         date = request.data.get('date')
-        slots = Slot.objects.filter(date=date, hour_init__gte=gap_acceptance).order_by('hour_init').distinct('hour_init')
+        if date == now_date.strftime("%Y-%m-%d"):
+            slots = Slot.objects.filter(date=date, hour_init__gte=gap_acceptance).order_by('hour_init').distinct('hour_init')
+        else:
+            slots = Slot.objects.filter(date=date).order_by('hour_init').distinct('hour_init')
         if slots:
             data = SlotModelSerializer(slots, many=True).data
             status_code = status.HTTP_200_OK
