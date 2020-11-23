@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from neural.training.models import Slot
 
 # Serializers
-from neural.training.serializers import SlotModelSerializer
+from neural.training.serializers import SlotModelSerializer, SeatModelSerializer
 
 
 class TrainingViewSet(viewsets.GenericViewSet):
@@ -28,6 +28,19 @@ class TrainingViewSet(viewsets.GenericViewSet):
         slots = Slot.objects.filter(date=date, hour_init__gte=gap_acceptance).order_by('hour_init').distinct('hour_init')
         if slots:
             data = SlotModelSerializer(slots, many=True).data
+            status_code = status.HTTP_200_OK
+        else:
+            status_code = status.HTTP_404_NOT_FOUND
+            data = 'No data'
+        return Response({'result': data}, status=status_code)
+
+    @action(detail=False, methods=['post'])
+    def get_seats(self, request):
+        slot = request.data.get('slot')
+        slot = Slot.objects.get(pk=slot)
+        if slot.available_places:
+            available_seats = slot.available_seats
+            data = SeatModelSerializer(available_seats, many=True).data
             status_code = status.HTTP_200_OK
         else:
             status_code = status.HTTP_404_NOT_FOUND

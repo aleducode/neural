@@ -14,7 +14,7 @@
                     <p class="alert alert-danger">
                         {% for field, error in form.errors.items  %}
                         {{error.0}}
-                    {% endfor %}
+                        {% endfor %}
                     </p>
                     {% endif %}
                     <form method="POST">
@@ -26,6 +26,10 @@
                         <div class="form-group">
                             <label for="formrow-firstname-input">{{form.slot.label}}</label>
                             {{form.slot}}
+                        </div>
+                        <div class="form-group">
+                            <label for="formrow-firstname-input">{{form.space.label}}</label>
+                            {{form.space}}
                         </div>
                         <button type="submit" class="btn btn-lg btn-block btn-info w-lg waves-effect waves-light"
                             style="color:white">Agendar</button>
@@ -40,43 +44,104 @@
 {% block js %}
 <script>
     date = document.getElementById('id_fecha')
-    select = document.getElementById('id_slot')
-
-    date.onchange = function () {
-        value = date.value
+    slot = document.getElementById('id_slot')
+    space = document.getElementById('id_space')
+    function clean_selector(id_selector){
+        obj = document.getElementById(id_selector)
+        obj.disabled = true;
+        obj.options.length = 0
+        var opt = document.createElement('option');
+        opt.value = null;
+        opt.innerHTML = '-----';
+        obj.appendChild(opt);
+    }
+    function get_seats(id_slot) {
         $.ajax({
             type: 'POST',
-            url: "{% url 'training:api-training-get-slots' %}",
+            url: "{% url 'training:api-training-get-seats' %}",
             data: {
-                "date": value,
+                "slot": id_slot,
                 'csrfmiddlewaretoken': '{{ csrf_token }}',
                 'user': '{{request.user.email}}'
             },
             timeout: 5000,
             dataType: "json",
         })
-        .done(function (response) {
-            result = response.result
-            if (result) {
-                
-                select.disabled = false;
-                for (i = 0, len = result.length; i < len; i++) {
-                    slot = result[i];
-                    var opt = document.createElement('option');
-                    opt.value = slot.id;
-                    opt.innerHTML = slot.hour_init + ' a ' + slot.hour_end;
-                    select.appendChild(opt);
-                  } 
-              }
+            .done(function (response) {
+                result = response.result
+                if (result) {
+                    space.options.length = 0
+                    space.disabled = false;
+                    for (i = 0, len = result.length; i < len; i++) {
+                        space_data = result[i];
+                        var opt = document.createElement('option');
+                        opt.value = space_data.id;
+                        opt.innerHTML = space_data.name;
+                        space.appendChild(opt);
+                    }
+                }
+            })
+            .fail(function (response) {
+                clean_selector('id_slot')
+                clean_selector('id_space')
+                Swal.fire(
+                    'Uy... no hay puestos disponibles para esta clase',
+                    '<p>Intenta buscar en otro horario.</p>',
+                    'error'
+                )
+            })
+
+    }
+    function get_slots(date){
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'training:api-training-get-slots' %}",
+            data: {
+                "date": date,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'user': '{{request.user.email}}'
+            },
+            timeout: 5000,
+            dataType: "json",
         })
-        .fail(function (response) {
-            select.disabled = true;
-            Swal.fire(
-                'Uy... no hay clases disponibles para esta fecha',
-                '<p>Intenta buscar en otra fecha.</p>',
-                'error'
-            )
-        })
+            .done(function (response) {
+                result = response.result
+                if (result) {
+                    slot.options.length = 0
+                    slot.disabled = false;
+                    for (i = 0, len = result.length; i < len; i++) {
+                        slot_data = result[i];
+                        var opt = document.createElement('option');
+                        opt.value = slot_data.id;
+                        opt.innerHTML = slot_data.hour_init + ' a ' + slot_data.hour_end + ' ( '+ slot_data.available_places + ' Cupos disponibles )';
+                        slot.appendChild(opt);
+                    }
+                    get_seats(result[0].id)
+                }
+            })
+            .fail(function (response) {
+                clean_selector('id_slot')
+                clean_selector('id_space')
+                Swal.fire(
+                    'Uy... no hay clases disponibles para esta fecha',
+                    '<p>Intenta buscar en otra fecha.</p>',
+                    'error'
+                )
+            })
+
+    }
+    date.onchange = function () {
+        value = date.value
+        get_slots(value)
     };
+
+    slot.onchange = function () {
+        slot_value = slot.value
+        get_seats(slot_value)
+    }
+
+    if (date.value){
+        get_slots(date.value)
+    }
 </script>
 {% endblock js %}

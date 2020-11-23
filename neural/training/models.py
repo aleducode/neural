@@ -20,6 +20,9 @@ class Space(NeuralBaseModel):
         from unidecode import unidecode
         self.slug_name = unidecode(self.name).replace(" ", "_").lower()
         return super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f'{self.name}'
 
 
 class Slot(NeuralBaseModel):
@@ -48,6 +51,11 @@ class Slot(NeuralBaseModel):
     @property
     def available_places(self):
         return self.max_places - self.users_scheduled.count()
+    
+    @property
+    def available_seats(self):
+        space = Space.objects.all()
+        return space.exclude(id__in=self.users_scheduled.values_list('space', flat=True)).order_by('id')
 
 
 class UserTraining(NeuralBaseModel):
@@ -69,7 +77,7 @@ class UserTraining(NeuralBaseModel):
         choices=Status.choices,
         default=Status.CONFIRMED,
     )
-    #space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name='user_trainings')
+    space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name='user_trainings')
 
     def __str__(self):
         return f'Entrenamiento: {self.user}'

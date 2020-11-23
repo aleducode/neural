@@ -1,7 +1,7 @@
 """Training admin."""
 
 from django.contrib import admin
-from neural.training.models import UserTraining, Slot
+from neural.training.models import UserTraining, Slot, Space
 
 
 class UserTrainingInline(admin.TabularInline):
@@ -15,3 +15,8 @@ class SlotAdmin(admin.ModelAdmin):
     list_filter = ['date', 'hour_init']
     list_display = ['__str__', 'date', 'hour_init', 'available_places']
     inlines = [UserTrainingInline]
+
+
+@admin.register(Space)
+class SpaceAdmin(admin.ModelAdmin):
+    pass

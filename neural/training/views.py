@@ -21,14 +21,7 @@ class ScheduleView(LoginRequiredMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        now = timezone.localtime()
-        date = timezone.localdate()
-        gap_acceptance = now + timedelta(minutes=20)
-        slots = Slot.objects.filter(date=date, hour_init__gte=gap_acceptance).order_by('hour_init').distinct('hour_init')
-
         kwargs['user'] = self.request.user
-        kwargs['slots'] = SlotModelSerializer(slots, many=True).data
-
         return kwargs
     
     def get_success_url(self):

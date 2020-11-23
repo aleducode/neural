@@ -3,7 +3,7 @@
 from django import forms
 from django.utils import timezone
 from datetime import timedelta
-from neural.training.models import UserTraining, Slot
+from neural.training.models import UserTraining, Slot, Space
 
 
 days_wrapper = ['Hoy', 'Mañana', 'Pasado Mañana']
@@ -17,14 +17,7 @@ class SchduleForm(forms.Form):
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
 
-        # Constructor slots
-        if 'slots' in kwargs:
-            self.slots = kwargs.pop('slots')
-            for slot in self.slots:
-                initial = slot.get('hour_init')
-                end = slot.get('hour_end')
-                schedule = f'{initial} a {end}'
-                SLOT_CHOICES += [(slot.get('id'), schedule)]
+
 
         super().__init__(*args, **kwargs)
         self.fields['slot'].widget = forms.Select(
@@ -50,8 +43,24 @@ class SchduleForm(forms.Form):
             }
         )
     )
+    space = forms.ModelChoiceField(
+        queryset=Space.objects.all().order_by('id'),
+        label='Espacio de trabajo',
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control',
+                'disabled': 'disabled'
+            }
+        )
+    )
     slot = forms.ChoiceField(
-        label='Sesión'
+        label='Sesión',
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control',
+                'disabled': 'disabled'
+            }
+        )
     )
 
     def clean(self):
