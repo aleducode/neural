@@ -10,8 +10,6 @@ urlpatterns = [
     path("", include("neural.users.urls", namespace="users")),
     path("", include("neural.training.urls", namespace="training")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
 if settings.DEBUG:
     urlpatterns += [
         path(
