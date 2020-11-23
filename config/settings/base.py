@@ -6,7 +6,7 @@ from django.contrib.messages import constants as messages
 import environ
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
-# neural/
+# abjhelp/
 APPS_DIR = ROOT_DIR / "neural"
 env = environ.Env()
 
@@ -56,6 +56,7 @@ DJANGO_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
+    #"django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # "django.contrib.humanize", # Handy template tags
@@ -64,7 +65,6 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = [
     "django_celery_beat",
-    'rest_framework',
 ]
 
 LOCAL_APPS = [
@@ -180,10 +180,6 @@ TEMPLATES = [
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#form-renderer
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
-
-# http://django-crispy-forms.readthedocs.io/en/latest/install.html#template-packs
-CRISPY_TEMPLATE_PACK = "bootstrap4"
-
 # FIXTURES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#fixture-dirs
