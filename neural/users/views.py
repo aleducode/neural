@@ -6,9 +6,10 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, UpdateView, FormView
 from neural.users.forms import (
-    CustomAuthenticationForm,
+    CustomAuthenticationForm, UserCreationForm
 )
 from django.urls import reverse_lazy
+
 
 
 class LoginView(auth_views.LoginView):
@@ -27,3 +28,10 @@ class LogoutView(LoginRequiredMixin, auth_views.LogoutView):
 
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = 'index.html'
+
+
+class SignUpView(FormView):
+    template_name = 'users/signup.html'
+    form_class = UserCreationForm
+    fields = ['username', 'first_name', 'phone_number', 'email']
+    success_url = reverse_lazy('users:login')
