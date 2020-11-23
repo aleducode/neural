@@ -290,3 +290,5 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+NEURAL_PHONE = env("NEURAL_PHONE")

@@ -1,6 +1,7 @@
 """Enterprise Clients views."""
 
 from django.contrib.auth import login
+from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -48,7 +49,7 @@ class PendingView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        phone_neural = '573184673453'
+        phone_neural = f'57{settings.NEURAL_PHONE}'
         message = f'https://wa.me/{phone_neural}?text=Hola+Neural+estoy+listo+para+iniciar+mis+entrenos+mi+nombre+es+{user.first_name}+{user.last_name}.'
         context['message'] = message
         return context
