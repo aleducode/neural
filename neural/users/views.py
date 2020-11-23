@@ -1,14 +1,14 @@
 """Enterprise Clients views."""
 
-from django.db.models import Sum
 from django.contrib.auth import login
-from django.contrib import messages
+from django.utils import timezone
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, UpdateView, FormView
+from django.views.generic import TemplateView, FormView
 from neural.users.forms import (
     CustomAuthenticationForm,
 )
+from neural.training.models import UserTraining
 from neural.users.forms import SignUpForms
 from django.urls import reverse_lazy
 
@@ -30,6 +30,17 @@ class LogoutView(LoginRequiredMixin, auth_views.LogoutView):
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = 'index.html'
 
+    def get_context_data(self, **kwargs):
+        from django.contrib import messages
+        context = super().get_context_data(**kwargs)
+        now = timezone.localdate()
+        today_training = UserTraining.objects.filter(user=self.request.user, slot__date=now)
+        if today_training.exists():
+            today_training = today_training.last()
+            messages.success(self.request, f'Recuerda:  Tu proximo entrenamiento es hoy a las {today_training.slot.hour_init} !!!')
+        return context
+
+
 
 class PendingView(LoginRequiredMixin, TemplateView):
     template_name = 'users/pending_membership.html'
@@ -41,7 +52,7 @@ class PendingView(LoginRequiredMixin, TemplateView):
         message = f'https://wa.me/{phone_neural}?text=Hola+Neural+estoy+listo+para+iniciar+mis+entrenos+mi+nombre+es+{user.first_name}+{user.last_name}.'
         context['message'] = message
         return context
-    
+
 
 class SignUpView(FormView):
     template_name = 'users/register.html'
