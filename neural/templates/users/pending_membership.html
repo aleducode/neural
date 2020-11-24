@@ -56,7 +56,7 @@
 
                             <img src="{% static 'images/fixed_logo.png' %}" alt="logo" height="100" />
                         </a>
-                        <h4 class="mt-5">Bienvenidx a la familia Neural</h4>
+                        <h4 class="mt-5">Bienvenidx, {{request.user.first_name|title}} a la familia Neural</h4>
                         <p class="text-muted">Cuentanos que has finalizado tu registro haciendo click aquí .</p>
                         <a type="button" class="btn btn-success waves-effect waves-light white-text"
                         href="{{message}}">

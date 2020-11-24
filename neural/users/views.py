@@ -2,6 +2,7 @@
 
 from django.contrib.auth import login
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -45,6 +46,14 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
 class PendingView(LoginRequiredMixin, TemplateView):
     template_name = 'users/pending_membership.html'
+
+    
+    def dispatch(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_verified:
+            return HttpResponseRedirect(reverse_lazy('users:index'))
+        return super().dispatch(request, *args, **kwargs)
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

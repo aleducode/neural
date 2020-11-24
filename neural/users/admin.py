@@ -15,4 +15,4 @@ class UserAdmin(auth_admin.UserAdmin):
     fieldsets = (("User", {"fields": ("phone_number", 'is_verified')}),) + tuple(
         auth_admin.UserAdmin.fieldsets
     )
-    list_display = ["email", "phone_number", "is_client", 'is_verified']
+    list_display = ["email", "phone_number", 'first_name', 'last_name', "is_client", 'is_verified']

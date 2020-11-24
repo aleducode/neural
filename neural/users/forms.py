@@ -163,6 +163,22 @@ class SignUpForms(forms.Form):
             attrs={'class': 'form-control'})
     )
 
+    def clean_phone_number(self):
+        """Phone number must be unique."""
+        phone_number = self.cleaned_data['phone_number']
+        phone_number_taken = User.objects.filter(phone_number=phone_number).exists()
+        if phone_number_taken:
+            raise forms.ValidationError('Número de teléfono ya registrado.')
+        return phone_number
+    
+    def clean_email(self):
+        """Email must be unique."""
+        email = self.cleaned_data['email']
+        email_taken = User.objects.filter(email=email).exists()
+        if email_taken:
+            raise forms.ValidationError('Email ya registrado.')
+        return email
+
     def clean(self):
         """Veirify password confirmation match."""
         data = super().clean()
