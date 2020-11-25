@@ -12,50 +12,60 @@ class Command(BaseCommand):
         """Handle command usage."""
         Slot.objects.all().delete()
         sessions = {
-            'FUNCTIONAL': [
-                {
-                    'init': '5:00',
-                    'end': '6:00'
-                },
-                {
-                    'init': '6:20',
-                    'end': '7:20'
-                },
-                {
-                    'init': '7:40',
-                    'end': '8:40'
-                },
-                {
-                    'init': '9:00',
-                    'end': '10:00'
-                },
-                {
-                    'init': '10:20',
-                    'end': '11:20'
-                },
-                {
-                    'init': '16:00',
-                    'end': '17:00'
-                },
-                {
-                    'init': '17:20',
-                    'end': '18:20'
-                },
-                {
-                    'init': '18:40',
-                    'end': '19:40'
-                },
-                {
-                    'init': '20:00',
-                    'end': '21:00'
-                }
-            ]
+            1: {
+                'NEURAL_CIRCUIT': [
+                    {
+                        'init': '5:00',
+                        'end': '6:00'
+                    },
+                    {
+                        'init': '6:20',
+                        'end': '7:20'
+                    },
+                    {
+                        'init': '7:40',
+                        'end': '8:40'
+                    },
+                    {
+                        'init': '9:00',
+                        'end': '10:00'
+                    },
+                    {
+                        'init': '16:00',
+                        'end': '17:00'
+                    },
+                    {
+                        'init': '17:20',
+                        'end': '18:20'
+                    },
+                    {
+                        'init': '18:40',
+                        'end': '18:40'
+                    },
+                ],
+                'BALANCE': [
+                    {
+                        'init': '19:00',
+                        'end': '20:00'
+                    },
+                ],
+            },
+            2: {
+                'NEURAL_CIRCUIT': [],
+                'POWER_HOUR': []
+            },
+            3: {
+                'WORKOUT': [],
+                'NEURAL_CIRCUIT': []
+            }
         }
+
         now = timezone.localdate()
         days = 7
-        for i in range(0, days + 1):
+        Slot.objects.all().delete()
+        for i in range(0, days):
             day = now + timedelta(days=i)
-            for session in sessions.get('FUNCTIONAL'):
+            for session in sessions:
                 Slot.objects.get_or_create(
                     date=day,
                     hour_init=session.get('init'),

@@ -30,14 +30,6 @@ class SchduleForm(forms.Form):
     DAYS_CHOICES = []
     now = timezone.localdate()
 
-    CLASS_CHOICES = [
-        ('', '-----'),
-        ('FUNCTIONAL', 'Neural Circuit'),
-        ('FUNCTIONAL', 'Power Hour'),
-        ('FUNCTIONAL', 'Balance'),
-        ('FUNCTIONAL', 'Workout Energy')
-    ]
-
     for i in range(0, 3):
         day = now + timedelta(days=i)
         DAYS_CHOICES.append((f'{day}', f'{day} ({days_wrapper[i]})'))
@@ -71,8 +63,8 @@ class SchduleForm(forms.Form):
             }
         )
     )
-    clases = forms.ChoiceField(
-        choices= CLASS_CHOICES,
+    classes = forms.ChoiceField(
+        choices=Slot.TrainingType.choices,
         label='Clases',
         widget=forms.Select(
             attrs={
