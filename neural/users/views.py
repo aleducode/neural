@@ -33,7 +33,6 @@ class LogoutView(LoginRequiredMixin, auth_views.LogoutView):
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = 'index.html'
 
-<<<<<<< HEAD
     def get_context_data(self, **kwargs):
         from django.contrib import messages
         context = super().get_context_data(**kwargs)
@@ -77,11 +76,3 @@ class SignUpView(FormView):
         # Force login
         login(self.request, user)
         return super().form_valid(form)
-=======
-
-class SignUpView(FormView):
-    template_name = 'users/signup.html'
-    form_class = UserCreationForm
-    fields = ['username', 'first_name', 'phone_number', 'email']
-    success_url = reverse_lazy('users:login')
->>>>>>> yesid
