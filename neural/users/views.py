@@ -8,7 +8,7 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, FormView
 from neural.users.forms import (
-    CustomAuthenticationForm, UserCreationForm
+    CustomAuthenticationForm
 )
 from neural.training.models import UserTraining
 from neural.users.forms import SignUpForms
