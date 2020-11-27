@@ -1,9 +1,10 @@
 """Training forms."""
 
 from django import forms
+from django.forms.widgets import NumberInput
 from django.utils import timezone
 from datetime import timedelta
-from neural.training.models import UserTraining, Slot, Space
+from neural.training.models import UserTraining, Slot, Space, Temperature
 
 
 days_wrapper = ['Hoy', 'Mañana', 'Pasado Mañana']
@@ -89,3 +90,36 @@ class SchduleForm(forms.Form):
         if not is_new:
             raise forms.ValidationError('Ya agendaste tu sesión para este día')
         return data
+
+class TemperatureForm(forms.Form):
+    """Temperature registry."""
+
+    def __init__(self, request=None, *args, **kwargs):
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+
+
+    temperature = forms.FloatField(       
+        label= 'Temperatura',
+        required=True,
+        widget= NumberInput
+        )
+    
+    def clean(self):
+        """Validaton Temperature."""
+        data = super().clean()
+        temperature = data ['temperature']
+
+        if temperature > 37:
+            raise forms.ValidationError('No puedes realizar tu entrenamiento.')
+        return data
+    def save(self):
+        data = self.cleaned_data['temperature']
+        user = self.user
+        Temperature.objects.create(
+            user=user,
+            temperature=data
+        )
+        return data
+        

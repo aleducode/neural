@@ -10,7 +10,7 @@ from django.urls import reverse_lazy
 
 # Models
 from neural.training.models import Slot, UserTraining
-from neural.training.forms import SchduleForm
+from neural.training.forms import SchduleForm, TemperatureForm
 from neural.training.serializers import SlotModelSerializer
 
 
@@ -44,3 +44,18 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
 
 class InfoView(LoginRequiredMixin, TemplateView):
     template_name = 'training/info.html'
+
+class TemperatureView(LoginRequiredMixin, FormView):
+    template_name = 'training/temperature.html'
+    form_class = TemperatureForm
+    success_url = reverse_lazy('users:index')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self,form):
+	    """Save form."""
+	    form.save()
+	    return super().form_valid(form)

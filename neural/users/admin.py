@@ -3,6 +3,7 @@ from django.contrib.auth import admin as auth_admin
 from django.contrib.auth import get_user_model
 
 from neural.users.forms import UserChangeForm, UserCreationForm
+from neural.training.models import Temperature
 
 User = get_user_model()
 

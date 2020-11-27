@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 
+
 from neural.users.models import User
 # Utils
 from neural.utils.models import NeuralBaseModel
@@ -73,13 +74,21 @@ class UserTraining(NeuralBaseModel):
         related_name='trainings',
         limit_choices_to={'is_verified': True}
     )
-    slot = models.ForeignKey(Slot, on_delete=models.CASCADE, related_name='user_trainings')
+    slot = models.ForeignKey(
+        Slot, 
+        on_delete=models.CASCADE, 
+        related_name='user_trainings'
+    )
     status = models.CharField(
         max_length=50,
         choices=Status.choices,
         default=Status.CONFIRMED,
     )
-    space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name='user_trainings')
+    space = models.ForeignKey(
+        Space, 
+        on_delete=models.CASCADE, 
+        related_name='user_trainings'
+    )
 
     def __str__(self):
         return f'Entrenamiento: {self.user}'
@@ -96,4 +105,15 @@ class UserTraining(NeuralBaseModel):
     def is_now(self):
         return self.slot.date == timezone.localdate()
 
+class Temperature(NeuralBaseModel):
+    
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+    temperature = models.FloatField()
+
+    def __str__ (self):
+
+	    return '{} : {}'.format(self.user, 'Temperatura')
 

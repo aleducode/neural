@@ -1,7 +1,7 @@
 """Training admin."""
 
 from django.contrib import admin
-from neural.training.models import UserTraining, Slot, Space
+from neural.training.models import UserTraining, Slot, Space, Temperature
 
 
 class UserTrainingInline(admin.TabularInline):
@@ -20,3 +20,8 @@ class SlotAdmin(admin.ModelAdmin):
 @admin.register(Space)
 class SpaceAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(Temperature)
+class TemperatureAdmin(admin.ModelAdmin):
+    list_display = ['user', 'temperature']
+

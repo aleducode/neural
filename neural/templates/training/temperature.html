@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="col-xl-6 offset-lg-3">
+            <a href="{% url 'users:index' %}">Regresar</a>
+            <div class="card mt-2">
+                <div class="card-body">
+                    <h3 class="mb-4 text-center">Registra tu tempertura actual.</h3>
+                    {% if form.errors %}
+                    <p class="alert alert-danger">
+                        {% for field, error in form.errors.items  %}
+                        {{error.0}}
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="formrow-firstname-input">{{form.temperatura.label}}</label>
+                            <input
+                            class="form-control {% if form.temperature.errors %}is-invalid{% endif %}"
+                            type="text"
+                            name="temperature"
+                            placeholder="Temperatura" 
+                        >
+                        
+                        </div>
+                        <button type="submit" class="btn btn-lg btn-block btn-info w-lg waves-effect waves-light"
+                            style="color:white">Registrar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+
+

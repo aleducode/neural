@@ -46,3 +46,4 @@ class User(NeuralBaseModel, AbstractUser):
 
     def get_short_name(self):
         return self.email
+

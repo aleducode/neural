@@ -23,10 +23,15 @@ urlpatterns = [
         view=training_views.MyScheduleView.as_view(),
         name='my_schedule'
     ),
-     path(
+    path(
         route='info',
         view=training_views.InfoView.as_view(),
         name='info'
+    ),
+    path(
+        route='temperature',
+        view=training_views.TemperatureView.as_view(),
+        name='temperature'
     ),
 
 ]
