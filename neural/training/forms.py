@@ -16,9 +16,9 @@ class SchduleForm(forms.Form):
         SLOT_CHOICES = [('', 'Seleccionar')]
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
-
-
-
+        
+        if 'now' in kwargs:
+            self.now = kwargs.pop('now')
         super().__init__(*args, **kwargs)
         self.fields['slot'].widget = forms.Select(
             attrs={
@@ -26,16 +26,16 @@ class SchduleForm(forms.Form):
             }
         )
         self.fields['slot'].choices = SLOT_CHOICES
+        DAYS_CHOICES = []
 
-    DAYS_CHOICES = []
-    now = timezone.localdate()
-
-    for i in range(0, 3):
-        day = now + timedelta(days=i)
-        DAYS_CHOICES.append((f'{day}', f'{day} ({days_wrapper[i]})'))
+        for i in range(0, 3):
+            day = self.now + timedelta(days=i)
+            if day.isoweekday() != 7:
+                DAYS_CHOICES.append((f'{day}', f'{day} ({days_wrapper[i]})'))
+        self.fields['fecha'].choices = DAYS_CHOICES
 
     fecha = forms.ChoiceField(
-        choices=DAYS_CHOICES,
+        choices=[],
         label='Día',
         widget=forms.Select(
             attrs={

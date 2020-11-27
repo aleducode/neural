@@ -22,6 +22,7 @@ class ScheduleView(LoginRequiredMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
+        kwargs['now'] = timezone.localdate()
         return kwargs
     
     def get_success_url(self):
