@@ -152,9 +152,9 @@
         slot_value = slot.value
         get_seats(slot_value)
     }
-
+    training_type = training.value
     if (date.value){
-        get_slots(date.value)
+        get_slots(date.value, training.value)
     }
 </script>
 {% endblock js %}
