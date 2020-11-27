@@ -31,6 +31,10 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                     {
+                        'init': '10:20',
+                        'end': '11:20'
+                    },
+                    {
                         'init': '16:00',
                         'end': '17:00'
                     },
@@ -38,17 +42,17 @@ class Command(BaseCommand):
                         'init': '17:20',
                         'end': '18:20'
                     },
+                      {
+                        'init': '20:00',
+                        'end': '21:00'
+                    }
+                ],
+                'WORKOUT': [
                     {
                         'init': '18:40',
                         'end': '19:40'
                     },
-                ],
-                'BALANCE': [
-                    {
-                        'init': '21:00',
-                        'end': '21:00'
-                    },
-                ],
+                ]
             },
             2: {
                 'POWER_HOUR': [
@@ -69,6 +73,10 @@ class Command(BaseCommand):
                     {
                         'init': '9:00',
                         'end': '10:00'
+                    },
+                     {
+                        'init': '10:20',
+                        'end': '11:20'
                     },
                     {
                         'init': '16:00',
@@ -108,6 +116,10 @@ class Command(BaseCommand):
                         'init': '9:00',
                         'end': '10:00'
                     },
+                     {
+                        'init': '10:20',
+                        'end': '11:20'
+                    },
                     {
                         'init': '16:00',
                         'end': '17:00'
@@ -143,6 +155,10 @@ class Command(BaseCommand):
                         'init': '9:00',
                         'end': '10:00'
                     },
+                     {
+                        'init': '10:20',
+                        'end': '11:20'
+                    },
                     {
                         'init': '16:00',
                         'end': '17:00'
@@ -156,12 +172,6 @@ class Command(BaseCommand):
                         'end': '21:00'
                     }
 
-                ],
-                'WORKOUT': [
-                    {
-                        'init': '18:40',
-                        'end': '19:40'
-                    },
                 ]
 
             },
@@ -182,6 +192,10 @@ class Command(BaseCommand):
                     {
                         'init': '9:00',
                         'end': '10:00'
+                    },
+                     {
+                        'init': '10:20',
+                        'end': '11:20'
                     },
                     {
                         'init': '16:00',
