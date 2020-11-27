@@ -63,6 +63,15 @@ class SchduleForm(forms.Form):
             }
         )
     )
+    classes = forms.ChoiceField(
+        choices=Slot.TrainingType.choices,
+        label='Clases',
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control',
+            }
+        )
+    )
 
     def clean(self):
         """Veirify availables places."""

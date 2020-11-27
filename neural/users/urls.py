@@ -27,5 +27,5 @@ urlpatterns = [
         route='logout/',
         view=user_views.LogoutView.as_view(),
         name='logout'
-    ),
+    )
 ]

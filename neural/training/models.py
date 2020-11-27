@@ -28,8 +28,10 @@ class Space(NeuralBaseModel):
 class Slot(NeuralBaseModel):
 
     class TrainingType(models.TextChoices):
-        FUNCTIONAL = 'FUNCTIONAL', 'Funcional'
-        PERSONAL = 'PERSONAL', 'Personalizado'
+        NEURAL_CIRCUIT = 'NEURAL_CIRCUIT', 'Neural Circuit'
+        POWER_HOUR = 'POWER_HOUR', 'Power Hour'
+        BALANCE = 'BALANCE', 'Balance'
+        WORKOUT = 'WORKOUT', 'Workout Energy'
 
     date = models.DateField()
     hour_init = models.TimeField()
@@ -38,7 +40,7 @@ class Slot(NeuralBaseModel):
     training_type = models.CharField(
         max_length=50,
         choices=TrainingType.choices,
-        default=TrainingType.FUNCTIONAL,
+        default=TrainingType.NEURAL_CIRCUIT,
     )
 
     def __str__(self):

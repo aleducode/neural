@@ -24,6 +24,10 @@
                             {{form.fecha}}
                         </div>
                         <div class="form-group">
+                            <label for="formrow-firstname-input">{{form.classes.label}}</label>
+                            {{form.classes}}
+                        </div>
+                        <div class="form-group">
                             <label for="formrow-firstname-input">{{form.slot.label}}</label>
                             {{form.slot}}
                         </div>
@@ -46,6 +50,8 @@
     date = document.getElementById('id_fecha')
     slot = document.getElementById('id_slot')
     space = document.getElementById('id_space')
+    training = document.getElementById('id_classes')
+    
     function clean_selector(id_selector){
         obj = document.getElementById(id_selector)
         obj.disabled = true;
@@ -92,12 +98,13 @@
             })
 
     }
-    function get_slots(date){
+    function get_slots(date, training_type){
         $.ajax({
             type: 'POST',
             url: "{% url 'training:api-training-get-slots' %}",
             data: {
                 "date": date,
+                "training_type": training_type,
                 'csrfmiddlewaretoken': '{{ csrf_token }}',
                 'user': '{{request.user.email}}'
             },
@@ -132,7 +139,13 @@
     }
     date.onchange = function () {
         value = date.value
-        get_slots(value)
+        training_type = training.value
+        get_slots(value, training_type)
+    };
+    training.onchange = function () {
+        value = date.value
+        training_type = training.value
+        get_slots(value, training_type)
     };
 
     slot.onchange = function () {

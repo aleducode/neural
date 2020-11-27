@@ -23,6 +23,7 @@ class UserCreationForm(admin_forms.UserCreationForm):
     error_message = admin_forms.UserCreationForm.error_messages.update(
         {"duplicate_username": _("This username has already been taken.")}
     )
+    
 
     class Meta(admin_forms.UserCreationForm.Meta):
         model = User

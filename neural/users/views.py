@@ -8,11 +8,12 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, FormView
 from neural.users.forms import (
-    CustomAuthenticationForm,
+    CustomAuthenticationForm
 )
 from neural.training.models import UserTraining
 from neural.users.forms import SignUpForms
 from django.urls import reverse_lazy
+
 
 
 class LoginView(auth_views.LoginView):
