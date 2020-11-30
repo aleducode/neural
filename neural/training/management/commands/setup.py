@@ -34,6 +34,7 @@ class Command(BaseCommand):
                         'init': '10:20',
                         'end': '11:20'
                     },
+        
                     {
                         'init': '16:00',
                         'end': '17:00'
@@ -243,7 +244,6 @@ class Command(BaseCommand):
 
         now = timezone.localdate()
         days = 6
-        Slot.objects.all().delete()
         for i in range(0, days):
             day = now + timedelta(days=i)
             for session in sessions:
@@ -255,6 +255,8 @@ class Command(BaseCommand):
                                 training_type=training,
                                 date=day,
                                 hour_init=hour.get('init'),
-                                hour_end=hour.get('end'),
-                                max_places=10
+                                defaults={
+                                    'hour_end': hour.get('end'),
+                                    'max_places': 10
+                                }
                             )
