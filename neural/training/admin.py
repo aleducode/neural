@@ -12,6 +12,7 @@ class UserTrainingInline(admin.TabularInline):
 
 @admin.register(Slot)
 class SlotAdmin(admin.ModelAdmin):
+    date_hierarchy = 'date'
     list_filter = ['date', 'hour_init']
     list_display = ['pk', '__str__', 'date', 'hour_init', 'available_places', 'training_type']
     inlines = [UserTrainingInline]
