@@ -4,10 +4,9 @@ from django import forms
 from django.utils import timezone
 from datetime import timedelta
 from neural.training.models import UserTraining, Slot, Space
-
+from django.utils.translation import gettext as _
 
 days_wrapper = ['Hoy', 'Mañana', 'Pasado Mañana']
-
 
 class SchduleForm(forms.Form):
     """Schedule form."""
@@ -31,7 +30,8 @@ class SchduleForm(forms.Form):
         for i in range(0, 3):
             day = self.now + timedelta(days=i)
             if day.isoweekday() != 7:
-                DAYS_CHOICES.append((f'{day}', f'{day} ({days_wrapper[i]})'))
+                day_name = _(day.strftime("%A"))
+                DAYS_CHOICES.append((f'{day}', f'{day} ({day_name})'))
         self.fields['fecha'].choices = DAYS_CHOICES
 
     fecha = forms.ChoiceField(

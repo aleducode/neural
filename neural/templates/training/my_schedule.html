@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
+{% load i18n %}
+
+
+
 
 
 {% block content %}
@@ -12,7 +16,9 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="card">
-                                <div class="card-body">
+                                <div class="card-body m-0 p-0">
+                                    
+                                    {% if user_slots %}
                                     <h4 class="card-title mb-5 text-center">Esta semana vamos con toda!!</h4>
                                     <div class="">
                                         <ul class="verti-timeline list-unstyled">
@@ -30,7 +36,9 @@
                                                         <div>
                                                             <h5>Entrenamiento: {{event.slot.get_training_type_display}}</h5>
                                                             <p class="text-muted">
-                                                                {% if event.is_now %}<span class="badge badge-pill badge-success float-left mr-1">HOY </span>{% endif %} {{event.slot.date|date:"l j"}} de {{event.slot.hour_init}} a {{event.slot.hour_end}}.</p>
+                                                                {% language 'es' %}
+                                                                {% if event.is_now %}<span class="badge badge-pill badge-success float-left mr-1">HOY </span>{% endif %} {{event.slot.date|date:"l j"}} de {{event.slot.hour_init|date:"f"}} a {{event.slot.hour_end|date:"f A"}}.</p>
+{% endlanguage %}
                                                             
                                                         </div>
                                                     </div>
@@ -41,6 +49,12 @@
                                         
                                         </ul>
                                     </div>
+                                    {% else %}
+                                    <h4 class="card-title mb-5 text-center">Aún no tienes agenda 😧</h4>
+                                    
+                                    <p class="text-center">Pero.... relax,  haciendo click <a href="{% url 'training:schedule' %}">aquí</a> agendas tu clase </p>
+                                    {% endif %}
+
                                 </div>
                             </div>
                         </div>

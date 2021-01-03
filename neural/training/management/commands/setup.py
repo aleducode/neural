@@ -243,7 +243,7 @@ class Command(BaseCommand):
         }
 
         now = timezone.localdate()
-        days = 6
+        days = 30
         for i in range(0, days):
             day = now + timedelta(days=i)
             for session in sessions:

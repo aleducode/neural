@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
-
+{% load i18n %}
 
 {% block content %}
-
+{% language 'es' %}
 <div class="page-content">
     <div class="container-fluid">
         <div class="col-xl-6 offset-lg-3">
@@ -12,16 +12,18 @@
                     <h3 class="mb-4 text-center">Crear agenda de Entrenamiento</h3>
                     {% if form.errors %}
                     <p class="alert alert-danger">
-                        {% for field, error in form.errors.items  %}
+                        {% for field, error in form.errors.items %}
                         {{error.0}}
                         {% endfor %}
                     </p>
                     {% endif %}
                     <form method="POST">
+            
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="formrow-firstname-input">{{form.fecha.label}}</label>
                             {{form.fecha}}
+            
                         </div>
                         <div class="form-group">
                             <label for="formrow-firstname-input">{{form.classes.label}}</label>
@@ -37,12 +39,14 @@
                         </div>
                         <button type="submit" class="btn btn-lg btn-block btn-info w-lg waves-effect waves-light"
                             style="color:white">Agendar</button>
+            
                     </form>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+            </div>
+            </div>
+            </div>
+            {% endlanguage %}
 {% endblock content %}
 
 {% block js %}
