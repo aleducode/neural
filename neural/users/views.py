@@ -1,4 +1,4 @@
-"""Enterprise Clients views."""
+"""Users views."""
 
 from django.contrib.auth import login
 from django.conf import settings
@@ -13,8 +13,8 @@ from neural.users.forms import (
 from neural.training.models import UserTraining
 from neural.users.forms import SignUpForms
 from django.urls import reverse_lazy
-
-
+from django.utils.translation import gettext as _
+from datetime import timedelta
 
 class LoginView(auth_views.LoginView):
     """Login view."""
@@ -36,11 +36,19 @@ class IndexView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         from django.contrib import messages
         context = super().get_context_data(**kwargs)
-        now = timezone.localdate()
-        today_training = UserTraining.objects.filter(user=self.request.user, slot__date=now)
-        if today_training.exists():
-            today_training = today_training.last()
-            messages.success(self.request, f'Recuerda:  Tu proximo entrenamiento es hoy a las {today_training.slot.hour_init} !!!')
+        now_date = timezone.localdate()
+        last_training = UserTraining.objects.filter(user=self.request.user, slot__date__gte=now_date).last()
+        if last_training:
+            day = last_training.slot.date
+            if day == now_date:
+                day_name = 'hoy'
+            elif day == now_date + timedelta(days=1):
+                day_name = 'Mañana'
+            else:
+                translate_day = _(day.strftime("%A"))
+                day_name = f'El {translate_day}'
+            hour = last_training.slot.hour_init.strftime("%I:%M %p")
+            messages.warning(self.request, f'Recuerda:  Tu proximo entrenamiento es {day_name} a las {hour} !!!')
         return context
 
 

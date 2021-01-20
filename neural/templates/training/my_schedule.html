@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-
-
-
-
 {% block content %}
 
 <div class="page-content">
@@ -17,13 +13,11 @@
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="card-body m-0 p-0">
-                                    
                                     {% if user_slots %}
-                                    <h4 class="card-title mb-5 text-center">Esta semana vamos con toda!!</h4>
+                                    <h4 class="card-title mb-5 text-center">{{request.user.first_name|title}}, Esta semana vamos con toda!!</h4>
                                     <div class="">
                                         <ul class="verti-timeline list-unstyled">
-                                            
-                                            {% for event in user_slots  %}
+                                            {% for event in user_slots %}
                                             <li class="event-list ">
                                                 <div class="event-timeline-dot">
                                                     <i class="bx bx-right-arrow-circle"></i>
@@ -34,25 +28,28 @@
                                                     </div>
                                                     <div class="media-body">
                                                         <div>
-                                                            <h5>Entrenamiento: {{event.slot.get_training_type_display}}</h5>
+                                                            <h5>Entrenamiento: {{event.slot.get_training_type_display}}
+                                                            </h5>
                                                             <p class="text-muted">
                                                                 {% language 'es' %}
-                                                                {% if event.is_now %}<span class="badge badge-pill badge-success float-left mr-1">HOY </span>{% endif %} {{event.slot.date|date:"l j"}} de {{event.slot.hour_init|date:"f"}} a {{event.slot.hour_end|date:"f A"}}.</p>
-{% endlanguage %}
-                                                            
+                                                                {% if event.is_now %}<span
+                                                                    class="badge badge-pill badge-success float-left mr-1">HOY
+                                                                </span>{% endif %} {{event.slot.date|date:"l j"}} de
+                                                                {{event.slot.hour_init|date:"f"}} a
+                                                                {{event.slot.hour_end|date:"f A"}} <span class="text-danger">en la {{event.space.name}}</span> .</p>
+                                                            {% endlanguage %}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </li>
                                             {% endfor %}
-
-                                        
                                         </ul>
                                     </div>
                                     {% else %}
                                     <h4 class="card-title mb-5 text-center">Aún no tienes agenda 😧</h4>
-                                    
-                                    <p class="text-center">Pero.... relax,  haciendo click <a href="{% url 'training:schedule' %}">aquí</a> agendas tu clase </p>
+
+                                    <p class="text-center">Pero.... relax, haciendo click <a
+                                            href="{% url 'training:schedule' %}">aquí</a> agendas tu clase </p>
                                     {% endif %}
 
                                 </div>
@@ -65,47 +62,3 @@
     </div>
 </div>
 {% endblock content %}
-
-{% block js %}
-<script>
-    date = document.getElementById('id_fecha')
-    select = document.getElementById('id_slot')
-
-    date.onchange = function () {
-        value = date.value
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'training:api-training-get-slots' %}",
-            data: {
-                "date": value,
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-                'user': '{{request.user.email}}'
-            },
-            timeout: 5000,
-            dataType: "json",
-        })
-        .done(function (response) {
-            result = response.result
-            if (result) {
-                
-                select.disabled = false;
-                for (i = 0, len = result.length; i < len; i++) {
-                    slot = result[i];
-                    var opt = document.createElement('option');
-                    opt.value = slot.id;
-                    opt.innerHTML = slot.hour_init + ' a ' + slot.hour_end;
-                    select.appendChild(opt);
-                  } 
-              }
-        })
-        .fail(function (response) {
-            select.disabled = true;
-            Swal.fire(
-                'Uy... no hay clases disponibles para esta fecha',
-                '<p>Intenta buscar en otra fecha.</p>',
-                'error'
-            )
-        })
-    };
-</script>
-{% endblock js %}

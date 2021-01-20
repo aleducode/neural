@@ -66,6 +66,7 @@ class UserTraining(NeuralBaseModel):
     class Status(models.TextChoices):
         CANCELLED = 'CANCELLED', 'Cancelada'
         CONFIRMED = 'CONFIRMED', 'Confirmada'
+        DONE = 'DONE', 'Terminada'
 
     user = models.ForeignKey(
         User,

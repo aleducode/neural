@@ -21,3 +21,8 @@ class SlotAdmin(admin.ModelAdmin):
 @admin.register(Space)
 class SpaceAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(UserTraining)
+class UserTrainingAdmin(admin.ModelAdmin):
+    list_display = ['user', 'slot', 'status']
+    search_fields = ['user__first_name', 'user__last_name', 'user__email']

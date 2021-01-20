@@ -7,6 +7,7 @@
 <div class="page-content">
     
     <div class="container-fluid">
+        {% language 'es' %}
         {% if messages %}
         {% for message in messages %}
         <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
@@ -17,6 +18,7 @@
         </div>
         {% endfor %}
         {% endif %}
+        {% endlanguage %}
         <div class="row">
             <div class="col-lg-6 offset-lg-3 mb-4">
                 <h4 class="text-center">¡ Hola !</h4>

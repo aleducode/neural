@@ -8,6 +8,7 @@ from django.utils.translation import gettext as _
 
 days_wrapper = ['Hoy', 'Mañana', 'Pasado Mañana']
 
+
 class SchduleForm(forms.Form):
     """Schedule form."""
 
@@ -15,7 +16,7 @@ class SchduleForm(forms.Form):
         SLOT_CHOICES = [('', 'Seleccionar')]
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
-        
+
         if 'now' in kwargs:
             self.now = kwargs.pop('now')
         super().__init__(*args, **kwargs)
@@ -79,6 +80,10 @@ class SchduleForm(forms.Form):
         slot = data.get('slot')
         if not slot.available_places > 0:
             raise forms.ValidationError('No hay cupos disponibles para esta sesión.')
+        # Check work spaces availability
+        if UserTraining.objects.filter(slot=slot, space=data.get('space')).exists():
+            raise forms.ValidationError(
+                'Este espacio de trabajo ya ha sido seleccionado por alguien mas, intenta seleccionar otro.')
         training, is_new = UserTraining.objects.get_or_create(
             user=self.user,
             slot=slot,
