@@ -3,21 +3,22 @@
 # Django
 from django.contrib import messages
 from datetime import timedelta
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, UpdateView, FormView
+from django.views.generic import TemplateView, UpdateView, FormView, DetailView
 from django.urls import reverse_lazy
 
 # Models
 from neural.training.models import Slot, UserTraining
 from neural.training.forms import SchduleForm
 from neural.training.serializers import SlotModelSerializer
+from neural.utils.general import generate_calendar_google_invite
 
 
 class ScheduleView(LoginRequiredMixin, FormView):
     template_name = 'training/schedule.html'
     form_class = SchduleForm
-    success_url = reverse_lazy('users:index')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -25,9 +26,26 @@ class ScheduleView(LoginRequiredMixin, FormView):
         kwargs['now'] = timezone.localdate()
         return kwargs
     
-    def get_success_url(self):
-        success_url = super().get_success_url()
-        return success_url
+    def form_valid(self, form):
+        schedule = form.save()
+        return HttpResponseRedirect(reverse_lazy('training:schedule-done', kwargs={'pk': schedule.pk}))
+
+
+class ScheduleDoneView(LoginRequiredMixin, DetailView):
+    template_name = 'training/schedule-done.html'
+    queryset = UserTraining.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        training_session = self.get_object()
+        name_user = self.request.user.first_name
+        date = training_session.slot.date
+        init_hour = training_session.slot.hour_init
+        end_hour = training_session.slot.hour_end
+        context["calendar_url"] = generate_calendar_google_invite(name_user, date, init_hour, end_hour)
+        return context
+    
+
 
 
 class MyScheduleView(LoginRequiredMixin, TemplateView):
@@ -46,3 +64,4 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
 
 class InfoView(LoginRequiredMixin, TemplateView):
     template_name = 'training/info.html'
+

@@ -12,7 +12,7 @@ days_wrapper = ['Hoy', 'Mañana', 'Pasado Mañana']
 class SchduleForm(forms.Form):
     """Schedule form."""
 
-    def __init__(self, request=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         SLOT_CHOICES = [('', 'Seleccionar')]
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
@@ -84,14 +84,20 @@ class SchduleForm(forms.Form):
         if UserTraining.objects.filter(slot=slot, space=data.get('space')).exists():
             raise forms.ValidationError(
                 'Este espacio de trabajo ya ha sido seleccionado por alguien mas, intenta seleccionar otro.')
-        training, is_new = UserTraining.objects.get_or_create(
+        training_already_schedule = UserTraining.objects.filter(
             user=self.user,
             slot=slot,
-            status=UserTraining.Status.CONFIRMED,
-            defaults={
-                'space': data.get('space')
-            }
-        )
-        if not is_new:
+            status=UserTraining.Status.CONFIRMED
+        ).exists()
+        if training_already_schedule:
             raise forms.ValidationError('Ya agendaste tu sesión para este día')
         return data
+
+    def save(self):
+        data = self.cleaned_data
+        training = UserTraining.objects.create(
+            user=self.user,
+            slot=data.get('slot'),
+            space=data.get('space'),
+        )
+        return training

@@ -19,11 +19,16 @@ urlpatterns = [
         name='schedule'
     ),
     path(
+        route='schedule-done/<str:pk>',
+        view=training_views.ScheduleDoneView.as_view(),
+        name='schedule-done'
+    ),
+    path(
         route='my-schedule',
         view=training_views.MyScheduleView.as_view(),
         name='my_schedule'
     ),
-     path(
+    path(
         route='info',
         view=training_views.InfoView.as_view(),
         name='info'

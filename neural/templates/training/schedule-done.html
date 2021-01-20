@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row justify-content-center mt-lg-5">
+            <div class="col-xl-5 col-sm-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="text-center">
+                            <div class="row justify-content-center">
+                                <div class="col-lg-10">
+                                    <h4 class="mt-4 font-weight-semibold">Entrenamiento Agendado!!</h4>
+                                    <p class="text-info mt-3">
+                                        Oe {{request.user.first_name|title}}, ya te agendamos el entreno pero queremos que no lo ovides y por eso queremos que nos separes un espacio en tu calendario 😳 
+                                    </p>
+
+                                    <div class="mt-4">
+                                        <!-- Button trigger modal -->
+                                        <div class="text-center">
+                                        <a href="{{calendar_url}}" target="_blank" class="btn btn-primary text-white">
+                                            Agregar a mi calendario <i class="bx bxl-google "></i>
+                                        </a>
+                                    </div>
+                                        <a href="/" class="btn btn-light mt-2">
+                                            No, así melos. 
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center mt-5 mb-2">
+                                <div class="col-sm-6 col-8">
+                                    <div>
+                                        
+                                        <img src="{% static 'backoffice/assets/images/verification-img.png' %}" alt="" class="img-fluid">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                     
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+

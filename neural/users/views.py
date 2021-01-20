@@ -16,6 +16,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from datetime import timedelta
 
+
 class LoginView(auth_views.LoginView):
     """Login view."""
 
@@ -37,7 +38,9 @@ class IndexView(LoginRequiredMixin, TemplateView):
         from django.contrib import messages
         context = super().get_context_data(**kwargs)
         now_date = timezone.localdate()
-        last_training = UserTraining.objects.filter(user=self.request.user, slot__date__gte=now_date, status=UserTraining.Status.CONFIRMED).last()
+        user = self.request.user
+        last_training = UserTraining.objects.filter(
+            user=self.request.user, slot__date__gte=now_date, status=UserTraining.Status.CONFIRMED).last()
         if last_training:
             day = last_training.slot.date
             if day == now_date:
@@ -52,17 +55,14 @@ class IndexView(LoginRequiredMixin, TemplateView):
         return context
 
 
-
 class PendingView(LoginRequiredMixin, TemplateView):
     template_name = 'users/pending_membership.html'
 
-    
     def dispatch(self, request, *args, **kwargs):
         user = request.user
         if user.is_verified:
             return HttpResponseRedirect(reverse_lazy('users:index'))
         return super().dispatch(request, *args, **kwargs)
-    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
