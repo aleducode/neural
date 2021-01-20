@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block content %}
 
@@ -18,29 +18,33 @@
                                     <div class="">
                                         <ul class="verti-timeline list-unstyled">
                                             {% for event in user_slots %}
-                                            <li class="event-list ">
+                                            <li class="event-list " id="event_{{event.id}}">
                                                 <div class="event-timeline-dot">
                                                     <i class="bx bx-right-arrow-circle"></i>
                                                 </div>
                                                 <div class="media">
                                                     <div class="mr-3">
-                                                        <i class="bx {{event.random_icon}} h2 text-primary"></i>
+                                                        <i class="bx {{event.random_icon}} h3 text-primary"></i>
                                                     </div>
                                                     <div class="media-body">
                                                         <div>
-                                                            <h5>Entrenamiento: {{event.slot.get_training_type_display}}
+                                                            <h5>{{event.slot.get_training_type_display}}
                                                             </h5>
-                                                            <p class="text-muted">
-                                                                {% language 'es' %}
-                                                                {% if event.is_now %}<span
-                                                                    class="badge badge-pill badge-success float-left mr-1">HOY
-                                                                </span>{% endif %} {{event.slot.date|date:"l j"}} de
-                                                                {{event.slot.hour_init|date:"f"}} a
-                                                                {{event.slot.hour_end|date:"f A"}} <span class="text-danger">en la {{event.space.name}}</span> .</p>
-                                                            {% endlanguage %}
                                                         </div>
+                                                        
                                                     </div>
+     
                                                 </div>
+                                                <div class="text-muted">
+                                                    {% language 'es' %}
+                                                    {% if event.is_now %}<span
+                                                        class="badge badge-pill badge-success float-left mr-1">HOY
+                                                    </span>{% endif %} {{event.slot.date|date:"l j"}} de
+                                                    {{event.slot.hour_init|date:"f"}} a
+                                                    {{event.slot.hour_end|date:"f A"}} <span class="text-danger">en la {{event.space.name}}</span>
+                                                </div>
+                                                <a onclick="cancelSession('{{event.pk}}')" href="#">Cancelar</a>
+                                                {% endlanguage %}
                                             </li>
                                             {% endfor %}
                                         </ul>
@@ -62,3 +66,56 @@
     </div>
 </div>
 {% endblock content %}
+
+{% block js %}
+<script>
+
+    function cancelSession(pk_session) {
+        Swal.fire({
+            title: "Estas seguro de cancelar el entrenamiento?",
+            text: "Es posible que pierdas el puesto!",
+            type: "warning",
+            showCancelButton: !0,
+            confirmButtonText: "Si, seguro!",
+            cancelButtonText: "Noooo!",
+            confirmButtonClass: "btn btn-success mt-2",
+            cancelButtonClass: "btn btn-danger ml-2 mt-2",
+            buttonsStyling: !1
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'training:api-training-cancel-session' %}",
+                    data: {
+                        "user_training": pk_session,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    },
+                    timeout: 5000,
+                    dataType: "json",
+                })
+                    .done(function (response) {
+                        var elem = document.getElementById('event_'+pk_session);
+                        elem.parentNode.removeChild(elem);
+                        Swal.fire({
+                            title: "Eliminado!",
+                            text: "Tu sessión de entrenamiento ha sido cancelada.",
+                            type: "success"
+                        })
+                    })
+
+            }
+            else {
+                Swal.fire({
+                    title: "Ojo pueeees",
+                    text: "No hemos eliminado tu entreno, nos vemos en Neural :)",
+                    imageUrl: "{% static 'images/brain.png' %}",
+                    imageWidth: 150,
+                    imageHeight: 150,
+                })
+            }
+        })
+    }
+
+</script>
+{% endblock js %}
+    

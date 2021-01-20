@@ -87,6 +87,7 @@ class SchduleForm(forms.Form):
         training, is_new = UserTraining.objects.get_or_create(
             user=self.user,
             slot=slot,
+            status=UserTraining.Status.CONFIRMED,
             defaults={
                 'space': data.get('space')
             }

@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 # Models
-from neural.training.models import Slot
+from neural.training.models import Slot, UserTraining
 
 # Serializers
 from neural.training.serializers import SlotModelSerializer, SeatModelSerializer
@@ -51,3 +51,12 @@ class TrainingViewSet(viewsets.GenericViewSet):
             status_code = status.HTTP_404_NOT_FOUND
             data = 'No data'
         return Response({'result': data}, status=status_code)
+
+    @action(detail=False, methods=['post'])
+    def cancel_session(self, request):
+        user_training = request.data.get('user_training')
+        training = UserTraining.objects.get(pk=user_training)
+        training.status = UserTraining.Status.CANCELLED
+        training.space = None
+        training.save()
+        return Response({'result': 'OK'}, status=status.HTTP_200_OK)

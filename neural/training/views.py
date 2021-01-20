@@ -38,7 +38,8 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
         now = timezone.localtime()
         context['user_slots'] = UserTraining.objects.filter(
             user=self.request.user,
-            slot__date__gte=now
+            slot__date__gte=now,
+            status=UserTraining.Status.CONFIRMED
             ).order_by('slot__date')[:7]
         return context
 
