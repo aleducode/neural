@@ -20,7 +20,7 @@ class Space(NeuralBaseModel):
         from unidecode import unidecode
         self.slug_name = unidecode(self.name).replace(" ", "_").lower()
         return super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return f'{self.name}-{self.description}'
 
@@ -53,7 +53,7 @@ class Slot(NeuralBaseModel):
     @property
     def available_places(self):
         return self.max_places - self.users_scheduled.count()
-    
+
     @property
     def available_seats(self):
         space = Space.objects.all()
@@ -85,16 +85,26 @@ class UserTraining(NeuralBaseModel):
     def __str__(self):
         return f'Entrenamiento: {self.user}'
 
-
     @property
     def random_icon(self):
         import random
         icons = ['bx bx-cycling', 'bx bx-football', 'bx bx-dumbbell']
         index = random.randint(0, len(icons)-1)
         return icons[index]
-    
+
     @property
     def is_now(self):
         return self.slot.date == timezone.localdate()
 
 
+class UserTemperature(NeuralBaseModel):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='temperatures',
+        limit_choices_to={'is_verified': True}
+    )
+    temperature = models.FloatField()
+
+    def __str__(self):
+        return f'Temperatura: {self.user}'

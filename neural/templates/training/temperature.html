@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+{% language 'es' %}
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="col-xl-6 offset-lg-3">
+            <a href="{% url 'users:index' %}">Regresar</a>
+            <div class="card mt-2">
+                <div class="card-body">
+                    <h3 class="mb-4 text-center">Toma de Temperatura <i class="fas fa-temperature-high fa-lg text-danger"></i></h3>
+              
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Errores:</strong>
+                        {% for error in form.non_field_errors %}
+                        <p>{{error}}</p>
+                        {% endfor %}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                    <form method="POST">
+            
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="text-left">{{request.user.first_name|title}}, Cuanto tenés de temperatura? </label>
+                            {{form.temperature}}
+                            <div class="invalid-feedback">
+                                {% for error in form.temperature.errors %}
+                                {{error}}
+                                {% endfor %}
+                            </div>
+            
+                        </div>
+                    
+                        <button type="submit" class="btn btn-lg btn-block btn-info w-lg waves-effect waves-light"
+                            style="color:white">Guardar</button>
+            
+                    </form>
+                </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            {% endlanguage %}
+{% endblock content %}
+
+{% block js %}
+<script>
+
+    date = document.getElementById('id_fecha')
+    slot = document.getElementById('id_slot')
+    space = document.getElementById('id_space')
+    training = document.getElementById('id_classes')
+    
+    function clean_selector(id_selector){
+        obj = document.getElementById(id_selector)
+        obj.disabled = true;
+        obj.options.length = 0
+        var opt = document.createElement('option');
+        opt.value = null;
+        opt.innerHTML = '-----';
+        obj.appendChild(opt);
+    }
+    function get_seats(id_slot) {
+
+        if (Boolean(id_slot)){
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'training:api-training-get-seats' %}",
+            data: {
+                "slot": id_slot,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'user': '{{request.user.email}}'
+            },
+            timeout: 5000,
+            dataType: "json",
+        })
+            .done(function (response) {
+                result = response.result
+                if (result) {
+                    space.options.length = 0
+                    space.disabled = false;
+                    for (i = 0, len = result.length; i < len; i++) {
+                        space_data = result[i];
+                        var opt = document.createElement('option');
+                        opt.value = space_data.id;
+                        opt.innerHTML = space_data.name + '    🏋️‍♀️    ' + space_data.description;
+                        space.appendChild(opt);
+                    }
+                }
+            })
+            .fail(function (response) {
+                clean_selector('id_slot')
+                clean_selector('id_space')
+                Swal.fire(
+                    'Uy... no hay puestos disponibles para esta clase',
+                    '<p>Intenta buscar en otro horario.</p>',
+                    'error'
+                )
+            })
+        }
+        else {
+            Swal.fire(
+                'Uy... parece que alguien ha ocupado este lugar',
+                '<p>Intenta buscar en otro espacio.</p>',
+                'warning'
+            )
+        }
+
+    }
+    function get_slots(date, training_type){
+        if (Boolean(date)){
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'training:api-training-get-slots' %}",
+                data: {
+                    "date": date,
+                    "training_type": training_type,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'user': '{{request.user.email}}'
+                },
+                timeout: 5000,
+                dataType: "json",
+            })
+                .done(function (response) {
+                    result = response.result
+                    if (result) {
+                        slot.options.length = 0
+                        slot.disabled = false;
+                        for (i = 0, len = result.length; i < len; i++) {
+                            slot_data = result[i];
+                            var opt = document.createElement('option');
+                            opt.value = slot_data.id;
+                            opt.innerHTML = slot_data.hour_init + ' a ' + slot_data.hour_end + ' ( '+ slot_data.available_places + ' Cupos disponibles )';
+                            slot.appendChild(opt);
+                        }
+                        get_seats(result[0].id)
+                    }
+                })
+                .fail(function (response) {
+                    clean_selector('id_slot')
+                    clean_selector('id_space')
+                    Swal.fire(
+                        'Uy... no hay clases disponibles para esta fecha',
+                        '<p>Intenta buscar en otra fecha.</p>',
+                        'error'
+                    )
+                })
+        }
+        else {
+            Swal.fire(
+                'Uy... parece que alguien ha ocupado este lugar',
+                '<p>Intenta buscar en otro espacio.</p>',
+                'warning'
+            )
+
+        }
+
+    }
+    date.onchange = function () {
+        value = date.value
+        training_type = training.value
+        get_slots(value, training_type)
+    };
+    training.onchange = function () {
+        value = date.value
+        training_type = training.value
+        get_slots(value, training_type)
+    };
+
+    slot.onchange = function () {
+        slot_value = slot.value
+        get_seats(slot_value)
+    }
+    training_type = training.value
+    if (date.value){
+        get_slots(date.value, training.value)
+    }
+</script>
+{% endblock js %}

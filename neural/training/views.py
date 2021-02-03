@@ -10,8 +10,8 @@ from django.views.generic import TemplateView, UpdateView, FormView, DetailView
 from django.urls import reverse_lazy
 
 # Models
-from neural.training.models import Slot, UserTraining
-from neural.training.forms import SchduleForm
+from neural.training.models import Slot, UserTraining, UserTemperature
+from neural.training.forms import SchduleForm, TemperatureInputForm
 from neural.training.serializers import SlotModelSerializer
 from neural.utils.general import generate_calendar_google_invite
 
@@ -68,3 +68,28 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
 
 class InfoView(LoginRequiredMixin, TemplateView):
     template_name = 'training/info.html'
+
+
+class TemperatureView(LoginRequiredMixin, FormView):
+    template_name = 'training/temperature.html'
+    form_class = TemperatureInputForm
+    success_url = reverse_lazy('users:index')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_invalid(self, form):
+        for field, value in form.errors.items():
+            if field not in ['__all__']:
+                form.fields[field].widget.attrs['class'] = 'form-control is-invalid'
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        messages.success(self.request, 'Temperatura grabada correctamente')
+        return super().get_success_url()
