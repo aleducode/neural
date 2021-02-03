@@ -77,20 +77,21 @@ class SchduleForm(forms.Form):
     def clean(self):
         """Veirify availables places."""
         data = super().clean()
-        slot = data.get('slot')
-        if not slot.available_places > 0:
-            raise forms.ValidationError('No hay cupos disponibles para esta sesión.')
-        # Check work spaces availability
-        if UserTraining.objects.filter(slot=slot, space=data.get('space')).exists():
-            raise forms.ValidationError(
-                'Este espacio de trabajo ya ha sido seleccionado por alguien mas, intenta seleccionar otro.')
-        training_already_schedule = UserTraining.objects.filter(
-            user=self.user,
-            slot=slot,
-            status=UserTraining.Status.CONFIRMED
-        ).exists()
-        if training_already_schedule:
-            raise forms.ValidationError('Ya agendaste tu sesión para este día')
+        if not self.errors:
+            slot = data.get('slot')
+            if not slot.available_places > 0:
+                raise forms.ValidationError('No hay cupos disponibles para esta sesión.')
+            # Check work spaces availability
+            if UserTraining.objects.filter(slot=slot, space=data.get('space')).exists():
+                raise forms.ValidationError(
+                    'Este espacio de trabajo ya ha sido seleccionado por alguien mas, intenta seleccionar otro.')
+            training_already_schedule = UserTraining.objects.filter(
+                user=self.user,
+                slot=slot,
+                status=UserTraining.Status.CONFIRMED
+            ).exists()
+            if training_already_schedule:
+                raise forms.ValidationError('Ya agendaste tu sesión para este día')
         return data
 
     def save(self):

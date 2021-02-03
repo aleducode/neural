@@ -25,7 +25,13 @@ class ScheduleView(LoginRequiredMixin, FormView):
         kwargs['user'] = self.request.user
         kwargs['now'] = timezone.localdate()
         return kwargs
-    
+
+    def form_invalid(self, form):
+        for field, value in form.errors.items():
+            if field not in ['__all__']:
+                form.fields[field].widget.attrs['class'] = 'form-control is-invalid'
+        return super().form_invalid(form)
+
     def form_valid(self, form):
         schedule = form.save()
         return HttpResponseRedirect(reverse_lazy('training:schedule-done', kwargs={'pk': schedule.pk}))
@@ -44,8 +50,6 @@ class ScheduleDoneView(LoginRequiredMixin, DetailView):
         end_hour = training_session.slot.hour_end
         context["calendar_url"] = generate_calendar_google_invite(name_user, date, init_hour, end_hour)
         return context
-    
-
 
 
 class MyScheduleView(LoginRequiredMixin, TemplateView):
@@ -58,10 +62,9 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
             user=self.request.user,
             slot__date__gte=now,
             status=UserTraining.Status.CONFIRMED
-            ).order_by('slot__date')[:7]
+        ).order_by('slot__date')[:7]
         return context
 
 
 class InfoView(LoginRequiredMixin, TemplateView):
     template_name = 'training/info.html'
-
