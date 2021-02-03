@@ -9,7 +9,7 @@
             <div class="card mt-2">
                 <div class="card-body">
                     <h4 class=" text-center">Hola {{request.user.first_name|title}} 😛</h4>
-                    <h4 class="mb-4 text-center">Cuánto tenés de temperatura?  <i class="fas fa-temperature-high fa-lg text-danger"></i></h4>
+                    <h5 class="mb-4 text-center mt-3 ml-0 mr-0 pl-0 pr-0">Cuál es tu temperatura?  <i class="fas fa-temperature-high fa-lg text-danger"></i></h5>
                     {% if form.non_field_errors %}
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <strong>Errores:</strong>
