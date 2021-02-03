@@ -8,8 +8,7 @@
             <a href="{% url 'users:index' %}">Regresar</a>
             <div class="card mt-2">
                 <div class="card-body">
-                    <h3 class="mb-4 text-center">Toma de Temperatura <i class="fas fa-temperature-high fa-lg text-danger"></i></h3>
-              
+                    <h4 class="mb-4 text-center">Hola {{request.user.first_name|title}}, Cuanto tenés de temperatura?  <i class="fas fa-temperature-high fa-lg text-danger"></i></h4>
                     {% if form.non_field_errors %}
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <strong>Errores:</strong>
@@ -25,7 +24,7 @@
             
                         {% csrf_token %}
                         <div class="form-group">
-                            <label class="text-left">{{request.user.first_name|title}}, Cuanto tenés de temperatura? </label>
+                      
                             {{form.temperature}}
                             <div class="invalid-feedback">
                                 {% for error in form.temperature.errors %}
