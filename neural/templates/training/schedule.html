@@ -74,7 +74,6 @@
 
 {% block js %}
 <script>
-
     date = document.getElementById('id_fecha')
     slot = document.getElementById('id_slot')
     space = document.getElementById('id_space')
@@ -90,8 +89,6 @@
         obj.appendChild(opt);
     }
     function get_seats(id_slot) {
-
-        if (Boolean(id_slot)){
         $.ajax({
             type: 'POST',
             url: "{% url 'training:api-training-get-seats' %}",
@@ -105,7 +102,16 @@
         })
             .done(function (response) {
                 result = response.result
-                if (result) {
+                if (result == "No data") {
+                    Swal.fire(
+                        'Uy... no hay puestos disponibles para esta clase',
+                        '<p>Intenta buscar en otro horario.</p>',
+                        'error'
+                    )
+                    clean_selector('id_space')
+
+                }
+                else{
                     space.options.length = 0
                     space.disabled = false;
                     for (i = 0, len = result.length; i < len; i++) {
@@ -126,63 +132,55 @@
                     'error'
                 )
             })
-        }
-        else {
-            Swal.fire(
-                'Uy... parece que alguien ha ocupado este lugar',
-                '<p>Intenta buscar en otro espacio.</p>',
-                'warning'
-            )
-        }
 
     }
     function get_slots(date, training_type){
-        if (Boolean(date)){
-            $.ajax({
-                type: 'POST',
-                url: "{% url 'training:api-training-get-slots' %}",
-                data: {
-                    "date": date,
-                    "training_type": training_type,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}',
-                    'user': '{{request.user.email}}'
-                },
-                timeout: 5000,
-                dataType: "json",
-            })
-                .done(function (response) {
-                    result = response.result
-                    if (result) {
-                        slot.options.length = 0
-                        slot.disabled = false;
-                        for (i = 0, len = result.length; i < len; i++) {
-                            slot_data = result[i];
-                            var opt = document.createElement('option');
-                            opt.value = slot_data.id;
-                            opt.innerHTML = slot_data.hour_init + ' a ' + slot_data.hour_end + ' ( '+ slot_data.available_places + ' Cupos disponibles )';
-                            slot.appendChild(opt);
-                        }
-                        get_seats(result[0].id)
-                    }
-                })
-                .fail(function (response) {
-                    clean_selector('id_slot')
-                    clean_selector('id_space')
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'training:api-training-get-slots' %}",
+            data: {
+                "date": date,
+                "training_type": training_type,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'user': '{{request.user.email}}'
+            },
+            timeout: 5000,
+            dataType: "json",
+        })
+            .done(function (response) {
+                result = response.result
+                if (result == "No data") {
                     Swal.fire(
-                        'Uy... no hay clases disponibles para esta fecha',
-                        '<p>Intenta buscar en otra fecha.</p>',
+                        'Uy... no hay puestos disponibles para esta clase',
+                        '<p>Intenta buscar en otro horario.</p>',
                         'error'
                     )
-                })
-        }
-        else {
-            Swal.fire(
-                'Uy... parece que alguien ha ocupado este lugar',
-                '<p>Intenta buscar en otro espacio.</p>',
-                'warning'
-            )
+                    clean_selector('id_space')
+                    clean_selector('id_slot')
 
-        }
+                }
+                else {
+                    slot.options.length = 0
+                    slot.disabled = false;
+                    for (i = 0, len = result.length; i < len; i++) {
+                        slot_data = result[i];
+                        var opt = document.createElement('option');
+                        opt.value = slot_data.id;
+                        opt.innerHTML = slot_data.hour_init + ' a ' + slot_data.hour_end + ' ( '+ slot_data.available_places + ' Cupos disponibles )';
+                        slot.appendChild(opt);
+                    }
+                    get_seats(result[0].id)
+                }
+            })
+            .fail(function (response) {
+                clean_selector('id_slot')
+                clean_selector('id_space')
+                Swal.fire(
+                    'Uy... no hay clases disponibles para esta fecha',
+                    '<p>Intenta buscar en otra fecha.</p>',
+                    'error'
+                )
+            })
 
     }
     date.onchange = function () {
