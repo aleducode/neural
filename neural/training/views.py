@@ -37,6 +37,10 @@ class ScheduleView(LoginRequiredMixin, FormView):
         return HttpResponseRedirect(reverse_lazy('training:schedule-done', kwargs={'pk': schedule.pk}))
 
 
+class ScheduleV1View(TemplateView):
+    template_name = 'training/schedule-v1.html'
+
+
 class ScheduleDoneView(LoginRequiredMixin, DetailView):
     template_name = 'training/schedule-done.html'
     queryset = UserTraining.objects.all()
@@ -89,7 +93,7 @@ class TemperatureView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         form.save()
         return super().form_valid(form)
-    
+
     def get_success_url(self):
         messages.success(self.request, 'Temperatura grabada correctamente')
         return super().get_success_url()

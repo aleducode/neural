@@ -87,11 +87,12 @@ class SchduleForm(forms.Form):
                     'Este espacio de trabajo ya ha sido seleccionado por alguien mas, intenta seleccionar otro.')
             training_already_schedule = UserTraining.objects.filter(
                 user=self.user,
-                slot=slot,
+                slot__date=slot.date,
+                slot__training_type=slot.training_type,
                 status=UserTraining.Status.CONFIRMED
             ).exists()
             if training_already_schedule:
-                raise forms.ValidationError('Ya agendaste tu sesión para este día')
+                raise forms.ValidationError('Ya agendaste tu sesión para este día, debes cancelar si quieres agendar de nuevo.')
         return data
 
     def save(self):
