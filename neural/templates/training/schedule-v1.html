@@ -8,199 +8,46 @@
             <a href="{% url 'users:index' %}">Regresar</a>
             <div class="card mt-2">
                 <div class="card-body">
-                    <h3 class="mb-4 text-center">Crear agenda de Entrenamiento</h3>
-                    {% if form.non_field_errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>Errores:</strong>
-                        {% for error in form.non_field_errors %}
-                        <p>{{error}}</p>
-                        {% endfor %}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    {% endif %}
+                    <h3 class="mb-4 text-center">Seleccionar Día</h3>
                     <form method="POST">
-            
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="formrow-firstname-input">{{form.fecha.label}}</label>
-                            {{form.fecha}}
-                            <div class="invalid-feedback">
-                                {% for error in form.fecha.errors %}
-                                {{error}}
-                                {% endfor %}
+
+                        <div class="card-body border-top">
+                            <div class="text-center">
+                                <div class="row">
+                                    
+                                    {% for day in days %}
+                                    
+                                    <a href="{% url 'training:training-types' day.date %}">
+                                        <div class="col-sm-4">
+                                            <div>
+                                                <div class="font-size-24 text-primary mb-2">
+                                                    <i class="bx bx-calendar-check "></i>
+                                                </div>
+                                    
+                                                <p class="text-muted mb-2">{{day.date}}</p>
+                                                <h5>{{day.day}}</h5>
+                                    
+                                                <div class="mt-3 mb-2">
+                                                    <a href="{% url 'training:training-types' day.date %}" class="btn btn-primary btn-sm w-md">Ver Clases</a>
+                                                </div>
+                                                <hr>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
                             </div>
-            
+
                         </div>
-                        <div class="form-group">
-                            <label for="formrow-firstname-input">{{form.classes.label}}</label>
-                            {{form.classes}}
-                            <div class="invalid-feedback">
-                                {% for error in form.classes.errors %}
-                                {{error}}
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="formrow-firstname-input">{{form.slot.label}}</label>
-                            {{form.slot}}
-                            <div class="invalid-feedback">
-                                {% for error in form.slot.errors %}
-                                {{error}}
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="formrow-firstname-input">{{form.space.label}}</label>
-                            {{form.space}}
-                            <div class="invalid-feedback">
-                                {% for error in form.space.errors %}
-                                {{error}}
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-lg btn-block btn-info w-lg waves-effect waves-light"
-                            style="color:white">Agendar</button>
-            
+
                     </form>
                 </div>
             </div>
-            </div>
-            </div>
-            </div>
-            {% endlanguage %}
+        </div>
+    </div>
+</div>
+{% endlanguage %}
 {% endblock content %}
 
 {% block js %}
-<script>
-    date = document.getElementById('id_fecha')
-    slot = document.getElementById('id_slot')
-    space = document.getElementById('id_space')
-    training = document.getElementById('id_classes')
-    
-    function clean_selector(id_selector){
-        obj = document.getElementById(id_selector)
-        obj.disabled = true;
-        obj.options.length = 0
-        var opt = document.createElement('option');
-        opt.value = null;
-        opt.innerHTML = '-----';
-        obj.appendChild(opt);
-    }
-    function get_seats(id_slot) {
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'training:api-training-get-seats' %}",
-            data: {
-                "slot": id_slot,
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-                'user': '{{request.user.email}}'
-            },
-            timeout: 5000,
-            dataType: "json",
-        })
-            .done(function (response) {
-                result = response.result
-                if (result == "No data") {
-                    Swal.fire(
-                        'Uy... no hay puestos disponibles para esta clase',
-                        '<p>Intenta buscar en otro horario.</p>',
-                        'error'
-                    )
-                    clean_selector('id_space')
-
-                }
-                else{
-                    space.options.length = 0
-                    space.disabled = false;
-                    for (i = 0, len = result.length; i < len; i++) {
-                        space_data = result[i];
-                        var opt = document.createElement('option');
-                        opt.value = space_data.id;
-                        opt.innerHTML = space_data.name + '    🏋️‍♀️    ' + space_data.description;
-                        space.appendChild(opt);
-                    }
-                }
-            })
-            .fail(function (response) {
-                clean_selector('id_slot')
-                clean_selector('id_space')
-                Swal.fire(
-                    'Uy... no hay puestos disponibles para esta clase',
-                    '<p>Intenta buscar en otro horario.</p>',
-                    'error'
-                )
-            })
-
-    }
-    function get_slots(date, training_type){
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'training:api-training-get-slots' %}",
-            data: {
-                "date": date,
-                "training_type": training_type,
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-                'user': '{{request.user.email}}'
-            },
-            timeout: 5000,
-            dataType: "json",
-        })
-            .done(function (response) {
-                result = response.result
-                if (result == "No data") {
-                    Swal.fire(
-                        'Uy... no hay puestos disponibles para esta clase',
-                        '<p>Intenta buscar en otro horario.</p>',
-                        'error'
-                    )
-                    clean_selector('id_space')
-                    clean_selector('id_slot')
-
-                }
-                else {
-                    slot.options.length = 0
-                    slot.disabled = false;
-                    for (i = 0, len = result.length; i < len; i++) {
-                        slot_data = result[i];
-                        var opt = document.createElement('option');
-                        opt.value = slot_data.id;
-                        opt.innerHTML = slot_data.hour_init + ' a ' + slot_data.hour_end + ' ( '+ slot_data.available_places + ' Cupos disponibles )';
-                        slot.appendChild(opt);
-                    }
-                    get_seats(result[0].id)
-                }
-            })
-            .fail(function (response) {
-                clean_selector('id_slot')
-                clean_selector('id_space')
-                Swal.fire(
-                    'Uy... no hay clases disponibles para esta fecha',
-                    '<p>Intenta buscar en otra fecha.</p>',
-                    'error'
-                )
-            })
-
-    }
-    date.onchange = function () {
-        value = date.value
-        training_type = training.value
-        get_slots(value, training_type)
-    };
-    training.onchange = function () {
-        value = date.value
-        training_type = training.value
-        get_slots(value, training_type)
-    };
-
-    slot.onchange = function () {
-        slot_value = slot.value
-        get_seats(slot_value)
-    }
-    training_type = training.value
-    if (date.value){
-        get_slots(date.value, training.value)
-    }
-</script>
 {% endblock js %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+{% block content %}
+{% language 'es' %}
+<div class="page-content">
+    <div class="container-fluid">
+        {% language 'es' %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                    aria-hidden="true">&times;</span>
+            </button>{{ message }}
+
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endlanguage %}
+        <div class="col-xl-6 offset-lg-3">
+            <a href="{% url 'training:training-types' slot.date|date:"Y-m-d" %}">Regresar</a>
+            <div class="card mt-2 ml-0 mr-0 pl-0 pr-0">
+                <div class="card-body ml-0 mr-0 pl-0 pr-0 text-center">
+                    <h3 class="text-center">Seleccionar Espacio:</h3>
+                    <h4 class="text-center mt-0 mb-4"><small>{{slot.get_training_type_display}} |
+                            {{slot.date|date:"l"}}</small></h4>
+
+                    <div class="product-color">
+                        <form method="POST" id="seat_form">
+                            {% csrf_token %}
+                            {{form.selected_seat}}
+                        </form>
+                        {% for seat in slot.available_seats %}
+
+                        <a onclick="SelectConfirmation('{{seat.pk}}')" class="active">
+                            <div class="product-color-item border rounded">
+
+                                <img src="{% static 'images/pesa.png' %}" alt="" class="avatar-md p-1">
+                            </div>
+                            <p>{{seat}}</p>
+                        </a>
+                        {% endfor %}
+
+                    </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endlanguage %}
+{% endblock content %}
+
+{% block js %}
+<script>
+    function SelectConfirmation(seat_pk) {
+        Swal.fire({
+            title: 'Estas seguro que quieres elegir esta base?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: `Siiii`,
+            cancelButtonText: `No`,
+        }).then((result) => {
+            if (result.value) {
+                document.getElementById('id_selected_seat').value = seat_pk
+                document.getElementById("seat_form").submit();
+            }
+        })
+    }
+
+</script>
+{% endblock js %}

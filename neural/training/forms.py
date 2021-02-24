@@ -9,6 +9,12 @@ from django.utils.translation import gettext as _
 days_wrapper = ['Hoy', 'Mañana', 'Pasado Mañana']
 
 
+class SeatsForm(forms.Form):
+    selected_seat = forms.IntegerField(
+        widget=forms.HiddenInput()
+    )
+
+
 class SchduleForm(forms.Form):
     """Schedule form."""
 
@@ -92,7 +98,8 @@ class SchduleForm(forms.Form):
                 status=UserTraining.Status.CONFIRMED
             ).exists()
             if training_already_schedule:
-                raise forms.ValidationError('Ya agendaste tu sesión para este día, debes cancelar si quieres agendar de nuevo.')
+                raise forms.ValidationError(
+                    'Ya agendaste tu sesión para este día, debes cancelar si quieres agendar de nuevo.')
         return data
 
     def save(self):

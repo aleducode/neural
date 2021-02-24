@@ -24,6 +24,16 @@ urlpatterns = [
         name='schedule-v1'
     ),
     path(
+        route='schedule/<str:date>/',
+        view=training_views.TrainingByDateView.as_view(),
+        name='training-types'
+    ),
+    path(
+        route='schedule/slot/<int:pk>/',
+        view=training_views.TrainingSlotView.as_view(),
+        name='select_space'
+    ),
+    path(
         route='schedule-done/<str:pk>',
         view=training_views.ScheduleDoneView.as_view(),
         name='schedule-done'
@@ -33,12 +43,13 @@ urlpatterns = [
         view=training_views.MyScheduleView.as_view(),
         name='my_schedule'
     ),
+
     path(
         route='info',
         view=training_views.InfoView.as_view(),
         name='info'
     ),
-     path(
+    path(
         route='temperature',
         view=training_views.TemperatureView.as_view(),
         name='temperature'

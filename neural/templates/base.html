@@ -43,7 +43,8 @@
 	<link href="{% static 'backoffice/assets/css/app.min.css' %}" rel="stylesheet"/>
     
 
-	{% block styles %}{% endblock %}
+	{% block styles %}
+    {% endblock %}
 
 </head>
 <style>
@@ -76,7 +77,6 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
                     <!-- item-->
-                    <a class="dropdown-item" href="#"><i class="bx bx-user font-size-16 align-middle mr-1"></i> Perfil</a>
                     <a class="dropdown-item text-danger" href="{% url 'users:logout' %}"><i class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i> Cerrar sesión</a>
                 </div>
             </div>
