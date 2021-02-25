@@ -71,7 +71,7 @@ class TrainingByDateView(TemplateView):
     def get_context_data(self, **kwargs):
         pemission_to_schedule = True
         now = timezone.localtime()
-        now_date = timezone.now().strftime(self.format_date)
+        now_date = timezone.localtime().strftime(self.format_date)
         context = super().get_context_data(**kwargs)
         # Permissions
         if UserTraining.objects.filter(
