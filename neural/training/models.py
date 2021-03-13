@@ -32,6 +32,7 @@ class Slot(NeuralBaseModel):
         POWER_HOUR = 'POWER_HOUR', 'Power Hour'
         BALANCE = 'BALANCE', 'Balance'
         WORKOUT = 'WORKOUT', 'Workout Energy'
+        SPECIAL = 'SPECIAL', 'Special class'
 
     date = models.DateField()
     hour_init = models.TimeField()

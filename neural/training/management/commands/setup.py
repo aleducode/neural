@@ -39,20 +39,24 @@ class Command(BaseCommand):
                         'end': '17:00'
                     },
                     {
-                        'init': '17:20',
-                        'end': '18:20'
+                        'init': '17:00',
+                        'end': '18:00'
                     },
                     {
-                        'init': '20:00',
-                        'end': '21:00'
+                        'init': '18:10',
+                        'end': '19:10'
+                    },
+                    {
+                        'init': '20:30',
+                        'end': '21:30'
                     },
 
                 ],
                 'WORKOUT': [
                     {
-                        'init': '18:40',
-                        'end': '19:40'
-                    }
+                        'init': '19:20',
+                        'end': '20:20'
+                    },
                 ]
             },
             2: {
@@ -84,16 +88,20 @@ class Command(BaseCommand):
                         'end': '17:00'
                     },
                     {
-                        'init': '17:20',
-                        'end': '18:20'
+                        'init': '17:00',
+                        'end': '18:00'
                     },
                     {
-                        'init': '18:40',
-                        'end': '19:40'
+                        'init': '18:10',
+                        'end': '19:10'
                     },
                     {
-                        'init': '20:00',
-                        'end': '21:00'
+                        'init': '19:20',
+                        'end': '20:20'
+                    },
+                    {
+                        'init': '20:30',
+                        'end': '21:30'
                     },
 
                 ]
@@ -125,16 +133,20 @@ class Command(BaseCommand):
                         'end': '17:00'
                     },
                     {
-                        'init': '17:20',
-                        'end': '18:20'
+                        'init': '17:00',
+                        'end': '18:00'
                     },
                     {
-                        'init': '18:40',
-                        'end': '19:40'
+                        'init': '18:10',
+                        'end': '19:10'
                     },
                     {
-                        'init': '20:00',
-                        'end': '21:00'
+                        'init': '19:20',
+                        'end': '20:20'
+                    },
+                    {
+                        'init': '20:30',
+                        'end': '21:30'
                     },
                 ]},
             4: {
@@ -164,15 +176,23 @@ class Command(BaseCommand):
                         'end': '17:00'
                     },
                     {
-                        'init': '17:20',
-                        'end': '18:20'
+                        'init': '17:00',
+                        'end': '18:00'
+                    },
+                    {
+                        'init': '18:10',
+                        'end': '19:10'
+                    },
+                    {
+                        'init': '19:20',
+                        'end': '20:20'
                     },
 
                 ],
-                'POWER_HOUR': [
+                'SPECIAL': [
                     {
-                        'init': '20:00',
-                        'end': '21:00'
+                        'init': '20:30',
+                        'end': '21:30'
                     },
                 ],
 
@@ -204,12 +224,16 @@ class Command(BaseCommand):
                         'end': '17:00'
                     },
                     {
-                        'init': '17:20',
-                        'end': '18:20'
+                        'init': '17:00',
+                        'end': '18:00'
                     },
                     {
-                        'init': '18:40',
-                        'end': '19:40'
+                        'init': '18:10',
+                        'end': '19:10'
+                    },
+                    {
+                        'init': '19:20',
+                        'end': '20:20'
                     },
                 ]
             },
@@ -222,12 +246,16 @@ class Command(BaseCommand):
                 ],
                 'NEURAL_CIRCUIT': [
                     {
-                        'init': '8:20',
-                        'end': '9:20'
+                        'init': '8:00',
+                        'end': '9:00'
                     },
                     {
-                        'init': '9:40',
-                        'end': '10:40'
+                        'init': '9:00',
+                        'end': '10:00'
+                    },
+                    {
+                        'init': '10:00',
+                        'end': '11:00'
                     },
                     {
                         'init': '11:00',
@@ -239,6 +267,7 @@ class Command(BaseCommand):
 
         now = timezone.localdate()
         days = 30
+        result = []
         for i in range(0, days):
             day = now + timedelta(days=i)
             for session in sessions:
@@ -252,6 +281,8 @@ class Command(BaseCommand):
                                 defaults={
                                     'training_type': training,
                                     'hour_end': hour.get('end'),
-                                    'max_places': 10
+                                    'max_places': 12
                                 }
                             )
+                            result.append(slot.pk)
+        Slot.objects.filter(date__gte=timezone.now()).exclude(pk__in=result).delete()
