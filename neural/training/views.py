@@ -41,7 +41,7 @@ class ScheduleView(LoginRequiredMixin, FormView):
         return HttpResponseRedirect(reverse_lazy('training:schedule-done', kwargs={'pk': schedule.pk}))
 
 
-class ScheduleV1View(TemplateView):
+class ScheduleV1View(LoginRequiredMixin, TemplateView):
     template_name = 'training/schedule-v1.html'
 
     def get_context_data(self, **kwargs):
@@ -59,7 +59,7 @@ class ScheduleV1View(TemplateView):
         return context
 
 
-class TrainingByDateView(TemplateView):
+class TrainingByDateView(LoginRequiredMixin, TemplateView):
     template_name = 'training/sessions.html'
     format_date = "%Y-%m-%d"
 
