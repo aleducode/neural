@@ -112,8 +112,8 @@ class TrainingSlotView(LoginRequiredMixin, DetailView, FormView):
         if pk_seat == 0:
             schedule, is_free = UserTraining.objects.update_or_create(
                 slot=slot,
+                user=self.request.user,
                 defaults={
-                    'user': self.request.user,
                     'status': UserTraining.Status.CONFIRMED.value
                 }
             )
