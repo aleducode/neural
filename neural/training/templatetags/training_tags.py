@@ -14,5 +14,7 @@ def get_icon(value):
         return 'bx bx-dumbbell  text-danger'
     if value in ['BALANCE']:
         return 'bx bx-infinite text-warning'
+    if value in ['VIRTUAL']:
+        return 'bx bx-devices text-info'
     else:
         return 'bx bxs-flame  text-warning'

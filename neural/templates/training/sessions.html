@@ -31,10 +31,7 @@
             {% endfor %}
             {% endif %}
             <div class="mt-2 row">
-                
                 {% if sessions %}
-
-                    
                 {% for session in sessions %}
                 <a href="{% if session.available_places > 0 and pemission_to_schedule %}{% url 'training:select_space' session.pk %}{% endif %}"
                     style="display:block; width:100%">

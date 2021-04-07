@@ -29,8 +29,18 @@
                             {% csrf_token %}
                             {{form.selected_seat}}
                         </form>
-                        {% for seat in slot.available_seats %}
+                        
+                        {% if  slot.training_type == 'VIRTUAL' %}
+                        <a onclick="SelectConfirmation('0')" class="active">
+                            <div class="product-color-item border rounded">
 
+                                <img src="{% static 'images/casa.png' %}" alt="" class="avatar-md p-1">
+                            </div>
+                            <p>Casa de {{request.user.first_name|title}}</p>
+                        </a>
+                        {% else %}
+                            
+                        {% for seat in slot.available_seats %}
                         <a onclick="SelectConfirmation('{{seat.pk}}')" class="active">
                             <div class="product-color-item border rounded">
 
@@ -39,6 +49,8 @@
                             <p>{{seat}}</p>
                         </a>
                         {% endfor %}
+                        {% endif %}
+
 
                     </div>
 

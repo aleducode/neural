@@ -108,13 +108,24 @@ class TrainingSlotView(LoginRequiredMixin, DetailView, FormView):
         # Create User training session
         pk_seat = form.cleaned_data.get('selected_seat')
         slot = self.get_object()
-        schedule, is_free = UserTraining.objects.get_or_create(
-            slot=slot,
-            space=Space.objects.get(pk=pk_seat),
-            defaults={
-                'user': self.request.user
-            }
-        )
+        # Virtual class
+        if pk_seat == 0:
+            schedule, is_free = UserTraining.objects.update_or_create(
+                slot=slot,
+                defaults={
+                    'user': self.request.user,
+                    'status': UserTraining.Status.CONFIRMED.value
+                }
+            )
+            is_free = True
+        else:
+            schedule, is_free = UserTraining.objects.get_or_create(
+                slot=slot,
+                space=Space.objects.get(pk=pk_seat),
+                defaults={
+                    'user': self.request.user
+                }
+            )
         if not is_free:
             messages.error(
                 self.request, 'Este espacio de trabajo ya ha sido seleccionado por alguien mas, intenta seleccionar otro.')
