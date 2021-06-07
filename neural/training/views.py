@@ -8,14 +8,13 @@ from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 
-from django.views.generic import TemplateView, UpdateView, FormView, DetailView
+from django.views.generic import TemplateView, FormView, DetailView
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 
 # Models
-from neural.training.models import Slot, UserTraining, UserTemperature, Space
+from neural.training.models import Slot, UserTraining, Space
 from neural.training.forms import SchduleForm, TemperatureInputForm, SeatsForm
-from neural.training.serializers import SlotModelSerializer
 from neural.utils.general import generate_calendar_google_invite
 from datetime import datetime
 

@@ -22,6 +22,7 @@ class SlotAdmin(admin.ModelAdmin):
 class SpaceAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(UserTraining)
 class UserTrainingAdmin(admin.ModelAdmin):
     list_display = ['user', 'slot', 'status']

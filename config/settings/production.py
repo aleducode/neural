@@ -127,7 +127,6 @@ EMAIL_SUBJECT_PREFIX = env(
 ADMIN_URL = env("DJANGO_ADMIN_URL")
 
 
-
 # Collectfast
 # ------------------------------------------------------------------------------
 # https://github.com/antonagestam/collectfast#installation

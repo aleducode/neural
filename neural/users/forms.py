@@ -1,7 +1,6 @@
 """Users Forms"""
 
 from django import forms
-from django.contrib.auth import authenticate
 from django.contrib.auth import (
     authenticate, get_user_model,
 )
@@ -23,7 +22,6 @@ class UserCreationForm(admin_forms.UserCreationForm):
     error_message = admin_forms.UserCreationForm.error_messages.update(
         {"duplicate_username": _("This username has already been taken.")}
     )
-    
 
     class Meta(admin_forms.UserCreationForm.Meta):
         model = User
@@ -83,15 +81,6 @@ class CustomAuthenticationForm(forms.Form):
                 self.confirm_login_allowed(self.user_cache)
 
         return self.cleaned_data
-
-    def __init__(self, request=None, *args, **kwargs):
-        """
-        The 'request' parameter is set for custom auth use by subclasses.
-        The form data comes in via the standard 'data' kwarg.
-        """
-        self.request = request
-        self.user_cache = None
-        super().__init__(*args, **kwargs)
 
     def confirm_login_allowed(self, user):
         """
@@ -171,7 +160,7 @@ class SignUpForms(forms.Form):
         if phone_number_taken:
             raise forms.ValidationError('Número de teléfono ya registrado.')
         return phone_number
-    
+
     def clean_email(self):
         """Email must be unique."""
         email = self.cleaned_data['email']

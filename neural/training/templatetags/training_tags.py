@@ -1,7 +1,6 @@
 """Template tags."""
 
 from django import template
-from neural.training.models import Slot
 
 register = template.Library()
 

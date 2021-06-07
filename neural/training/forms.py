@@ -1,7 +1,6 @@
 """Training forms."""
 
 from django import forms
-from django.utils import timezone
 from datetime import timedelta
 from neural.training.models import UserTraining, Slot, Space, UserTemperature
 from django.utils.translation import gettext as _
