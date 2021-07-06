@@ -167,13 +167,7 @@ class Command(BaseCommand):
                         'end': '21:10'
                     },
 
-                ],
-                'SPECIAL': [
-                    {
-                        'init': '18:10',
-                        'end': '19:10'
-                    },
-                ],
+                ]
             },
             4: {
                 'NEURAL_CIRCUIT': [
@@ -204,10 +198,6 @@ class Command(BaseCommand):
                     {
                         'init': '16:00',
                         'end': '17:00'
-                    },
-                    {
-                        'init': '17:00',
-                        'end': '18:00'
                     },
                     {
                         'init': '18:10',
@@ -310,6 +300,14 @@ class Command(BaseCommand):
                         'end': '12:00'
                     },
                 ],
+            },
+            7: {
+                'SPECIAL': [
+                    {
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                ],
             }
         }
 
@@ -319,18 +317,17 @@ class Command(BaseCommand):
         for i in range(0, days):
             day = now + timedelta(days=i)
             for session in sessions:
-                if day.isoweekday() != 7:
-                    now_data = sessions[day.isoweekday()]
-                    for training in now_data:
-                        for hour in now_data[training]:
-                            slot, created = Slot.objects.update_or_create(
-                                date=day,
-                                hour_init=hour.get('init'),
-                                training_type=training,
-                                defaults={
-                                    'hour_end': hour.get('end'),
-                                    'max_places': 10
-                                }
-                            )
-                            result.append(slot.pk)
+                now_data = sessions[day.isoweekday()]
+                for training in now_data:
+                    for hour in now_data[training]:
+                        slot, created = Slot.objects.update_or_create(
+                            date=day,
+                            hour_init=hour.get('init'),
+                            training_type=training,
+                            defaults={
+                                'hour_end': hour.get('end'),
+                                'max_places': 10
+                            }
+                        )
+                        result.append(slot.pk)
         Slot.objects.filter(date__gte=timezone.now()).exclude(pk__in=result).delete()
