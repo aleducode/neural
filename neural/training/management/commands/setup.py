@@ -170,8 +170,8 @@ class Command(BaseCommand):
                 ],
                 'SPECIAL': [
                     {
-                        'init': '17:00',
-                        'end': '18:00'
+                        'init': '18:00',
+                        'end': '19:00'
                     },
                 ],
             },
