@@ -167,7 +167,13 @@ class Command(BaseCommand):
                         'end': '21:10'
                     },
 
-                ]
+                ],
+                'SPECIAL': [
+                    {
+                        'init': '17:00',
+                        'end': '18:00'
+                    },
+                ],
             },
             4: {
                 'NEURAL_CIRCUIT': [
@@ -267,11 +273,7 @@ class Command(BaseCommand):
                     {
                         'init': '19:10',
                         'end': '20:10'
-                    },
-                    {
-                        'init': '20:10',
-                        'end': '21:10'
-                    },
+                    }
 
                 ]
             },
