@@ -54,35 +54,6 @@
             </div>
 
         </div>
-        <div class="row">
-            <div class="col-lg-4  offset-lg-2">
-                <a href="{% url 'training:info' %}">
-                <div class="card border border-danger">
-                    <div class="card-header bg-transparent border-danger">
-                        <h5 class="my-0 text-danger" style="font-size: x-large;"><i
-                            class="mdi mdi-bullseye-arrow mr-3"></i>Ver calendario Neural</h5>
-                    </div>
-                    <div class="card-body mt-0 pt-0">
-                        <h5>Eventos disponibles, horarios y tipos de clases.</h5>
-                    </div>
-                </div>
-            </a>
-            </div>
-            <div class="col-lg-4">
-                <a {% if already_temperature %} onclick="alreadyTemp()"{% else %}href="{% url 'training:temperature' %}"{% endif %}>
-                <div class="card border border-warning">
-                    <div class="card-header bg-transparent border-warning">
-                        <h5 class="my-0 text-warning" style="font-size: x-large;"><i
-                            class="mdi mdi-qrcode-scan mr-3"></i>Toma de temperatura</h5>
-                    </div>
-                    <div class="card-body mt-0 pt-0">
-                        <h5>Recuerda al ingresar a neural.</h5>
-                    </div>
-                </div>
-            </a>
-            </div>
-        
-        </div>
         <!-- end row -->
     </div> <!-- container-fluid -->
 </div>
