@@ -58,7 +58,7 @@ class Command(BaseCommand):
                 ],
                 'WORKOUT': [
                     {
-                        'init': '19:20',
+                        'init': '19:10',
                         'end': '20:10'
                     },
                 ]
@@ -113,7 +113,7 @@ class Command(BaseCommand):
                     },
 
                 ],
-                'SPECIAL': [
+                'MILITAR': [
                     {
                         'init': '18:10',
                         'end': '19:10'
@@ -225,12 +225,6 @@ class Command(BaseCommand):
                         'end': '18:00'
                     },
                 ],
-                'SPECIAL': [
-                    {
-                        'init': '18:10',
-                        'end': '19:10'
-                    },
-                ],
             },
             5: {
                 'NEURAL_CIRCUIT': [
@@ -274,21 +268,16 @@ class Command(BaseCommand):
                         'init': '19:10',
                         'end': '20:10'
                     }
-
                 ]
             },
             6: {
                 'BALANCE': [
                     {
-                        'init': '7:00',
-                        'end': '8:00'
-                    },
-                ],
-                'NEURAL_CIRCUIT': [
-                    {
                         'init': '8:00',
                         'end': '9:00'
                     },
+                ],
+                'NEURAL_CIRCUIT': [
                     {
                         'init': '9:00',
                         'end': '10:00'
@@ -314,7 +303,7 @@ class Command(BaseCommand):
         }
 
         now = timezone.localdate()
-        days = 30
+        days = 115
         result = []
         for i in range(0, days):
             day = now + timedelta(days=i)
@@ -328,7 +317,7 @@ class Command(BaseCommand):
                             training_type=training,
                             defaults={
                                 'hour_end': hour.get('end'),
-                                'max_places': 10
+                                'max_places': 12
                             }
                         )
                         result.append(slot.pk)

@@ -10,7 +10,7 @@ from django.views.generic import TemplateView, FormView
 from neural.users.forms import (
     CustomAuthenticationForm
 )
-from neural.training.models import UserTraining, UserTemperature
+from neural.training.models import UserTraining
 from neural.users.forms import SignUpForms
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
@@ -42,13 +42,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
         last_training = UserTraining.objects.filter(
             user=self.request.user, slot__date__gte=now_date, status=UserTraining.Status.CONFIRMED).last()
 
-        if UserTemperature.objects.filter(
-            created__year=now_date.year,
-            created__month=now_date.month,
-            created__day=now_date.day,
-            user=user
-        ).exists():
-            context['already_temperature'] = True
         if last_training:
             day = last_training.slot.date
             if day == now_date:

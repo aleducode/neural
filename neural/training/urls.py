@@ -49,11 +49,4 @@ urlpatterns = [
         view=training_views.InfoView.as_view(),
         name='info'
     ),
-    path(
-        route='temperature',
-        view=training_views.TemperatureView.as_view(),
-        name='temperature'
-    ),
-
-
 ]

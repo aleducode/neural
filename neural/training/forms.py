@@ -2,7 +2,7 @@
 
 from django import forms
 from datetime import timedelta
-from neural.training.models import UserTraining, Slot, Space, UserTemperature
+from neural.training.models import UserTraining, Slot, Space
 from django.utils.translation import gettext as _
 
 days_wrapper = ['Hoy', 'Mañana', 'Pasado Mañana']
@@ -107,27 +107,5 @@ class SchduleForm(forms.Form):
             user=self.user,
             slot=data.get('slot'),
             space=data.get('space'),
-        )
-        return training
-
-
-class TemperatureInputForm(forms.Form):
-
-    def __init__(self, *args, **kwargs):
-        if 'user' in kwargs:
-            self.user = kwargs.pop('user')
-        super().__init__(*args, **kwargs)
-    temperature = forms.FloatField(
-        min_value=30,
-        max_value=40,
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control form-control-lg',
-        }))
-
-    def save(self):
-        data = self.cleaned_data
-        training = UserTemperature.objects.create(
-            user=self.user,
-            temperature=data.get('temperature'),
         )
         return training
