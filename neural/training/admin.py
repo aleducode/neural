@@ -27,4 +27,3 @@ class SpaceAdmin(admin.ModelAdmin):
 class UserTrainingAdmin(admin.ModelAdmin):
     list_display = ['user', 'slot', 'status']
     search_fields = ['user__first_name', 'user__last_name', 'user__email']
-
