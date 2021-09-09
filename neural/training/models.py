@@ -27,6 +27,7 @@ class Slot(NeuralBaseModel):
 
     class TrainingType(models.TextChoices):
         NEURAL_CIRCUIT = 'NEURAL_CIRCUIT', 'Neural Circuit'
+        MILITAR = 'MILITAR', "Militar Box"
         POWER_HOUR = 'POWER_HOUR', 'Power Hour'
         BALANCE = 'BALANCE', 'Balance'
         WORKOUT = 'WORKOUT', 'Workout Energy'
@@ -95,16 +96,3 @@ class UserTraining(NeuralBaseModel):
     @property
     def is_now(self):
         return self.slot.date == timezone.localdate()
-
-
-class UserTemperature(NeuralBaseModel):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='temperatures',
-        limit_choices_to={'is_verified': True}
-    )
-    temperature = models.FloatField()
-
-    def __str__(self):
-        return f'Temperatura: {self.user}'

@@ -14,7 +14,7 @@ from django.utils.translation import gettext as _
 
 # Models
 from neural.training.models import Slot, UserTraining, Space
-from neural.training.forms import SchduleForm, TemperatureInputForm, SeatsForm
+from neural.training.forms import SchduleForm, SeatsForm
 from neural.utils.general import generate_calendar_google_invite
 from datetime import datetime
 
@@ -168,28 +168,3 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
 
 class InfoView(LoginRequiredMixin, TemplateView):
     template_name = 'training/info.html'
-
-
-class TemperatureView(LoginRequiredMixin, FormView):
-    template_name = 'training/temperature.html'
-    form_class = TemperatureInputForm
-    success_url = reverse_lazy('users:index')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-    def form_invalid(self, form):
-        for field, value in form.errors.items():
-            if field not in ['__all__']:
-                form.fields[field].widget.attrs['class'] = 'form-control is-invalid'
-        return super().form_invalid(form)
-
-    def form_valid(self, form):
-        form.save()
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        messages.success(self.request, 'Temperatura grabada correctamente')
-        return super().get_success_url()
