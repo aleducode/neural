@@ -303,7 +303,7 @@ class Command(BaseCommand):
         }
 
         now = timezone.localdate()
-        days = 115
+        days = 114
         result = []
         for i in range(0, days):
             day = now + timedelta(days=i)
