@@ -47,7 +47,7 @@ class Slot(NeuralBaseModel):
     training_type = models.CharField(
         max_length=50,
         choices=TrainingType.choices,
-        default=TrainingType.NEURAL_CIRCUIT,
+        default=TrainingType.FUNCIONAL_TRAINING,
     )
 
     def __str__(self):
