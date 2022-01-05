@@ -12,14 +12,10 @@ class Command(BaseCommand):
         """Handle command usage."""
         sessions = {
             1: {
-                'NEURAL_CIRCUIT': [
+                'FUNCIONAL_TRAINING': [
                     {
                         'init': '5:00',
                         'end': '6:00'
-                    },
-                    {
-                        'init': '6:00',
-                        'end': '7:00'
                     },
                     {
                         'init': '7:00',
@@ -34,11 +30,6 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                     {
-                        'init': '10:00',
-                        'end': '11:00'
-                    },
-
-                    {
                         'init': '16:00',
                         'end': '17:00'
                     },
@@ -47,30 +38,42 @@ class Command(BaseCommand):
                         'end': '18:00'
                     },
                     {
-                        'init': '18:10',
-                        'end': '19:10'
+                        'init': '18:00',
+                        'end': '19:00'
                     },
                     {
-                        'init': '20:10',
-                        'end': '21:10'
+                        'init': '20:00',
+                        'end': '21:00'
                     },
 
                 ],
-                'WORKOUT': [
+                'GAP_MMSS': [
                     {
-                        'init': '19:10',
-                        'end': '20:10'
+                        'init': '6:00',
+                        'end': '7:00'
+                    },
+                ],
+                'SENIOR': [
+                    {
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                ],
+                'STEP': [
+                    {
+                        'init': '19:00',
+                        'end': '20:00'
                     },
                 ]
             },
             2: {
-                'POWER_HOUR': [
+                'RTG': [
                     {
                         'init': '5:00',
                         'end': '6:00'
                     },
                 ],
-                'NEURAL_CIRCUIT': [
+                'FUNCIONAL_TRAINING': [
                     {
                         'init': '6:00',
                         'end': '7:00'
@@ -82,10 +85,6 @@ class Command(BaseCommand):
                     {
                         'init': '8:00',
                         'end': '9:00'
-                    },
-                    {
-                        'init': '9:00',
-                        'end': '10:00'
                     },
                     {
                         'init': '10:00',
@@ -100,83 +99,30 @@ class Command(BaseCommand):
                         'end': '18:00'
                     },
                     {
-                        'init': '18:10',
-                        'end': '19:10'
+                        'init': '19:00',
+                        'end': '20:00'
                     },
                     {
-                        'init': '19:10',
-                        'end': '20:10'
-                    },
-                    {
-                        'init': '20:10',
-                        'end': '21:10'
+                        'init': '20:00',
+                        'end': '21:00'
                     },
 
                 ],
-                'MILITAR': [
-                    {
-                        'init': '18:10',
-                        'end': '19:10'
-                    },
-                ],
-            },
-            3: {
-                'NEURAL_CIRCUIT': [
-                    {
-                        'init': '5:00',
-                        'end': '6:00'
-                    },
-                    {
-                        'init': '6:00',
-                        'end': '7:00'
-                    },
-                    {
-                        'init': '7:00',
-                        'end': '8:00'
-                    },
-                    {
-                        'init': '8:00',
-                        'end': '9:00'
-                    },
+                'PILATES': [
                     {
                         'init': '9:00',
                         'end': '10:00'
                     },
-                    {
-                        'init': '10:00',
-                        'end': '11:00'
-                    },
-                    {
-                        'init': '16:00',
-                        'end': '17:00'
-                    },
-                    {
-                        'init': '17:00',
-                        'end': '18:00'
-                    },
-                    {
-                        'init': '18:10',
-                        'end': '19:10'
-                    },
-                    {
-                        'init': '19:10',
-                        'end': '20:10'
-                    },
-                    {
-                        'init': '20:10',
-                        'end': '21:10'
-                    },
-
                 ],
-                'SPECIAL': [
+                'FIT_BOXING': [
                     {
                         'init': '18:00',
                         'end': '19:00'
                     },
                 ],
             },
-            4: {
-                'NEURAL_CIRCUIT': [
+            3: {
+                'FUNCIONAL_TRAINING': [
                     {
                         'init': '5:00',
                         'end': '6:00'
@@ -190,67 +136,8 @@ class Command(BaseCommand):
                         'end': '8:00'
                     },
                     {
-                        'init': '8:00',
-                        'end': '9:00'
-                    },
-                    {
                         'init': '9:00',
                         'end': '10:00'
-                    },
-                    {
-                        'init': '10:00',
-                        'end': '11:00'
-                    },
-                    {
-                        'init': '16:00',
-                        'end': '17:00'
-                    },
-                    {
-                        'init': '18:10',
-                        'end': '19:10'
-                    },
-                    {
-                        'init': '19:10',
-                        'end': '20:10'
-                    },
-                    {
-                        'init': '20:10',
-                        'end': '21:10'
-                    },
-
-                ],
-                'POWER_HOUR': [
-                    {
-                        'init': '17:00',
-                        'end': '18:00'
-                    },
-                ],
-            },
-            5: {
-                'NEURAL_CIRCUIT': [
-                    {
-                        'init': '5:00',
-                        'end': '6:00'
-                    },
-                    {
-                        'init': '6:00',
-                        'end': '7:00'
-                    },
-                    {
-                        'init': '7:00',
-                        'end': '8:00'
-                    },
-                    {
-                        'init': '8:00',
-                        'end': '9:00'
-                    },
-                    {
-                        'init': '9:00',
-                        'end': '10:00'
-                    },
-                    {
-                        'init': '10:00',
-                        'end': '11:00'
                     },
                     {
                         'init': '16:00',
@@ -261,27 +148,155 @@ class Command(BaseCommand):
                         'end': '18:00'
                     },
                     {
-                        'init': '18:10',
-                        'end': '19:10'
+                        'init': '18:00',
+                        'end': '19:00'
                     },
                     {
-                        'init': '19:10',
-                        'end': '20:10'
-                    }
-                ]
-            },
-            6: {
+                        'init': '19:00',
+                        'end': '20:00'
+                    },
+                ],
                 'BALANCE': [
                     {
                         'init': '8:00',
                         'end': '9:00'
                     },
                 ],
-                'NEURAL_CIRCUIT': [
+                'SENIOR': [
+                    {
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                ],
+                'GAP_MMSS': [
+                    {
+                        'init': '20:00',
+                        'end': '21:00'
+                    },
+                ],
+            },
+            4: {
+                'TRX': [
+                    {
+                        'init': '5:00',
+                        'end': '6:00'
+                    },
+                ],
+                'FUNCIONAL_TRAINING': [
+                    
+                    {
+                        'init': '6:00',
+                        'end': '7:00'
+                    },
+                    {
+                        'init': '7:00',
+                        'end': '8:00'
+                    },
+                    {
+                        'init': '8:00',
+                        'end': '9:00'
+                    },
                     {
                         'init': '9:00',
                         'end': '10:00'
                     },
+                    {
+                        'init': '17:00',
+                        'end': '18:00'
+                    },
+                    {
+                        'init': '18:00',
+                        'end': '19:00'
+                    },
+                    {
+                        'init': '20:00',
+                        'end': '21:00'
+                    },
+
+                ],
+                'YOGA': [
+                    {
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                ],
+                'RTG': [
+                    {
+                        'init': '16:00',
+                        'end': '17:00'
+                    },
+                ],
+                'FIT_BOXING': [
+                    {
+                        'init': '16:00',
+                        'end': '17:00'
+                    },
+                ],
+            },
+            5: {
+                'FUNCIONAL_TRAINING': [
+                    {
+                        'init': '5:00',
+                        'end': '6:00'
+                    },
+                    {
+                        'init': '6:00',
+                        'end': '7:00'
+                    },
+                    {
+                        'init': '8:00',
+                        'end': '9:00'
+                    },
+                    {
+                        'init': '9:00',
+                        'end': '10:00'
+                    },
+                    {
+                        'init': '16:00',
+                        'end': '17:00'
+                    },
+                    {
+                        'init': '17:00',
+                        'end': '18:00'
+                    },
+                    {
+                        'init': '19:00',
+                        'end': '20:00'
+                    }
+                ],
+                'TONO': [
+                    {
+                        'init': '7:00',
+                        'end': '8:00'
+                    },
+                ],
+                'SENIOR': [
+                    {
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                ],
+                'BODY_PUMP': [
+                    {
+                        'init': '18:00',
+                        'end': '19:00'
+                    },
+                ],
+            },
+            6: {
+                'YOGA': [
+                    {
+                        'init': '8:00',
+                        'end': '9:00'
+                    },
+                ],
+                'RUMBA': [
+                    {
+                        'init': '9:00',
+                        'end': '10:00'
+                    },
+                ],
+                'FUNCIONAL_TRAINING': [
                     {
                         'init': '10:00',
                         'end': '11:00'
@@ -293,19 +308,13 @@ class Command(BaseCommand):
                 ],
             },
             7: {
-                'SPECIAL': [
-                    {
-                        'init': '10:00',
-                        'end': '11:00'
-                    },
-                ],
-            }
+            },
         }
 
         now = timezone.localdate()
-        days = 114
+        days = 55
         result = []
-        for i in range(0, days):
+        for i in range(2, days):
             day = now + timedelta(days=i)
             for session in sessions:
                 now_data = sessions[day.isoweekday()]
