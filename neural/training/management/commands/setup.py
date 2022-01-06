@@ -183,7 +183,7 @@ class Command(BaseCommand):
                     },
                 ],
                 'FUNCIONAL_TRAINING': [
-                    
+
                     {
                         'init': '6:00',
                         'end': '7:00'
