@@ -26,13 +26,19 @@ class Space(NeuralBaseModel):
 class Slot(NeuralBaseModel):
 
     class TrainingType(models.TextChoices):
-        NEURAL_CIRCUIT = 'NEURAL_CIRCUIT', 'Neural Circuit'
-        MILITAR = 'MILITAR', "Militar Box"
-        POWER_HOUR = 'POWER_HOUR', 'Power Hour'
+        FUNCIONAL_TRAINING = 'FUNCIONAL_TRAINING', 'Funcional Training'
+        GAP_MMSS = 'GAP_MMSS', 'GAP/MMSS'
+        CARDIO_STEP = 'CARDIO_STEP', 'Cardio Step'
+        SENIOR = 'SENIOR', 'Senior'
+        RTG = 'RTG', 'RTG'
+        PILATES = 'PILATES', 'Pilates'
+        FIT_BOXING = 'FIT_BOXING', 'Fit Boxing'
         BALANCE = 'BALANCE', 'Balance'
-        WORKOUT = 'WORKOUT', 'Workout Energy'
-        VIRTUAL = 'VIRTUAL', 'Virtual'
-        SPECIAL = 'SPECIAL', 'Special class'
+        TRX = 'TRX', 'TRX'
+        YOGA = 'YOGA', 'Yoga'
+        TONO = 'TONO', 'Tono'
+        BODY_PUMP = 'BODY_PUMP', 'Body Pumps'
+        RUMBA = 'RUMBA', 'Rumba'
 
     date = models.DateField()
     hour_init = models.TimeField()
@@ -41,7 +47,7 @@ class Slot(NeuralBaseModel):
     training_type = models.CharField(
         max_length=50,
         choices=TrainingType.choices,
-        default=TrainingType.NEURAL_CIRCUIT,
+        default=TrainingType.FUNCIONAL_TRAINING,
     )
 
     def __str__(self):
