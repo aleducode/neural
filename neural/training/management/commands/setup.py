@@ -314,7 +314,7 @@ class Command(BaseCommand):
         now = timezone.localdate()
         days = 55
         result = []
-        for i in range(2, days):
+        for i in range(0, days):
             day = now + timedelta(days=i)
             for session in sessions:
                 now_data = sessions[day.isoweekday()]
