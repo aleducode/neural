@@ -38,8 +38,8 @@ class Command(BaseCommand):
                         'end': '18:00'
                     },
                     {
-                        'init': '18:00',
-                        'end': '19:00'
+                        'init': '19:00',
+                        'end': '20:00'
                     },
                     {
                         'init': '20:00',
@@ -59,10 +59,10 @@ class Command(BaseCommand):
                         'end': '11:00'
                     },
                 ],
-                'STEP': [
+                'CARDIO_STEP': [
                     {
-                        'init': '19:00',
-                        'end': '20:00'
+                        'init': '18:00',
+                        'end': '19:00'
                     },
                 ]
             },
@@ -87,6 +87,10 @@ class Command(BaseCommand):
                         'end': '9:00'
                     },
                     {
+                        'init': '9:00',
+                        'end': '10:00'
+                    },
+                    {
                         'init': '10:00',
                         'end': '11:00'
                     },
@@ -99,8 +103,8 @@ class Command(BaseCommand):
                         'end': '18:00'
                     },
                     {
-                        'init': '19:00',
-                        'end': '20:00'
+                        'init': '18:00',
+                        'end': '19:00'
                     },
                     {
                         'init': '20:00',
@@ -108,16 +112,10 @@ class Command(BaseCommand):
                     },
 
                 ],
-                'PILATES': [
-                    {
-                        'init': '9:00',
-                        'end': '10:00'
-                    },
-                ],
                 'FIT_BOXING': [
                     {
-                        'init': '18:00',
-                        'end': '19:00'
+                        'init': '19:00',
+                        'end': '20:00'
                     },
                 ],
             },
@@ -132,8 +130,8 @@ class Command(BaseCommand):
                         'end': '7:00'
                     },
                     {
-                        'init': '7:00',
-                        'end': '8:00'
+                        'init': '8:00',
+                        'end': '9:00'
                     },
                     {
                         'init': '9:00',
@@ -158,8 +156,8 @@ class Command(BaseCommand):
                 ],
                 'BALANCE': [
                     {
-                        'init': '8:00',
-                        'end': '9:00'
+                        'init': '7:00',
+                        'end': '8:00'
                     },
                 ],
                 'SENIOR': [
@@ -176,14 +174,12 @@ class Command(BaseCommand):
                 ],
             },
             4: {
-                'TRX': [
+                
+                'FUNCIONAL_TRAINING': [
                     {
                         'init': '5:00',
                         'end': '6:00'
                     },
-                ],
-                'FUNCIONAL_TRAINING': [
-
                     {
                         'init': '6:00',
                         'end': '7:00'
@@ -228,8 +224,8 @@ class Command(BaseCommand):
                 ],
                 'FIT_BOXING': [
                     {
-                        'init': '16:00',
-                        'end': '17:00'
+                        'init': '19:00',
+                        'end': '20:00'
                     },
                 ],
             },
@@ -244,8 +240,8 @@ class Command(BaseCommand):
                         'end': '7:00'
                     },
                     {
-                        'init': '8:00',
-                        'end': '9:00'
+                        'init': '7:00',
+                        'end': '8:00'
                     },
                     {
                         'init': '9:00',
@@ -264,10 +260,10 @@ class Command(BaseCommand):
                         'end': '20:00'
                     }
                 ],
-                'TONO': [
+                'TRX': [
                     {
-                        'init': '7:00',
-                        'end': '8:00'
+                        'init': '8:00',
+                        'end': '9:00'
                     },
                 ],
                 'SENIOR': [
@@ -276,7 +272,7 @@ class Command(BaseCommand):
                         'end': '11:00'
                     },
                 ],
-                'BODY_PUMP': [
+                'A_FUEGO': [
                     {
                         'init': '18:00',
                         'end': '19:00'
@@ -284,7 +280,7 @@ class Command(BaseCommand):
                 ],
             },
             6: {
-                'YOGA': [
+                'PILATES': [
                     {
                         'init': '8:00',
                         'end': '9:00'
@@ -312,9 +308,9 @@ class Command(BaseCommand):
         }
 
         now = timezone.localdate()
-        days = 55
+        days = 74
         result = []
-        for i in range(2, days):
+        for i in range(0, days):
             day = now + timedelta(days=i)
             for session in sessions:
                 now_data = sessions[day.isoweekday()]
