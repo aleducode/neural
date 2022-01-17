@@ -174,7 +174,7 @@ class Command(BaseCommand):
                 ],
             },
             4: {
-                
+
                 'FUNCIONAL_TRAINING': [
                     {
                         'init': '5:00',
