@@ -36,8 +36,7 @@ class Slot(NeuralBaseModel):
         BALANCE = 'BALANCE', 'Balance'
         TRX = 'TRX', 'TRX'
         YOGA = 'YOGA', 'Yoga'
-        TONO = 'TONO', 'Tono'
-        BODY_PUMP = 'BODY_PUMP', 'Body Pumps'
+        A_FUEGO = 'A_FUEGO', 'A Fuego'
         RUMBA = 'RUMBA', 'Rumba'
 
     date = models.DateField()

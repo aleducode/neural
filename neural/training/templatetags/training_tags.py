@@ -27,10 +27,8 @@ def get_icon(value):
         return 'mdi mdi-odnoklassniki text-info'
     if value in ['YOGA']:
         return 'mdi mdi-yoga text-info'
-    if value in ['TONO']:
-        return 'bx bx-cycling text-info'
-    if value in ['BODY_PUMP']:
-        return 'mdi mdi-airbag text-warning'
+    if value in ['A_FUEGO']:
+        return 'bx bxs-flame  text-warning'
     if value in ['RUMBA']:
         return 'mdi mdi-music-circle-outline text-info'
     else:
