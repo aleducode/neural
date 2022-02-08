@@ -5,6 +5,11 @@ app_name = "users"
 urlpatterns = [
     path(
         route="",
+        view=user_views.LandingView.as_view(),
+        name='landing'
+    ),
+    path(
+        route="",
         view=user_views.IndexView.as_view(),
         name='index'
     ),
