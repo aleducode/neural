@@ -146,12 +146,12 @@ class Command(BaseCommand):
                         'end': '18:00'
                     },
                     {
-                        'init': '18:00',
-                        'end': '19:00'
-                    },
-                    {
                         'init': '19:00',
                         'end': '20:00'
+                    },
+                    {
+                        'init': '20:00',
+                        'end': '21:00'
                     },
                 ],
                 'BALANCE': [
@@ -168,8 +168,8 @@ class Command(BaseCommand):
                 ],
                 'GAP_MMSS': [
                     {
-                        'init': '20:00',
-                        'end': '21:00'
+                        'init': '18:00',
+                        'end': '19:00'
                     },
                 ],
             },
@@ -244,6 +244,10 @@ class Command(BaseCommand):
                         'end': '8:00'
                     },
                     {
+                        'init': '8:00',
+                        'end': '9:00'
+                    },
+                    {
                         'init': '9:00',
                         'end': '10:00'
                     },
@@ -259,12 +263,6 @@ class Command(BaseCommand):
                         'init': '19:00',
                         'end': '20:00'
                     }
-                ],
-                'TRX': [
-                    {
-                        'init': '8:00',
-                        'end': '9:00'
-                    },
                 ],
                 'SENIOR': [
                     {
