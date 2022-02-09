@@ -3162,13 +3162,13 @@ input[switch="dark"]:checked + label {
   left: 0;
   top: 0;
   opacity: 0.7;
-  background-color: #000; }
+  background-color: #000 !important; }
 
 .hero-section {
   padding-top: 220px;
   padding-bottom: 190px; }
   .hero-section.bg-ico-hero {
-    background-image: url("../images/crypto/bg-ico-hero.jpg");
+    background-image: url("../images/bg-4.JPG");
     background-size: cover;
     background-position: top; }
   @media (max-width: 575.98px) {

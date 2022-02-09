@@ -9,7 +9,7 @@ urlpatterns = [
         name='landing'
     ),
     path(
-        route="",
+        route='index/',
         view=user_views.IndexView.as_view(),
         name='index'
     ),

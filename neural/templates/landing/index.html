@@ -46,6 +46,12 @@
                     max-height: unset;
                     width: 100%;
                 }
+                .user-actions > div {
+                    margin: 10px;
+                }
+                video{
+                    width: 100%;
+                }
             </style>
         {% endblock %}
     </head>
@@ -78,12 +84,13 @@
                             <a class="nav-link" href="#team">Equipo</a>
                         </li>
                     </ul>
-
-                    <div class="ml-lg-2">
-                        <a href="{% url 'users:login' %}" class="btn btn-outline-success w-xs">Inica Sesión</a>
-                    </div>
-                    <div class="ml-lg-2">
-                        <a href="{% url 'users:signup' %}" class="btn btn-outline-primary w-xs">Registrate</a>
+                    <div class="d-flex justify-content-center user-actions">
+                        <div class="ml-lg-2 justify-center">
+                            <a href="{% url 'users:login' %}" class="btn btn-outline-success w-xs">Inica Sesión</a>
+                        </div>
+                        <div class="ml-lg-2 justify-center">
+                            <a href="{% url 'users:signup' %}" class="btn btn-outline-primary w-xs">Registrate</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -122,7 +129,7 @@
                 <div class="row align-items-center pt-4">
                     <div class="col-md-6 col-sm-8">
                         <div>
-                            <video src="{% static 'video/neural.mp4' %}" width="600" height="440" autoplay muted controls></video>
+                            <video src="{% static 'video/neural.mp4' %}" autoplay muted controls></video>
                         </div>
                     </div>
                     <div class="col-md-5 ml-auto">
@@ -163,7 +170,7 @@
                     </div>
                     <div class="col-md-6  col-sm-8 ml-md-auto">
                         <div class="mt-4 mr-md-0">
-                            <video src="{% static 'video/personalizado.mp4' %}" width="600" height="440" autoplay muted controls></video>
+                            <video src="{% static 'video/personalizado.mp4' %}" autoplay muted controls></video>
                         </div>
                     </div>
                     
@@ -351,12 +358,12 @@
                 </div>
                 <!-- end row -->
                 <div class="row">
-                    <div class="col-xl-4 col-sm-6">
+                    <div class="col-xl-3 col-sm-6">
                         <div class="card text-center team-box">
                             <div class="card-body">
                                 <div class="team-box mb-4 mb-xl-0">
                                     <div class="position-relative">
-                                        <img src="{% static 'images/training/diego.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                        <img src="{% static 'images/training/diego-1.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
                                     </div>
                                 </div>
                                 <div class="mt-3">
@@ -383,7 +390,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-sm-6">
+                    <div class="col-xl-3 col-sm-6">
                         <div class="card text-center team-box">
                             <div class="card-body">
                                 <div class="team-box mb-4 mb-xl-0">
@@ -396,7 +403,7 @@
                                     <h6 class="text-muted mb-0">Fisioterapeuta</h6>
                                 </div>
                                 <div class="mt-4 text-wrap">
-                                    <p>Fisioterapeuta de la Fundación Universitaria María Cano, fui fisioterapeuta de la selección colombia sub 20 de fútbol playa, realice mi práctica universitaria en el Club Atlético Nacional(2017) y soy una apasionada por el deporte y la actividad física, mental y fisioterapia.</p>
+                                    <p>Fisioterapeuta de la Fundación Universitaria María Cano, fui fisioterapeuta de la selección colombia sub 20 de fútbol playa, realice mi práctica universitaria en el Club Atlético Nacional(2017) y soy una apasionada por el deporte, la salud, la prevención, la actividad física, mental y fisioterapia.</p>
                                 </div>
                             </div>
                             <div class="card-footer bg-transparent border-top">
@@ -415,12 +422,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-sm-6">
+                    <div class="col-xl-3 col-sm-6">
                         <div class="card text-center team-box">
                             <div class="card-body">
                                 <div class="team-box mb-4 mb-xl-0">
                                     <div class="position-relative">
-                                        <img src="{% static 'images/training/santiago.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                        <img src="{% static 'images/training/santiago-1.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
                                     </div>
                                 </div>
 
@@ -430,6 +437,39 @@
                                 </div>
                                 <div class="mt-4 text-wrap">
                                     <p>Profesional en deporte, cuento con la experiencia como entrenador de fútbol, entrenador personal y preparador físico de deportistas de alto rendimiento, te brindaré mi acompañamiento de manera permanente y trabajaré junto contigo para transformar tu cuerpo y mente y cumplir tus objetivos</p>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-top">
+                                <div class="d-flex mb-0 team-social-links">
+                                    <div class="flex-fill">
+                                        <a href="https://www.facebook.com/NeuralConsciente" data-toggle="tooltip" title="Facebook">
+                                            <i class="mdi mdi-facebook"></i>
+                                        </a>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <a href="https://www.instagram.com/santiagomr_pf/" data-toggle="tooltip" title="Instagram">
+                                            <i class="mdi mdi-instagram"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="card text-center team-box">
+                            <div class="card-body">
+                                <div class="team-box mb-4 mb-xl-0">
+                                    <div class="position-relative">
+                                        <img src="{% static 'images/training/wil-1.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <h5>Wil Londoño</h5>
+                                    <h6 class="text-muted mb-0">Preparador Físico</h6>
+                                </div>
+                                <div class="mt-4 text-wrap">
+                                    <p>Entrenador Deportivo Ex jugador de fútbol profesional.Con más de 9 años de experiencia como preparador fisico y deportista de alto rendimiento.Te invito a que entrenes conmigo de manera inteligente y eficaz Llevemos tu entrenamiento a otro nivel!!Para que así podamos cumplir esos propósitos, metas y sueños.</p>
                                 </div>
                             </div>
                             <div class="card-footer bg-transparent border-top">
