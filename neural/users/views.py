@@ -31,6 +31,10 @@ class LogoutView(LoginRequiredMixin, auth_views.LogoutView):
     pass
 
 
+class LandingView(TemplateView):
+    template_name = 'landing/index.html'
+
+
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = 'index.html'
 
