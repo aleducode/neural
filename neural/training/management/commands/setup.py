@@ -197,8 +197,8 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                     {
-                        'init': '17:00',
-                        'end': '18:00'
+                        'init': '16:00',
+                        'end': '17:00'
                     },
                     {
                         'init': '18:00',
@@ -218,8 +218,8 @@ class Command(BaseCommand):
                 ],
                 'RTG': [
                     {
-                        'init': '16:00',
-                        'end': '17:00'
+                        'init': '17:00',
+                        'end': '18:00'
                     },
                 ],
                 'FIT_BOXING': [
