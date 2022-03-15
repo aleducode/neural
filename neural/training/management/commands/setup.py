@@ -30,6 +30,10 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                     {
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                    {
                         'init': '16:00',
                         'end': '17:00'
                     },
@@ -51,12 +55,6 @@ class Command(BaseCommand):
                     {
                         'init': '6:00',
                         'end': '7:00'
-                    },
-                ],
-                'SENIOR': [
-                    {
-                        'init': '10:00',
-                        'end': '11:00'
                     },
                 ],
                 'CARDIO_STEP': [
@@ -138,6 +136,10 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                     {
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                    {
                         'init': '16:00',
                         'end': '17:00'
                     },
@@ -158,12 +160,6 @@ class Command(BaseCommand):
                     {
                         'init': '7:00',
                         'end': '8:00'
-                    },
-                ],
-                'SENIOR': [
-                    {
-                        'init': '10:00',
-                        'end': '11:00'
                     },
                 ],
                 'GAP_MMSS': [
@@ -197,8 +193,12 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                     {
-                        'init': '17:00',
-                        'end': '18:00'
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                    {
+                        'init': '16:00',
+                        'end': '17:00'
                     },
                     {
                         'init': '18:00',
@@ -210,16 +210,10 @@ class Command(BaseCommand):
                     },
 
                 ],
-                'YOGA': [
-                    {
-                        'init': '10:00',
-                        'end': '11:00'
-                    },
-                ],
                 'RTG': [
                     {
-                        'init': '16:00',
-                        'end': '17:00'
+                        'init': '17:00',
+                        'end': '18:00'
                     },
                 ],
                 'FIT_BOXING': [
@@ -252,6 +246,10 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                     {
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                    {
                         'init': '16:00',
                         'end': '17:00'
                     },
@@ -263,12 +261,6 @@ class Command(BaseCommand):
                         'init': '19:00',
                         'end': '20:00'
                     }
-                ],
-                'SENIOR': [
-                    {
-                        'init': '10:00',
-                        'end': '11:00'
-                    },
                 ],
                 'A_FUEGO': [
                     {
@@ -290,11 +282,13 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                 ],
-                'FUNCIONAL_TRAINING': [
+                'YOGA': [
                     {
                         'init': '10:00',
                         'end': '11:00'
                     },
+                ],
+                'FUNCIONAL_TRAINING': [
                     {
                         'init': '11:00',
                         'end': '12:00'
