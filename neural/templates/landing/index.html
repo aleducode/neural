@@ -567,6 +567,17 @@
             </div>
             <!-- end container -->
         </footer>
+        <div id="myModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body text-center">
+                    <img class="mobile-popup img-fluid" src="{% static 'images/taller-movilidad.jpg' %}" alt="" srcset="">
+                </div>
+            </div>
+        </div>
         <!-- Footer end -->
 
         <!-- JAVASCRIPT -->
@@ -589,6 +600,19 @@
         <script src="{% static 'backoffice/assets/js/pages/ico-landing.init.js' %}"></script>
 
         <script src="{% static 'backoffice/assets/js/app.js' %}"></script>
+
+        <script>
+            $(window).on('load',function(){
+                $(".close").click(function (e){
+                    //Save in the sessionStorage if the modal has been shown
+                    sessionStorage["PopupShown"] = 'yes'; 
+                });
+                if(sessionStorage["PopupShown"] != 'yes'){ 
+                    $('#myModal').modal('show');
+                }
+            });
+        </script>
+
         <script>
             var wp_div = document.createElement('div');
             Object.assign(wp_div, {
