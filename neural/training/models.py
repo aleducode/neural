@@ -34,8 +34,8 @@ class Slot(NeuralBaseModel):
         PILATES = 'PILATES', 'Pilates'
         FIT_BOXING = 'FIT_BOXING', 'Fit Boxing'
         BALANCE = 'BALANCE', 'Balance'
-        TRX = 'TRX', 'TRX'
-        YOGA = 'YOGA', 'Yoga'
+        SUPERSTAR = 'SUPERSTAR', 'Super Star'
+        CARDIOHIT = 'CARDIOHIT', 'Cardio Hit'
         A_FUEGO = 'A_FUEGO', 'A Fuego'
         RUMBA = 'RUMBA', 'Rumba'
 

@@ -23,10 +23,10 @@ def get_icon(value):
         return 'mdi mdi-boxing-glove text-warning'
     if value in ['BALANCE']:
         return 'mdi mdi-nature-people text-warning'
-    if value in ['TRX']:
-        return 'mdi mdi-odnoklassniki text-info'
-    if value in ['YOGA']:
-        return 'mdi mdi-yoga text-info'
+    if value in ['SUPERSTAR']:
+        return 'bx bx-star text-warning'
+    if value in ['CARDIOHIT']:
+        return 'mdi mdi-run-fast text-info'
     if value in ['A_FUEGO']:
         return 'bx bxs-flame  text-warning'
     if value in ['RUMBA']:

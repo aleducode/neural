@@ -42,8 +42,8 @@ class Command(BaseCommand):
                         'end': '18:00'
                     },
                     {
-                        'init': '19:00',
-                        'end': '20:00'
+                        'init': '18:00',
+                        'end': '19:00'
                     },
                     {
                         'init': '20:00',
@@ -59,8 +59,8 @@ class Command(BaseCommand):
                 ],
                 'CARDIO_STEP': [
                     {
-                        'init': '18:00',
-                        'end': '19:00'
+                        'init': '19:00',
+                        'end': '20:00'
                     },
                 ]
             },
@@ -276,13 +276,13 @@ class Command(BaseCommand):
                         'end': '9:00'
                     },
                 ],
-                'RUMBA': [
+                'SUPERSTAR': [
                     {
                         'init': '9:00',
                         'end': '10:00'
                     },
                 ],
-                'YOGA': [
+                'CARDIOHIT': [
                     {
                         'init': '10:00',
                         'end': '11:00'
