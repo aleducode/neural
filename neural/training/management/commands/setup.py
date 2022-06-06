@@ -70,6 +70,10 @@ class Command(BaseCommand):
                         'init': '5:00',
                         'end': '6:00'
                     },
+                    {
+                        'init': '17:00',
+                        'end': '18:00'
+                    },
                 ],
                 'FUNCIONAL_TRAINING': [
                     {
@@ -97,24 +101,18 @@ class Command(BaseCommand):
                         'end': '17:00'
                     },
                     {
-                        'init': '17:00',
-                        'end': '18:00'
-                    },
-                    {
                         'init': '18:00',
                         'end': '19:00'
+                    },
+                    {
+                        'init': '19:00',
+                        'end': '20:00'
                     },
                     {
                         'init': '20:00',
                         'end': '21:00'
                     },
 
-                ],
-                'FIT_BOXING': [
-                    {
-                        'init': '19:00',
-                        'end': '20:00'
-                    },
                 ],
             },
             3: {
@@ -185,10 +183,6 @@ class Command(BaseCommand):
                         'end': '8:00'
                     },
                     {
-                        'init': '8:00',
-                        'end': '9:00'
-                    },
-                    {
                         'init': '9:00',
                         'end': '10:00'
                     },
@@ -201,6 +195,10 @@ class Command(BaseCommand):
                         'end': '17:00'
                     },
                     {
+                        'init': '17:00',
+                        'end': '18:00'
+                    },
+                    {
                         'init': '18:00',
                         'end': '19:00'
                     },
@@ -210,10 +208,10 @@ class Command(BaseCommand):
                     },
 
                 ],
-                'RTG': [
+                'SUPERSTAR': [
                     {
-                        'init': '17:00',
-                        'end': '18:00'
+                        'init': '08:00',
+                        'end': '09:00'
                     },
                 ],
                 'FIT_BOXING': [
@@ -258,15 +256,13 @@ class Command(BaseCommand):
                         'end': '18:00'
                     },
                     {
-                        'init': '19:00',
-                        'end': '20:00'
-                    }
-                ],
-                'A_FUEGO': [
-                    {
                         'init': '18:00',
                         'end': '19:00'
                     },
+                    {
+                        'init': '19:00',
+                        'end': '20:00'
+                    }
                 ],
             },
             6: {
