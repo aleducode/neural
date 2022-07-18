@@ -38,7 +38,7 @@ class LandingView(TemplateView):
         context = super().get_context_data(**kwargs)
         image_pop_up = ImagePopUp.objects.filter(is_active=True).first()
         context['image_pop_up'] = image_pop_up
-        return context    
+        return context
 
 
 class IndexView(LoginRequiredMixin, TemplateView):

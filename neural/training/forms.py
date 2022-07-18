@@ -118,7 +118,7 @@ class ImagePopUpForm(forms.ModelForm):
         """Check min and max lenght."""
         is_active = ImagePopUp.objects.filter(is_active=True).count()
         if is_active > 0:
-            raise forms.ValidationError(f"Ya hay una imagen con estado activo, elimina está si quieres agregar una nueva.")
+            raise forms.ValidationError("Ya hay una imagen con estado activo, elimina está si quieres agregar una nueva.")
         return super().clean()
 
     class Meta:
