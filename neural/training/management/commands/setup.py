@@ -278,13 +278,13 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                 ],
-                'CARDIOHIT': [
+                'FUNCIONAL_TRAINING': [
                     {
                         'init': '10:00',
                         'end': '11:00'
                     },
                 ],
-                'FUNCIONAL_TRAINING': [
+                'CARDIOHIT': [
                     {
                         'init': '11:00',
                         'end': '12:00'
