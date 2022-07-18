@@ -113,3 +113,10 @@ class ImagePopUp(NeuralBaseModel):
     class Meta:
         verbose_name = 'Image pop up'
         verbose_name_plural = 'Images pop ups'
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=["user", "device_type", "trust_device"],
+        #         condition=models.Q(trust_device=True),
+        #         name="unique_device_type_active"
+        #     )
+        # ]

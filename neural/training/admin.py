@@ -2,6 +2,7 @@
 
 from django.contrib import admin
 from neural.training.models import UserTraining, Slot, Space, ImagePopUp
+from neural.training.forms import ImagePopUpForm
 
 
 class UserTrainingInline(admin.TabularInline):
@@ -32,3 +33,4 @@ class UserTrainingAdmin(admin.ModelAdmin):
 @admin.register(ImagePopUp)
 class ImagePopUpAdmin(admin.ModelAdmin):
     list_display = ["image_name", "image", "is_active"]
+    form = ImagePopUpForm
