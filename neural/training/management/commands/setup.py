@@ -154,13 +154,11 @@ class Command(BaseCommand):
                         'end': '21:00'
                     },
                 ],
-                'BALANCE': [
+                'GAP_MMSS': [
                     {
                         'init': '7:00',
                         'end': '8:00'
                     },
-                ],
-                'GAP_MMSS': [
                     {
                         'init': '18:00',
                         'end': '19:00'
