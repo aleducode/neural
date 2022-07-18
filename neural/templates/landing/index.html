@@ -553,6 +553,7 @@
             </div>
             <!-- end container -->
         </footer>
+        {% if image_pop_up %}
         <div id="myModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -560,10 +561,11 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body text-center">
-                    <img class="mobile-popup img-fluid" src="{% static 'images/defensa-personal.jpg' %}" alt="" srcset="">
+                    <img class="mobile-popup img-fluid" src="{{image_pop_up.image.url}}" alt="" srcset="">
                 </div>
             </div>
         </div>
+        {% endif %}
         <!-- Footer end -->
 
         <!-- JAVASCRIPT -->
