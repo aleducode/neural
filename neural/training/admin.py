@@ -1,7 +1,7 @@
 """Training admin."""
 
 from django.contrib import admin
-from neural.training.models import UserTraining, Slot, Space
+from neural.training.models import UserTraining, Slot, Space, ImagePopUp
 
 
 class UserTrainingInline(admin.TabularInline):
@@ -27,3 +27,8 @@ class SpaceAdmin(admin.ModelAdmin):
 class UserTrainingAdmin(admin.ModelAdmin):
     list_display = ['user', 'slot', 'status']
     search_fields = ['user__first_name', 'user__last_name', 'user__email']
+
+
+@admin.register(ImagePopUp)
+class ImagePopUpAdmin(admin.ModelAdmin):
+    list_display = ["image_name", "image", "is_active"]

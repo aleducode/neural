@@ -101,3 +101,15 @@ class UserTraining(NeuralBaseModel):
     @property
     def is_now(self):
         return self.slot.date == timezone.localdate()
+
+
+class ImagePopUp(NeuralBaseModel):
+    """Image pop up."""
+
+    image_name = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='pop_ups')
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Image pop up'
+        verbose_name_plural = 'Images pop ups'
