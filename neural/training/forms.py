@@ -2,7 +2,7 @@
 
 from django import forms
 from datetime import timedelta
-from neural.training.models import UserTraining, Slot, Space
+from neural.training.models import UserTraining, Slot, Space, ImagePopUp
 from django.utils.translation import gettext as _
 
 days_wrapper = ['Hoy', 'Mañana', 'Pasado Mañana']
@@ -109,3 +109,18 @@ class SchduleForm(forms.Form):
             space=data.get('space'),
         )
         return training
+
+
+class ImagePopUpForm(forms.ModelForm):
+    """Admin form image pop up."""
+
+    def clean(self):
+        """Check min and max lenght."""
+        is_active = ImagePopUp.objects.filter(is_active=True).count()
+        if is_active > 0:
+            raise forms.ValidationError("Ya hay una imagen con estado activo, elimina está si quieres agregar una nueva.")
+        return super().clean()
+
+    class Meta:
+        model = ImagePopUp
+        fields = '__all__'

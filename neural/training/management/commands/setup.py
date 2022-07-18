@@ -154,13 +154,11 @@ class Command(BaseCommand):
                         'end': '21:00'
                     },
                 ],
-                'BALANCE': [
+                'GAP_MMSS': [
                     {
                         'init': '7:00',
                         'end': '8:00'
                     },
-                ],
-                'GAP_MMSS': [
                     {
                         'init': '18:00',
                         'end': '19:00'
@@ -278,13 +276,13 @@ class Command(BaseCommand):
                         'end': '10:00'
                     },
                 ],
-                'CARDIOHIT': [
+                'FUNCIONAL_TRAINING': [
                     {
                         'init': '10:00',
                         'end': '11:00'
                     },
                 ],
-                'FUNCIONAL_TRAINING': [
+                'CARDIOHIT': [
                     {
                         'init': '11:00',
                         'end': '12:00'

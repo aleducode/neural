@@ -10,7 +10,7 @@ from django.views.generic import TemplateView, FormView
 from neural.users.forms import (
     CustomAuthenticationForm
 )
-from neural.training.models import UserTraining
+from neural.training.models import UserTraining, ImagePopUp
 from neural.users.forms import SignUpForms
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
@@ -33,6 +33,12 @@ class LogoutView(LoginRequiredMixin, auth_views.LogoutView):
 
 class LandingView(TemplateView):
     template_name = 'landing/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        image_pop_up = ImagePopUp.objects.filter(is_active=True).first()
+        context['image_pop_up'] = image_pop_up
+        return context
 
 
 class IndexView(LoginRequiredMixin, TemplateView):
