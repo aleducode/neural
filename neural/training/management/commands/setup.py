@@ -3,7 +3,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from neural.training.models import Slot
-from datetime import timedelta
+from datetime import timedelta, date
 
 
 class Command(BaseCommand):
@@ -289,8 +289,8 @@ class Command(BaseCommand):
             },
         }
 
-        now = timezone.localdate()
-        days = 74
+        now = date(2022, 8, 31)
+        days = 116
         result = []
         for i in range(0, days):
             day = now + timedelta(days=i)
