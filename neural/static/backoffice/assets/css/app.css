@@ -3168,7 +3168,7 @@ input[switch="dark"]:checked + label {
   padding-top: 220px;
   padding-bottom: 190px; }
   .hero-section.bg-ico-hero {
-    background-image: url("../images/bg-4.JPG");
+    background-image: url("../images/portada.jpg");
     background-size: cover;
     background-position: top; }
   @media (max-width: 575.98px) {
