@@ -61,7 +61,7 @@
         <nav class="navbar navbar-expand-lg navigation fixed-top sticky nav-sticky">
             <div class="container">
                 <a class="navbar-logo" href="/">
-                    <img src="{% static 'images/logo.png' %}" alt="" height="75" class="logo logo-dark">
+                    <img src="{% static 'images/NEGRO.png' %}" style= "max-height:50px">
                 </a>
 
                 <button type="button" class="btn btn-sm px-3 font-size-16 d-lg-none header-item waves-effect waves-light" data-toggle="collapse" data-target="#topnav-menu-content">
@@ -103,8 +103,7 @@
                     <div class="col-lg-5">
                         <div class="text-white-50">
                             <h1 class="text-white font-weight-semibold mb-3 hero-title"> Bienvenidos a Neural Centro de Entrenamiento</h1>
-                            <p class="font-size-14">Neural es un Centro de Entrenamiento cuyos principales objetivos son generar consciencia e impacto mental y físico en sus usuarios, siendo un lugar para crear comunidad y vínculos significativos en el crecimiento de las personas y deportistas.
-                                Todo movimiento nace a partir de una neurona.
+                            <p class="font-size-14">
                                 Todo movieminto se hace desde la in/consciencia.
                                 Neural llegó para hacernos conscientes de cada movimiento.</p>
                         </div>
@@ -138,17 +137,15 @@
                         <div class="mt-4 mt-md-auto">
                             <div class="d-flex align-items-center mb-2">
                                 <div class="features-number font-weight-semibold display-4 mr-3">01</div>
-                                <h4 class="mb-0">Entrenamiento Neural</h4>
+                                <h4 class="mb-0">Servicios</h4>
                             </div>
                             <p class="text-muted">Somos la nueva alternativa al entrenamiento tradicional, combinando tanto la parte física como mental y adaptándonos a tus necesidades específicas ofreciendo nuestros servicios de: </p>
                             <div class="text-muted mt-4">
                                 <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Entrenamiento Funcional</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Entrenamiento Físico/cognitivo</p>
+                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Neurociencia aplicada al entorno deportivo</p>
                                 <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Preparación Física Deportiva</p>
                                 <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Fisioterapia</p>
                                 <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Nutrición</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Psicología</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Neural Kids</p>
                                 <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Línea Senior</p>
                             </div>
                         </div>
@@ -161,9 +158,9 @@
                         <div class="mt-4 mt-md-0">
                             <div class="d-flex align-items-center mb-2">
                                 <div class="features-number font-weight-semibold display-4 mr-3">02</div>
-                                <h4 class="mb-0">Entrenamiento Físico/Cognitivo</h4>
+                                <h4 class="mb-0">Neurociencia aplicada al entorno deportivo</h4>
                             </div>
-                            <p class="text-muted">Se basa en la mejora de las capacidades cognitivas (concentración, atención, toma de decisiones y resolución de problemas), habilidades visuales y coordinativas, enfocadas al deporte en el que te desempeñas, para tener un rendimiento sobresaliente en la competencia 🥇🧠👀 Este servicio se presta de manera personalizada.</p>
+                            <p class="text-muted">Nuestro entrenamiento físico cognitivo se basa en la mejora de las habilidades cognitivas (concentración, atención, toma de decisiones y resolución de problemas), habilidades visuales y coordinativas, enfocadas al deporte en el que te desempeñas, para tener un rendimiento sobresaliente en la competencia 🥇🧠👀 Este servicio se presta de manera personalizada.</p>
                             <div class="text-muted mt-4">
                                 <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Entrenamiento enfocado en tu disciplina.</p>
                                 <p><i class="mdi mdi-circle-medium text-success mr-1"></i>Personalizado y de acuerdo a tus necesidades.</p>
@@ -182,63 +179,6 @@
             <!-- end container -->
         </section>
         <!-- Features end -->
-        <section class="section bg-white" id="classes_new">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="text-center mb-5">
-                            <div class="small-title">Neural Consciente</div>
-                            <h4>Lo Nuevo en Neural</h4>
-                        </div>
-                    </div>
-                </div>
-                <!-- end row -->
-                <div class="row new-clasess">
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Fit Boxing 🏋🏻‍♂️🏋🏼‍♀️</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/boxing.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Entrenamiento de una hora, donde siempre estarás acompañado de un profesional que te va a guiar y va a estar atento de tu técnica y postura; su principal objetivo es mejorar la condición física a través del ejercicio y estímulos mentales.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {% comment %} <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Cardio Step y rumba fitness 🤼‍♂️🏆</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/step.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Se basa en la mejora de las capacidades cognitivas (concentración, atención, toma de decisiones y resolución de problemas), visuales y coordinativas, enfocadas al deporte en el que te desempeñas, para tener un rendimiento sobresaliente en la competencia 🥇🔥 Este servicio se presta de manera personalizada.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Yoga 🧘🏻‍♂️</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/yoga-1.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Neural FISIO se centra en rehabilitar, tratar y prevenir patologías y lesiones osteomusculares que intervengan en el movimiento del cuerpo humano.</p>
-                            </div>
-                        </div>
-                    </div> {% endcomment %}
-                </div>
-            </div>
-
-        </section>
         <!-- Blog start -->
         <section class="section bg-white" id="news">
 
@@ -259,7 +199,7 @@
                         <h5 class="mb-3">Entrenamiento Funcional 🏋🏻‍♂️🏋🏼‍♀️</h5>
                         <div class="blog-box mb-4 mb-xl-0">
                             <div class="position-relative">
-                                <img src="{% static 'images/funcional.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                <img src="{% static 'images/funcional.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
                             </div>
 
                             <div class="mt-4 text-muted">
@@ -270,10 +210,10 @@
                     </div>
 
                     <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Entrenamiento Físico/cognitivo 🤼‍♂️🏆</h5>
+                        <h5 class="mb-3">Neurociencia aplicada al entorno deportivo 🤼‍♂️🏆</h5>
                         <div class="blog-box mb-4 mb-xl-0">
                             <div class="position-relative">
-                                <img src="{% static 'images/cognitivo.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                <img src="{% static 'images/neurociencia-1.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
                             </div>
 
                             <div class="mt-4 text-muted">
@@ -287,12 +227,12 @@
                         <h5 class="mb-3">Preparación Física Deportiva</h5>
                         <div class="blog-box mb-4 mb-xl-0">
                             <div class="position-relative">
-                                <img src="{% static 'images/fisico-deportiva.png' %}" alt="350" class="rounded img-fluid mx-auto d-block">
+                                <img src="{% static 'images/preparacion-fisica.jpg' %}" alt="350" class="rounded img-fluid mx-auto d-block">
                             </div>
 
                             <div class="mt-4 text-muted">
 
-                                <p>Mejora de las capacidades físicas, haciendo énfasis en fuerza y potencia, con el valor agregado de nuestro método Físico/Cognitivo. Servicio personalizado o Grupal.</p>
+                                <p>Nuestro entrenamiento físico cognitivose basa en mejorar las habilidades físicas, haciendo énfasis en fuerza y potencia, con el valor agregado de nuestro método Físico/Cognitivo. Servicio personalizado o Grupal.</p>
                             </div>
                         </div>
                     </div>
@@ -303,7 +243,7 @@
                         <h5 class="mb-3">Nutrición🍉🍍🥑</h5>
                         <div class="blog-box mb-4 mb-xl-0">
                             <div class="position-relative">
-                                <img src="{% static 'images/nutricion.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                <img src="{% static 'images/nutricion.JPG' %}" alt="" class="rounded img-fluid mx-auto d-block">
                             </div>
 
                             <div class="mt-4 text-muted">
@@ -317,7 +257,7 @@
                         <h5 class="mb-3">Fisioterapia 🚑🧘🏻‍♂️</h5>
                         <div class="blog-box mb-4 mb-xl-0">
                             <div class="position-relative">
-                                <img src="{% static 'images/fisio-1.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                <img src="{% static 'images/fisioterapia.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
                             </div>
 
                             <div class="mt-4 text-muted">
@@ -326,7 +266,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-sm-6">
+                    {% comment %} <div class="col-xl-4 col-sm-6">
                         <h5 class="mb-3">Neural Kids💜💙💛</h5>
                         <div class="blog-box mb-4 mb-xl-0">
                             <div class="position-relative">
@@ -338,12 +278,12 @@
                                 <p>Es un programa que tiene como objetivo desarrollar las habilidades motrices básicas de los niños y niñas a través de la formación e iniciación deportiva  horizontal, con el valor agregado de nuestro método Físico/Cognitivo para el desarrollo de las habilidades cognitivas y visuales.</p>
                             </div>
                         </div>
-                    </div>
+                    </div> {% endcomment %}
                     <div class="col-xl-4 col-sm-6">
                         <h5 class="mb-3">Entrenamiento Senior 🧑🏻‍🦳👨🏽‍🦳</h5>
                         <div class="blog-box mb-4 mb-xl-0">
                             <div class="position-relative">
-                                <img src="{% static 'images/senior.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                <img src="{% static 'images/linea-senior.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
                             </div>
 
                             <div class="mt-4 text-muted">

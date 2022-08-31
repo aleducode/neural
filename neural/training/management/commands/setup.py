@@ -3,7 +3,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from neural.training.models import Slot
-from datetime import timedelta
+from datetime import timedelta, date
 
 
 class Command(BaseCommand):
@@ -181,6 +181,10 @@ class Command(BaseCommand):
                         'end': '8:00'
                     },
                     {
+                        'init': '08:00',
+                        'end': '09:00'
+                    },
+                    {
                         'init': '9:00',
                         'end': '10:00'
                     },
@@ -205,12 +209,6 @@ class Command(BaseCommand):
                         'end': '21:00'
                     },
 
-                ],
-                'SUPERSTAR': [
-                    {
-                        'init': '08:00',
-                        'end': '09:00'
-                    },
                 ],
                 'FIT_BOXING': [
                     {
@@ -264,12 +262,6 @@ class Command(BaseCommand):
                 ],
             },
             6: {
-                'PILATES': [
-                    {
-                        'init': '8:00',
-                        'end': '9:00'
-                    },
-                ],
                 'SUPERSTAR': [
                     {
                         'init': '9:00',
@@ -277,6 +269,10 @@ class Command(BaseCommand):
                     },
                 ],
                 'FUNCIONAL_TRAINING': [
+                    {
+                        'init': '8:00',
+                        'end': '9:00'
+                    },
                     {
                         'init': '10:00',
                         'end': '11:00'
@@ -293,8 +289,8 @@ class Command(BaseCommand):
             },
         }
 
-        now = timezone.localdate()
-        days = 74
+        now = date(2022, 8, 31)
+        days = 116
         result = []
         for i in range(0, days):
             day = now + timedelta(days=i)
@@ -308,7 +304,7 @@ class Command(BaseCommand):
                             training_type=training,
                             defaults={
                                 'hour_end': hour.get('end'),
-                                'max_places': 12
+                                'max_places': 20
                             }
                         )
                         result.append(slot.pk)
