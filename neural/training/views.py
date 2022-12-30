@@ -13,8 +13,8 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 
 # Models
-from neural.training.models import Slot, UserTraining, Space
-from neural.training.forms import SchduleForm, SeatsForm
+from neural.training.models import Slot, UserTraining
+from neural.training.forms import SchduleForm
 from neural.utils.general import generate_calendar_google_invite
 from datetime import datetime
 
@@ -79,7 +79,8 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
             status=UserTraining.Status.CONFIRMED
         ).exists():
             pemission_to_schedule = False
-            messages.error(self.request, 'Ya reservaste para este día si quieres modificarlo cancela tu clase activa')
+            link = reverse_lazy('training:my_schedule')
+            messages.error(self.request, f'Ya reservaste para este día si quieres modificarlo cancela tu clase activa <a href="{link}">aquí</a>', extra_tags='safe')
 
         if self.date == now_date:
             base_filter = Slot.objects.filter(
@@ -97,43 +98,34 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class TrainingSlotView(LoginRequiredMixin, DetailView, FormView):
+class TrainingSlotView(LoginRequiredMixin, DetailView):
     template_name = 'training/seats.html'
     queryset = Slot.objects.all()
-    form_class = SeatsForm
     success_url = reverse_lazy("training:schedule-done")
 
-    def form_valid(self, form):
-        # Create User training session
-        pk_seat = form.cleaned_data.get('selected_seat')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         slot = self.get_object()
-        # Virtual class
-        if pk_seat == 0:
-            schedule, is_free = UserTraining.objects.update_or_create(
-                slot=slot,
-                user=self.request.user,
-                defaults={
-                    'status': UserTraining.Status.CONFIRMED.value
-                }
-            )
-            is_free = True
-        else:
-            schedule, is_free = UserTraining.objects.get_or_create(
-                slot=slot,
-                space=Space.objects.get(pk=pk_seat),
-                defaults={
-                    'user': self.request.user
-                }
-            )
-        if not is_free:
+        context['slot'] = slot
+        return context
+
+    def post(self, request, *args, **kwargs):
+        # Create User training session
+        slot = self.get_object()
+        # Check again spaces
+        if not slot.available_places:
             messages.error(
-                self.request, 'Este espacio de trabajo ya ha sido seleccionado por alguien mas, intenta seleccionar otro.')
+                self.request, 'Este espacio de entreno se ha llenado, intenta seleccionando otro horario.')
             return render(
                 self.request,
                 self.template_name, {
-                    'form': form,
                     'slot': slot,
                 })
+
+        schedule, _ = UserTraining.objects.get_or_create(
+            slot=slot,
+            user=self.request.user,
+        )
         return HttpResponseRedirect(reverse_lazy('training:schedule-done', kwargs={'pk': schedule.pk}))
 
 

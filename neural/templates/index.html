@@ -13,7 +13,12 @@
         <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
                     aria-hidden="true">&times;</span>
-            </button>{{ message }}
+            </button>
+            {% if 'safe' in message.tags %}
+            {{ message|safe }}
+        {% else %}
+            {{ message }}
+        {% endif %}
 
         </div>
         {% endfor %}

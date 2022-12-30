@@ -61,9 +61,8 @@ class Slot(NeuralBaseModel):
         return self.max_places - self.users_scheduled.count()
 
     @property
-    def available_seats(self):
-        space = Space.objects.all()
-        return space.exclude(id__in=self.users_scheduled.values_list('space', flat=True)).order_by('id')
+    def users(self):
+        return self.users_scheduled.all().select_related('user')
 
 
 class UserTraining(NeuralBaseModel):

@@ -3,82 +3,62 @@
 {% block content %}
 {% language 'es' %}
 <div class="page-content">
-    <div class="container-fluid">
-        {% language 'es' %}
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                    aria-hidden="true">&times;</span>
-            </button>{{ message }}
+  <div class="container-fluid">
+    {% language 'es' %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+          aria-hidden="true">&times;</span>
+      </button>{% if 'safe' in message.tags %}
+      {{ message|safe }}
+  {% else %}
+      {{ message }}
+  {% endif %}
 
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endlanguage %}
-        <div class="col-xl-6 offset-lg-3">
-            <a href="{% url 'training:training-types' slot.date|date:"Y-m-d" %}">Regresar</a>
-            <div class="card mt-2 ml-0 mr-0 pl-0 pr-0">
-                <div class="card-body ml-0 mr-0 pl-0 pr-0 text-center">
-                    <h3 class="text-center">Seleccionar Espacio:</h3>
-                    <h4 class="text-center mt-0 mb-4"><small>{{slot.get_training_type_display}} |
-                            {{slot.date|date:"l"}}</small></h4>
-
-                    <div class="product-color">
-                        <form method="POST" id="seat_form">
-                            {% csrf_token %}
-                            {{form.selected_seat}}
-                        </form>
-                        
-                        {% if  slot.training_type == 'VIRTUAL' %}
-                        <a onclick="SelectConfirmation('0')" class="active">
-                            <div class="product-color-item border rounded">
-
-                                <img src="{% static 'images/casa.png' %}" alt="" class="avatar-md p-1">
-                            </div>
-                            <p>Casa de {{request.user.first_name|title}}</p>
-                        </a>
-                        {% else %}
-                            
-                        {% for seat in slot.available_seats %}
-                        <a onclick="SelectConfirmation('{{seat.pk}}')" class="active">
-                            <div class="product-color-item border rounded">
-
-                                <img src="{% static 'images/pesa.png' %}" alt="" class="avatar-md p-1">
-                            </div>
-                            <p>{{seat}}</p>
-                        </a>
-                        {% endfor %}
-                        {% endif %}
-
-
-                    </div>
-
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
+    {% endfor %}
+    {% endif %}
+    {% endlanguage %}
+    <div class="col-xl-6 offset-lg-3">
+      <a href="{% url 'training:training-types' slot.date|date:" Y-m-d" %}">Regresar</a>
+      <div class="card mt-2 ml-0 mr-0 pl-0 pr-0">
+        <div class="card-body ml-0 mr-0 pl-0 pr-0 text-center">
+          <h3 class="text-center">Confirmar Entreno:</h3>
+          <h4 class="text-center mt-0 mb-4"><small>{{slot.get_training_type_display}} |
+              {{slot.date|date:"l d"}}</small></h4>
+
+          <div class="product-color">
+            <div class="text-center mb-5">
+              <h1 class="display-2 font-weight-medium">{{slot.available_places}}</h1>
+              <h4 class="text-uppercase">Cupos</h4>
+
+              {% if slot.available_places < slot.max_places %} <p>Vas a entrenar con:</p>
+
+                {% for user_train in slot.users %}
+                <small>💪{{user_train.user.first_name}}</small>
+                <br>
+                {% endfor %}
+                {% endif %}
+                <form method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success waves-effect waves-light mt-5">
+                    <i class="bx bx-check-double font-size-16 align-middle mr-2"></i> Confirmar entreno
+                  </button>
+                </form>
+
+            </div>
+
+          </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endlanguage %}
 {% endblock content %}
 
 {% block js %}
-<script>
-    function SelectConfirmation(seat_pk) {
-        Swal.fire({
-            title: 'Estas seguro que quieres elegir esta base?',
-            showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: `Siiii`,
-            cancelButtonText: `No`,
-        }).then((result) => {
-            if (result.value) {
-                document.getElementById('id_selected_seat').value = seat_pk
-                document.getElementById("seat_form").submit();
-            }
-        })
-    }
-
-</script>
 {% endblock js %}
