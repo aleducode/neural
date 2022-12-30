@@ -46,3 +46,21 @@ class User(NeuralBaseModel, AbstractUser):
 
     def get_short_name(self):
         return self.email
+
+
+class Ranking(NeuralBaseModel):
+    """Ranking model.
+
+    A ranking is a score that a user get for a specific
+    uear. It is used to determine the best user for a
+    year.
+    """
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='rankings')
+    position = models.PositiveIntegerField(unique=True)
+    trainings = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f'{self.user} - {self.position}'
+
+    class Meta:
+        unique_together = ('user', 'position')

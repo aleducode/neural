@@ -17,6 +17,7 @@ from django.utils.translation import gettext as _
 
 # Models
 from neural.training.models import Slot, UserTraining
+from neural.users.models import Ranking
 from neural.training.forms import SchduleForm
 from neural.utils.general import generate_calendar_google_invite
 from datetime import datetime
@@ -170,6 +171,10 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        ranking = self.request.user.rankings.last()
+        total_ranking = Ranking.objects.count()
+        context['total_ranking'] = total_ranking
+        context['ranking'] = ranking
         now = timezone.localtime()
         trainings = UserTraining.objects.filter(
             user=self.request.user,
