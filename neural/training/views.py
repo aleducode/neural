@@ -1,7 +1,10 @@
 """Training views."""
 
+import calendar
+
 # Django
 from django.contrib import messages
+from django.db.models import Count
 from datetime import timedelta
 from django.http import HttpResponseRedirect
 from django.utils import timezone
@@ -160,3 +163,60 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
 
 class InfoView(LoginRequiredMixin, TemplateView):
     template_name = 'training/info.html'
+
+
+class ResumeYear(LoginRequiredMixin, TemplateView):
+    template_name = 'training/resume.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.localtime()
+        trainings = UserTraining.objects.filter(
+            user=self.request.user,
+            slot__date__year=now.year,
+            status=UserTraining.Status.CONFIRMED
+        )
+        cancelled_trainings = UserTraining.objects.filter(
+            user=self.request.user,
+            slot__date__year=now.year,
+            status=UserTraining.Status.CANCELLED
+        )
+        if trainings.count() == 0:
+            return context
+        context['trainings'] = trainings.count()
+        context["reaction"] = "🤩" if trainings.count() >= 20 else "🤟"
+
+        # Day selected
+        best_day = trainings.values('slot__date__week_day').annotate(
+            total=Count('slot__date__week_day')).order_by('-total').first()
+        context["best_day_name"] = _(calendar.day_name[best_day['slot__date__week_day'] - 1]) if best_day else None
+
+        # Best train
+        best_train = trainings.values('slot__training_type').annotate(
+            total=Count('slot__training_type')).order_by('-total').first()
+        context["best_train"] = Slot.TrainingType[best_train['slot__training_type']].label if best_train else None
+        # Best train hours
+        best_train_hour = trainings.values('slot__hour_init').annotate(
+            total=Count('slot__hour_init')).order_by('-total').first()
+        context["best_train_hour"] = best_train_hour['slot__hour_init'] if best_train_hour else None
+
+        array_per_month = trainings.values('slot__date__month').annotate(
+            total=Count('slot__date__month')
+            ).order_by('slot__date__month')
+        final_array = []
+        for date in range(1, 13):
+            if not array_per_month.filter(slot__date__month=date).exists():
+                final_array.append(0)
+            else:
+                final_array.append(array_per_month.get(slot__date__month=date)['total'])
+        context['array_per_month'] = final_array
+        context['best_month'] = max(final_array)
+        month = final_array.index(context['best_month']) + 1
+        context["best_month_name"] = _(calendar.month_name[month])
+
+        # Worst month
+        context['worst_month'] = min(final_array)
+        month = final_array.index(context['worst_month']) + 1
+        context["worst_month_name"] = _(calendar.month_name[month])
+        context['cancelled_trainings'] = cancelled_trainings.count()
+        return context

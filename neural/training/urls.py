@@ -49,4 +49,9 @@ urlpatterns = [
         view=training_views.InfoView.as_view(),
         name='info'
     ),
+    path(
+        route='resumen-2022',
+        view=training_views.ResumeYear.as_view(),
+        name='resume_year'
+    ),
 ]
