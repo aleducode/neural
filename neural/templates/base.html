@@ -62,7 +62,7 @@
         <header id="page-topbar" class="text-center">
             <div class="row">
             <div class="col-6 offset-3">
-                <a class="logo" href="/">
+                <a class="logo" href="/index">
                     <img src="{% static 'images/BLANCO.png' %}"alt="" class="img-fluid" style= "max-height:55px">
                 </a>
             </div>
@@ -104,6 +104,11 @@
                     </div>
                 </div>
             </footer>
+
+            {% block modal %}
+
+            {% endblock modal %}
+
 
         <!-- end main content-->
 

@@ -202,7 +202,7 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
 
         array_per_month = trainings.values('slot__date__month').annotate(
             total=Count('slot__date__month')
-            ).order_by('slot__date__month')
+        ).order_by('slot__date__month')
         final_array = []
         for date in range(1, 13):
             if not array_per_month.filter(slot__date__month=date).exists():

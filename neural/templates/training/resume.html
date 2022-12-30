@@ -14,7 +14,12 @@
  padding-left: 0px;
   padding-right: 0px;
 }
-
+@media (min-width: 992px) {
+  .img-fluid {
+    max-width: 30%;
+    height: auto;
+  }
+}
 </style>
 {% endblock styles %}
 
@@ -28,7 +33,7 @@
 
         {% if not trainings %}
         <div class="card-body">
-          <h3 class="text-danger">No está disponible el resumen del 2022 debido a tu poca asistencia a neural, :(</h3>
+          <h3 class="text-danger">No está disponible el resumen del 2022 debido a tu poca asistencia a neural,🥹</h3>
         </div>
         {% else %}
 

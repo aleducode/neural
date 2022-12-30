@@ -25,9 +25,12 @@
         {% endif %}
         {% endlanguage %}
         <div class="row">
-            <div class="col-lg-6 offset-lg-3 mb-4">
-                <h4 class="text-center">¡ Hola !</h4>
+            <div class="col-lg-6 offset-lg-3 mb-4 text-center">
+                <h4 class="text-center">¡Hola!</h4>
                 <h5 class="text-center"> 💪 {{request.user.get_full_name|title}} 🏋️‍♀️</h5>
+                <a href="{% url 'training:resume_year' %}" class="m-4 btn btn-warning text-white waves-effect waves-light btn-lg">
+                 🏆 Ver mi resumen del 2022
+                </a>
             </div>
 
             <div class="col-lg-4 offset-lg-2">
@@ -97,8 +100,34 @@
 </div>
 {% endblock content %}
 
+{% block modal %}
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+      <div class="modal-content">
+      <div class="modal-header">
+          <h3>Ya está disponible tu resumen del 2022 🏆🏆</h3>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body text-center">
+        <a  href="{% url 'training:resume_year' %}"
+        class="btn btn-primary btn-lg waves-effect waves-light text-white">Ir a verlooooo</a>
+      </div>
+  </div>
+</div>
+{% endblock modal %}
+
 {% block js %}
+
     <script>
+      $(window).on('load',function(){
+        $(".close").click(function (e){
+            //Save in the sessionStorage if the modal has been shown
+            sessionStorage["PopupShownInternal"] = 'yes';
+        });
+        if(sessionStorage["PopupShownInternal"] != 'yes'){
+            $('#myModal').modal('show');
+        }
+    });
         function alreadyTemp(){
             Swal.fire(
                 'Tu temperatura ya ha sido tomada',
