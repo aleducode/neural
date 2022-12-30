@@ -1,4 +1,5 @@
 """Users views."""
+from datetime import timedelta
 
 from django.contrib.auth import login
 from django.conf import settings
@@ -6,15 +7,15 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, FormView
+from django.views.generic import TemplateView, FormView, View
+from django.urls import reverse_lazy
+from django.utils.translation import gettext as _
+from neural.training.models import UserTraining, ImagePopUp
+from neural.users.forms import SignUpForms
 from neural.users.forms import (
     CustomAuthenticationForm
 )
-from neural.training.models import UserTraining, ImagePopUp
-from neural.users.forms import SignUpForms
-from django.urls import reverse_lazy
-from django.utils.translation import gettext as _
-from datetime import timedelta
+from neural.users.models import User
 
 
 class LoginView(auth_views.LoginView):
@@ -95,3 +96,18 @@ class SignUpView(FormView):
         # Force login
         login(self.request, user)
         return super().form_valid(form)
+
+
+class SwitchUserView(LoginRequiredMixin, View):
+    template_name = 'users/index.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        return HttpResponseRedirect(reverse_lazy('users:index'))
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        user_to_switch = User.objects.get(pk=pk)
+        login(self.request, user_to_switch)
+        return HttpResponseRedirect(reverse_lazy('users:index'))

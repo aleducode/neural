@@ -32,5 +32,10 @@ urlpatterns = [
         route='logout/',
         view=user_views.LogoutView.as_view(),
         name='logout'
+    ),
+    path(
+        route='switch-user/<int:pk>/',
+        view=user_views.SwitchUserView.as_view(),
+        name='switch_user'
     )
 ]
