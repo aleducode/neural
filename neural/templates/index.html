@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="page-content">
-    
+
     <div class="container-fluid">
         {% language 'es' %}
         {% if messages %}
@@ -54,6 +54,39 @@
             </div>
 
         </div>
+        <div class="row">
+          <div class="col-lg-6 offset-lg-3 mb-4">
+              <h4 class="text-center">Servicios personalizados 💅</h4>
+          </div>
+
+          <div class="col-lg-4 offset-lg-2">
+              <a href="https://wa.me/573229079914?text=Hola%20Soy%20{{user.get_full_name}}%20Estoy%20intersado%20en%20entreno%20personalizado" target="_blank">
+              <div class="card border border-primary">
+                  <div class="card-header bg-transparent border-primary">
+                      <h5 class="my-0 text-primary" style="font-size: x-large;">
+                        <i class="mdi mdi-biathlon mr-3"></i>Entreno personalizado</h5>
+                  </div>
+                  <div class="card-body mt-0 pt-0">
+                      <h5>Tienes un profe para hacer un entreno especial, adaptado a tus necesidades.</h5>
+                  </div>
+              </div>
+          </a>
+          </div>
+          <div class="col-lg-4">
+              <a href="https://wa.me/+573052655596?text=Hola%20Soy%20{{user.get_full_name}}%20Estoy%20intersado%20en%20servicio%20de%20fisio" target="_blank">
+              <div class="card border border-danger">
+                  <div class="card-header bg-transparent border-danger">
+                      <h5 class="my-0 text-danger" style="font-size: x-large;"><i
+                              class="mdi mdi-medical-bag mr-3"></i>¡Me dueleee!</h5>
+                  </div>
+                  <div class="card-body mt-0 pt-0">
+                      <h5>Necesitas que te revisemos un dolor, una molestia, se le tiene...</h5>
+                  </div>
+              </div>
+          </a>
+          </div>
+
+      </div>
         <!-- end row -->
     </div> <!-- container-fluid -->
 </div>
@@ -70,4 +103,3 @@
         }
     </script>
 {% endblock js %}
-    
