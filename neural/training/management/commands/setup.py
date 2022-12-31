@@ -292,7 +292,7 @@ class Command(BaseCommand):
         }
 
         now = date(2022, 12, 7)
-        days = 25
+        days = 90
         result = []
         for i in range(0, days):
             day = now + timedelta(days=i)
