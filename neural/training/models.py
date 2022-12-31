@@ -28,15 +28,15 @@ class Slot(NeuralBaseModel):
     class TrainingType(models.TextChoices):
         FUNCIONAL_TRAINING = 'FUNCIONAL_TRAINING', 'Funcional Training'
         GAP_MMSS = 'GAP_MMSS', 'GAP/MMSS'
-        CARDIO_STEP = 'CARDIO_STEP', 'Cardio Step'
+        CARDIO_STEP = 'CARDIO_STEP', 'Aeroibic Step'
         SENIOR = 'SENIOR', 'Senior'
         RTG = 'RTG', 'RTG'
         PILATES = 'PILATES', 'Pilates'
-        FIT_BOXING = 'FIT_BOXING', 'Fit Boxing'
+        FIT_BOXING = 'FIT_BOXING', 'Funcional box'
         BALANCE = 'BALANCE', 'Balance'
         SUPERSTAR = 'SUPERSTAR', 'Super Star'
         CARDIOHIT = 'CARDIOHIT', 'Cardio Hit'
-        A_FUEGO = 'A_FUEGO', 'A Fuego'
+        A_FUEGO = 'A_FUEGO', 'Solo pernil'
         RUMBA = 'RUMBA', 'Rumba'
 
     date = models.DateField()
