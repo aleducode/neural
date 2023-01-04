@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+
+{% block styles %}
+<style>
+  .card-title {
+    font-size:20px;
+    margin:0 0 7px 0;
+    font-weight:600
+  }
+  .card-title-desc{
+    font-size: 15px;
+  }
+
+</style>
+
+{% endblock styles %}
+
+{% block content %}
+
+<div class="page-content">
+
+    <div class="container-fluid">
+        {% language 'es' %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                    aria-hidden="true">&times;</span>
+            </button>
+            {% if 'safe' in message.tags %}
+            {{ message|safe }}
+        {% else %}
+            {{ message }}
+        {% endif %}
+
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endlanguage %}
+        <div class="row">
+          <div class="col-md-8 offset-md-2 ">
+              <div class="card">
+                  <div class="card-body">
+                      <h3 class="card-title text-center">Perfil de {{user.get_full_name}}</h3>
+                      <p class="card-title-desc text-center">Queremos conocer un toque mas de vos 🤓.</p>
+                      <form  method="post">
+                        {% csrf_token %}
+                      <div class="form-group row">
+                          <label for="example-text-input" class="col-md-2 col-form-label">Plan</label>
+                          <div class="col-md-10">
+                              {{form.plan}}
+                          </div>
+                      </div>
+                      <div class="form-group row">
+                          <label for="example-search-input" class="col-md-2 col-form-label">Fecha de nacimiento</label>
+                          <div class="col-md-10">
+                            {{form.birthdate}}
+                          </div>
+                      </div>
+                      <div class="form-group row">
+                          <label for="example-email-input" class="col-md-2 col-form-label">Dirección</label>
+                          <div class="col-md-10">
+                            {{form.address}}
+                          </div>
+                      </div>
+                      <div class="form-group row">
+                          <label for="example-url-input" class="col-md-12 col-form-label">Contacto de emergencia</label>
+                          <div class="col-md-6 mt-2">
+                              {{form.emergency_contact}}
+                          </div>
+                          <div class="col-md-6 mt-2">
+                            {{form.emergency_contact_phone}}
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                          <label for="example-tel-input" class="col-md-2 col-form-label">Profesión</label>
+                          <div class="col-md-10">
+                              {{form.profession}}
+                          </div>
+                      </div>
+                      <div class="form-group row">
+                          <label for="example-password-input" class="col-md-2 col-form-label">Instagram</label>
+                          <div class="col-md-10">
+                             {{form.instagram}}
+                          </div>
+                      </div>
+                      <div class="col-12 text-center">
+                          <button type="submit" class="btn btn-primary waves-effect waves-light">Guardar</button>
+                      </div>
+                    </form>
+
+                  </div>
+              </div>
+          </div> <!-- end col -->
+      </div>
+        <!-- end row -->
+    </div> <!-- container-fluid -->
+</div>
+{% endblock content %}
+
+{% block modal %}
+{% endblock modal %}
+
+{% block js %}
+{% endblock js %}

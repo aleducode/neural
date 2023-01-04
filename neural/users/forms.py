@@ -2,14 +2,14 @@
 
 from django import forms
 from django.contrib.auth import (
-    authenticate, get_user_model,
+    authenticate,
 )
 from django.core.validators import RegexValidator
 from django.contrib.auth import forms as admin_forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-User = get_user_model()
+from neural.users.models import Plan, User, Profile
 
 
 class UserChangeForm(admin_forms.UserChangeForm):
@@ -186,3 +186,44 @@ class SignUpForms(forms.Form):
         data['username'] = data['email']
         user = User.objects.create_user(**data)
         return user
+
+
+class ProfileForm(forms.Form):
+    """Profile form."""
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    plan = forms.ModelChoiceField(queryset=Plan.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}))
+    birthdate = forms.DateField(widget=forms.TextInput(
+        attrs={
+            'class': 'form-control',
+            'type': 'date',
+            "value": "2000-01-01"
+        }
+    ))
+    address = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emergency_contact = forms.CharField(widget=forms.TextInput(
+        attrs={
+            'class': 'form-control',
+            'placeholder': 'Nombre de contacto de emergencia'
+        }
+    ))
+    emergency_contact_phone = forms.CharField(widget=forms.TextInput(
+        attrs={
+            'class': 'form-control', 'placeholder': 'Número de contacto de emergencia'
+        }))
+    profession = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    instagram = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    def save(self):
+        """Update user's profile data."""
+        profle, _ = Profile.objects.update_or_create(
+            user=self.user,
+            defaults=self.cleaned_data
+        )
+        return profle

@@ -48,6 +48,33 @@ class User(NeuralBaseModel, AbstractUser):
         return self.email
 
 
+class Plan(NeuralBaseModel):
+    """Plan model.
+
+    A plan is a set of trainings that a user can
+    do in a specific period of time.
+    """
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=500)
+
+    def __str__(self):
+        return self.name
+
+
+class Profile(NeuralBaseModel):
+    user = models.OneToOneField('users.User', on_delete=models.CASCADE, related_name='profile')
+    plan = models.ForeignKey('users.Plan', on_delete=models.CASCADE, related_name='profiles')
+    birthdate = models.DateField(blank=True, null=True)
+    address = models.CharField(max_length=500, blank=True, null=True)
+    emergency_contact = models.CharField(max_length=500, blank=True, null=True)
+    emergency_contact_phone = models.CharField(max_length=500, blank=True, null=True)
+    profession = models.CharField(max_length=500, blank=True, null=True)
+    instagram = models.CharField(max_length=500, blank=True, null=True)
+
+    def __str__(self):
+        return "Profile of {}".format(self.user)
+
+
 class Ranking(NeuralBaseModel):
     """Ranking model.
 

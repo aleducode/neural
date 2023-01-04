@@ -24,6 +24,11 @@ urlpatterns = [
         name='signup'
     ),
     path(
+        route='profile',
+        view=user_views.ProfileView.as_view(),
+        name='profile'
+    ),
+    path(
         route='login/',
         view=user_views.LoginView.as_view(),
         name='login'
