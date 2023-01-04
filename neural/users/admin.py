@@ -1,19 +1,65 @@
 from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
+from django.utils.translation import gettext_lazy as _
 
-from neural.users.forms import UserChangeForm, UserCreationForm
-from neural.users.models import User, Ranking
+
+from neural.users.forms import UserChangeForm
+from neural.users.models import User, Ranking, Profile, Plan
+
+
+@admin.register(Plan)
+class PlanAdmin(admin.ModelAdmin):
+    list_display = ['name', 'description']
+    search_fields = ['name', 'description']
+    ordering = ['name']
+
+
+class AdminProfileInline(admin.StackedInline):
+    model = Profile
+    verbose_name_plural = 'profile'
+    autocomplete_fields = ['plan']
 
 
 @admin.register(User)
 class UserAdmin(auth_admin.UserAdmin):
 
-    form = UserChangeForm
-    add_form = UserCreationForm
-    fieldsets = (("User", {"fields": ("phone_number", 'is_verified')}),) + tuple(
-        auth_admin.UserAdmin.fieldsets
+    fieldsets = (
+        (None, {"fields": ("phone_number", "password")}),
+        (_("Personal info"), {"fields": ("first_name", "last_name", "email")}),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_verified",
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                ),
+            },
+        ),
     )
-    list_display = ["email", "phone_number", 'first_name', 'last_name', "is_client", 'is_verified']
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("phone_number", "email", "password1", "password2"),
+            },
+        ),
+    )
+    form = UserChangeForm
+    list_display = [
+        "email",
+        "first_name",
+        "last_name",
+        "phone_number",
+        "is_staff",
+        "is_superuser",
+    ]
+    search_fields = ["first_name", "last_name", "phone_number", "email"]
+    list_filter = ["is_staff", "is_superuser"]
+    ordering = ("date_joined",)
+    inlines = [AdminProfileInline]
 
 
 @admin.register(Ranking)

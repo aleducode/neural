@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.contrib.auth import login
 from django.conf import settings
+from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth import views as auth_views
@@ -13,7 +14,8 @@ from django.utils.translation import gettext as _
 from neural.training.models import UserTraining, ImagePopUp
 from neural.users.forms import SignUpForms
 from neural.users.forms import (
-    CustomAuthenticationForm
+    CustomAuthenticationForm,
+    ProfileForm
 )
 from neural.users.models import User
 
@@ -111,3 +113,35 @@ class SwitchUserView(LoginRequiredMixin, View):
         user_to_switch = User.objects.get(pk=pk)
         login(self.request, user_to_switch)
         return HttpResponseRedirect(reverse_lazy('users:index'))
+
+
+class ProfileView(LoginRequiredMixin, FormView):
+    template_name = 'users/profile.html'
+    form_class = ProfileForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        user = self.request.user
+        profile = user.profile if hasattr(user, 'profile') else None
+        if profile:
+            initial['plan'] = profile.plan
+            initial['birthdate'] = profile.birthdate
+            initial['address'] = profile.address
+            initial['emergency_contact'] = profile.emergency_contact
+            initial['emergency_contact_phone'] = profile.emergency_contact_phone
+            initial['profession'] = profile.profession
+            initial['instagram'] = profile.instagram
+        return initial
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        messages.success(self.request, 'Perfil actualizado correctamente')
+        return reverse_lazy('users:profile')
