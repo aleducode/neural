@@ -125,10 +125,12 @@ class TrainingSlotView(LoginRequiredMixin, DetailView):
                 self.template_name, {
                     'slot': slot,
                 })
-
-        schedule, _ = UserTraining.objects.get_or_create(
+        schedule, _ = UserTraining.objects.update_or_create(
             slot=slot,
             user=self.request.user,
+            defaults={
+                "status": "CONFIRMED"
+            }
         )
         return HttpResponseRedirect(reverse_lazy('training:schedule-done', kwargs={'pk': schedule.pk}))
 
