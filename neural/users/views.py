@@ -12,6 +12,7 @@ from django.views.generic import TemplateView, FormView, View
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from neural.training.models import UserTraining, ImagePopUp
+from neural.landing.models import HeaderLanding, MainContentHeader
 from neural.users.forms import SignUpForms
 from neural.users.forms import (
     CustomAuthenticationForm,
@@ -40,6 +41,7 @@ class LandingView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         image_pop_up = ImagePopUp.objects.filter(is_active=True).first()
+        context['header_landing'] = HeaderLanding.objects.get()
         context['image_pop_up'] = image_pop_up
         return context
 
