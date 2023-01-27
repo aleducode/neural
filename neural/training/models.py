@@ -27,7 +27,7 @@ class Slot(NeuralBaseModel):
 
     class TrainingType(models.TextChoices):
         FUNCIONAL_TRAINING = 'FUNCIONAL_TRAINING', 'Funcional Training'
-        GAP_MMSS = 'GAP_MMSS', 'GAP/MMSS'
+        GAP_MMSS = 'GAP_MMSS', 'GAP'
         CARDIO_STEP = 'CARDIO_STEP', 'Aeroibic Step'
         SENIOR = 'SENIOR', 'Senior'
         RTG = 'RTG', 'RTG'
