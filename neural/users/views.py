@@ -51,9 +51,11 @@ class IndexView(LoginRequiredMixin, TemplateView):
         from django.contrib import messages
         context = super().get_context_data(**kwargs)
         now_date = timezone.localdate()
+        user = self.request.user
         last_training = UserTraining.objects.filter(
             user=self.request.user, slot__date__gte=now_date, status=UserTraining.Status.CONFIRMED).last()
-
+        profile = user.profile if hasattr(user, 'profile') else None
+        context['profile'] = profile
         if last_training:
             day = last_training.slot.date
             if day == now_date:

@@ -103,26 +103,28 @@
   <div class="modal-dialog">
       <div class="modal-content">
       <div class="modal-header">
-          <h3>Ya está disponible tu resumen del 2022 🏆🏆</h3>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h3>OEEEEEE🤪🤪</h3>
+
       </div>
       <div class="modal-body text-center">
-        <a  href="{% url 'training:resume_year' %}"
-        class="btn btn-primary btn-lg waves-effect waves-light text-white">Ir a verlooooo</a>
+        <img src="{% static 'images/giphy.gif' %}" alt="" class="img-fluid">
+        <h4 class="mt-2">Queremos conocerte un poco mas, andá y contanos un par de cositas 👇👇</h4>
+        <a  href="{% url 'users:profile' %}"
+        class="btn btn-primary btn-lg waves-effect waves-light text-white">Completar perfil</a>
       </div>
   </div>
 </div>
 {% endblock modal %}
 
 {% block js %}
-
     <script>
-        function alreadyTemp(){
-            Swal.fire(
-                'Tu temperatura ya ha sido tomada',
-                '<p>☺️</p>',
-                'warning'
-            )
-        }
+        $(document).ready(function(){
+
+          {% if not profile %}
+          $("#myModal").modal('show');
+
+          {% endif %}
+
+        });
     </script>
 {% endblock js %}
