@@ -6,6 +6,8 @@ from ckeditor.fields import RichTextField
 from neural.utils.models import NeuralBaseModel
 
 # Create your models here.
+
+
 class HeaderLanding(NeuralBaseModel):
     """Header section landing."""
 
@@ -13,10 +15,14 @@ class HeaderLanding(NeuralBaseModel):
     header_description = RichTextField()
     header_image = models.ImageField(upload_to='header_images')
 
+    def __str__(self):
+        return "Título landing"
+
     class Meta:
         verbose_name = 'Header section'
         verbose_name_plural = 'Header section'
-    
+
+
 class MainContentHeader(NeuralBaseModel):
     """Main content section."""
 
@@ -29,3 +35,19 @@ class MainContentHeader(NeuralBaseModel):
     class Meta:
         verbose_name = 'Main content section'
         verbose_name_plural = 'Main content section'
+
+
+class ServicesLanding(NeuralBaseModel):
+    """List services landing page."""
+
+    title = models.CharField(max_length=500)
+    service_image = models.ImageField(upload_to='header_images')
+    service_description = RichTextField()
+    main_content = models.ForeignKey(MainContentHeader, on_delete=models.CASCADE, related_name="services")
+
+    def __str__(self):
+        return f"Servicio {self.title}"
+
+    class Meta:
+        verbose_name = 'service'
+        verbose_name_plural = 'Services'

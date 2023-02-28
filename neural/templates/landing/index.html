@@ -123,8 +123,7 @@
                         <div class="text-center mb-5">
                             <h4>Quienes somos</h4>
                         </div>
-                        <p class="text-muted">Neural es un centro de entrenamiento y fisioterapia, cuyos principales objetivos son generar consciencia e impacto, enfocado al deportista en formación, de proyección y alto rendimiento, contamos con una metodología de entrenamiento diferenciada bajo el contexto de NEUROCIENCIA APLICADA AL ENTRENAMIENTO DEPORTIVO.</p>
-                        <p class="text-muted">Además, contamos con servicios generales para el público NO deportista entendiendo la importancia de brindar a nuestra comunidad un bienestar físico y mental.</p>
+                        {{main_content.description|safe}}
                     </div>
                 </div>
                 <!-- end row -->
@@ -132,7 +131,7 @@
                 <div class="row align-items-center pt-4">
                     <div class="col-md-6 col-sm-8">
                         <div>
-                            <video src="{% static 'video/neural.mp4' %}" autoplay muted controls></video>
+                            <video src="{{main_content.video_services.url}}" autoplay muted controls></video>
                         </div>
                     </div>
                     <div class="col-md-5 ml-auto">
@@ -141,15 +140,7 @@
                                 <div class="features-number font-weight-semibold display-4 mr-3">01</div>
                                 <h4 class="mb-0">Servicios</h4>
                             </div>
-                            <p class="text-muted">Somos la nueva alternativa al entrenamiento tradicional, combinando tanto la parte física como mental y adaptándonos a tus necesidades específicas ofreciendo nuestros servicios de: </p>
-                            <div class="text-muted mt-4">
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Entrenamiento Funcional</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Neurociencia aplicada al entorno deportivo</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Preparación Física Deportiva</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Fisioterapia</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Nutrición</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Línea Senior</p>
-                            </div>
+                            {{main_content.description_services|safe}}
                         </div>
                     </div>
                 </div>
@@ -162,16 +153,12 @@
                                 <div class="features-number font-weight-semibold display-4 mr-3">02</div>
                                 <h4 class="mb-0">Neurociencia aplicada al entorno deportivo</h4>
                             </div>
-                            <p class="text-muted">Nuestro entrenamiento físico cognitivo se basa en la mejora de las habilidades cognitivas (concentración, atención, toma de decisiones y resolución de problemas), habilidades visuales que faciliten una mejor toma de desiciones.</p>
-                            <div class="text-muted mt-4">
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Entrenamiento enfocado en tu disciplina.</p>
-                                <p><i class="mdi mdi-circle-medium text-success mr-1"></i>Personalizado y de acuerdo a tus necesidades.</p>
-                            </div>
+                            {{main_content.description_training|safe}}
                         </div>
                     </div>
                     <div class="col-md-6  col-sm-8 ml-md-auto">
                         <div class="mt-4 mr-md-0">
-                            <video src="{% static 'video/personalizado.mp4' %}" autoplay muted controls></video>
+                            <video src="{{main_content.video_trainng.url}}" autoplay muted controls></video>
                         </div>
                     </div>
 

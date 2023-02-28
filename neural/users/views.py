@@ -42,6 +42,7 @@ class LandingView(TemplateView):
         context = super().get_context_data(**kwargs)
         image_pop_up = ImagePopUp.objects.filter(is_active=True).first()
         context['header_landing'] = HeaderLanding.objects.get()
+        context["main_content"] = MainContentHeader.objects.get()
         context['image_pop_up'] = image_pop_up
         return context
 
