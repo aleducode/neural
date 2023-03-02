@@ -184,92 +184,22 @@
                 <!-- end row -->
 
                 <div class="row">
+                    {% for service in main_content.services.all %}
                     <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Entrenamiento Funcional 🏋🏻‍♂️🏋🏼‍♀️</h5>
+                        <h5 class="mb-3">{{service.title}}</h5>
                         <div class="blog-box mb-4 mb-xl-0">
                             <div class="position-relative">
-                                <img src="{% static 'images/funcional.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                <img src="{{service.service_image.url}}" alt="" class="rounded img-fluid mx-auto d-block">
                             </div>
 
                             <div class="mt-4 text-muted">
 
-                                <p>Entrenamiento de una hora en dondesiempre estaras acompañado de un profesional que te va a guiar y va a estar atento de tu tecnica y postura; su principal objetivo es mejorar la condicion fisica a traves del ejercicio y estimulos mentales.</p>
+                                {{service.service_description|safe}}
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Neurociencia aplicada al entorno deportivo 🤼‍♂️🏆</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/neurociencia-1.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Se basa en la mejora de las capacidades cognitivas (concentración, atención, toma de decisiones y resolución de problemas), visuales y coordinativas, enfocadas al deporte en el que te desempeñas, para tener un rendimiento sobresaliente en la competencia 🥇🔥 Este servicio se presta de manera personalizada.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Preparación Física Deportiva</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/fisico1.jpg' %}" alt="350" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Nuestra preparación física deportiva se basa en mejorar las habilidades físicas, haciendo énfasis en fuerza y potencia, con el valor agregado de nuestro método Físico/Cognitivo. Servicio personalizado o Grupal.</p>
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
-
-                <div class="row">
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Nutrición🍉🍍🥑</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/nutricion.JPG' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Conoce tu cuerpo y cómo tu mente interviene para alimentarte, toma hábitos de vida saludable con la ayuda de nuestro servicio de Nutrición.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Fisioterapia 🚑🧘🏻‍♂️</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/fisioterapia.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Neural FISIO se centra en rehabilitar, tratar y prevenir patologías y lesiones osteomusculares que intervengan en el movimiento del cuerpo humano.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Entrenamiento Senior 🧑🏻‍🦳👨🏽‍🦳</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/senior1.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>¡Regálale Salud Física y Mental a tu adulto mayor! -  Línea de entrenamiento especializada en el adulto mayor, en mantener su calidad de vida e independencia.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- end row -->
             </div>
             <!-- end container -->
         </section>

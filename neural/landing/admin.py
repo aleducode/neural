@@ -2,7 +2,7 @@
 from django.contrib import admin
 
 # Models
-from neural.landing.models import HeaderLanding, MainContentHeader, ServicesLanding
+from neural.landing.models import HeaderLanding, MainContentHeader, ServicesLanding, PersonalTrainer
 
 
 class ServicesInline(admin.StackedInline):
@@ -18,3 +18,7 @@ class HeaderLandingAdmin(admin.ModelAdmin):
 @admin.register(MainContentHeader)
 class MainContentHeaderAdmin(admin.ModelAdmin):
     inlines = [ServicesInline]
+
+@admin.register(PersonalTrainer)
+class PersonalTrainerAdmin(admin.ModelAdmin):
+    list_display = ["name",]

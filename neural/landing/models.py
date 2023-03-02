@@ -51,3 +51,20 @@ class ServicesLanding(NeuralBaseModel):
     class Meta:
         verbose_name = 'service'
         verbose_name_plural = 'Services'
+
+
+class PersonalTrainer(NeuralBaseModel):
+    """Personal training model."""
+
+    name = models.CharField(max_length=200)
+    description = RichTextField()
+    image = models.ImageField(upload_to='personal_trainer')
+    url_facebook = models.CharField(max_length=200)
+    url_ig = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f"Entrenador {self.name}"
+    
+    class Meta:
+        verbose_name = 'Entrenador'
+        verbose_name_plural = 'Entrenadores'
