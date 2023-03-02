@@ -5,7 +5,6 @@ from django.contrib import admin
 from neural.landing.models import HeaderLanding, MainContentHeader, ServicesLanding, PersonalTrainer
 
 
-
 @admin.register(ServicesLanding)
 class ServicesLandingAdmin(admin.ModelAdmin):
     list_display = ["title",]
@@ -19,6 +18,7 @@ class HeaderLandingAdmin(admin.ModelAdmin):
 @admin.register(MainContentHeader)
 class MainContentHeaderAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(PersonalTrainer)
 class PersonalTrainerAdmin(admin.ModelAdmin):

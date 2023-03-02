@@ -64,7 +64,7 @@ class PersonalTrainer(NeuralBaseModel):
 
     def __str__(self):
         return f"Entrenador {self.name}"
-    
+
     class Meta:
         verbose_name = 'Entrenador'
         verbose_name_plural = 'Entrenadores'
