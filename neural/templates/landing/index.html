@@ -218,31 +218,31 @@
                 </div>
                 <!-- end row -->
                 <div class="row">
+                    {% for trainer in trainers %}
                     <div class="col-xl-4 col-sm-6">
                         <div class="card text-center team-box">
                             <div class="card-body">
                                 <div class="team-box mb-4 mb-xl-0">
                                     <div class="position-relative">
-                                        <img src="{% static 'images/training/diego-1.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                        <img src="{{trainer.image.url}}" alt="" class="rounded img-fluid mx-auto d-block">
                                     </div>
                                 </div>
                                 <div class="mt-3">
-                                    <h5>Diego Marín</h5>
-                                    <h6 class="text-muted mb-0">Pf y Entrenador Físico/Cognitivo</h6>
+                                    <h5>{{trainer.name|safe}}</h5>
                                 </div>
                                 <div class="mt-4 text-wrap">
-                                    <p>Preparador físico deportivo del CEEF (Argentina), certificado como entrenador físico/cognitivo por ACUMEN, tengo más de 8 años de experiencia dentro del campo de entrenamiento y preparación física de deportistas de alto rendimiento, en formación y profesional.</p>
+                                    <p>{{trainer.description|safe}}</p>
                                 </div>
                             </div>
                             <div class="card-footer bg-transparent border-top">
                                 <div class="d-flex mb-0 team-social-links">
                                     <div class="flex-fill">
-                                        <a href="https://www.facebook.com/NeuralConsciente" data-toggle="tooltip" title="Facebook">
+                                        <a href="{{trainer.url_facebook}}" data-toggle="tooltip" title="Facebook">
                                             <i class="mdi mdi-facebook"></i>
                                         </a>
                                     </div>
                                     <div class="flex-fill">
-                                        <a href="https://www.instagram.com/diegomarin.pf/" data-toggle="tooltip" title="Instagram">
+                                        <a href="{{trainer.url_ig}}" data-toggle="tooltip" title="Instagram">
                                             <i class="mdi mdi-instagram"></i>
                                         </a>
                                     </div>
@@ -250,71 +250,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-sm-6">
-                        <div class="card text-center team-box">
-                            <div class="card-body">
-                                <div class="team-box mb-4 mb-xl-0">
-                                    <div class="position-relative">
-                                        <img src="{% static 'images/training/susana.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <h5>Susana Franco</h5>
-                                    <h6 class="text-muted mb-0">Fisioterapeuta</h6>
-                                </div>
-                                <div class="mt-4 text-wrap">
-                                    <p>Fisioterapeuta de la Fundación Universitaria María Cano, fui fisioterapeuta de la selección colombia sub 20 de fútbol playa, realicé mi práctica universitaria en el Club Atlético Nacional(2017) y soy una apasionada por el deporte, la salud, la prevención, la actividad física, mental y la rehabilitación.</p>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-transparent border-top">
-                                <div class="d-flex mb-0 team-social-links">
-                                    <div class="flex-fill">
-                                        <a href="https://www.facebook.com/NeuralConsciente" data-toggle="tooltip" title="Facebook">
-                                            <i class="mdi mdi-facebook"></i>
-                                        </a>
-                                    </div>
-                                    <div class="flex-fill">
-                                        <a href="https://www.instagram.com/susifranco.fisio/" data-toggle="tooltip" title="Instagram">
-                                            <i class="mdi mdi-instagram"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-sm-6">
-                        <div class="card text-center team-box">
-                            <div class="card-body">
-                                <div class="team-box mb-4 mb-xl-0">
-                                    <div class="position-relative">
-                                        <img src="{% static 'images/training/mateo1.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                                    </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <h5>Mateo Escudero</h5>
-                                    <h6 class="text-muted mb-0">Preparador Físico</h6>
-                                </div>
-                                <div class="mt-4 text-wrap">
-                                    <p>técnico y tecnologo en entrenamiento físico y deportivo, destacado en competencias dentro del marco de la actividad física, tales como: Rumba, cardio step, entrenamiento funcional, musculación y preparación física con énfasis en el desarrollo del ámbito deportivo. "Todo logro empieza con la decisión de intentarlo"</p>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-transparent border-top">
-                                <div class="d-flex mb-0 team-social-links">
-                                    <div class="flex-fill">
-                                        <a href="https://www.facebook.com/NeuralConsciente" data-toggle="tooltip" title="Facebook">
-                                            <i class="mdi mdi-facebook"></i>
-                                        </a>
-                                    </div>
-                                    <div class="flex-fill">
-                                        <a href="https://www.instagram.com/neuralconsciente" data-toggle="tooltip" title="Instagram">
-                                            <i class="mdi mdi-instagram"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
                 <!-- end row -->
             </div>
