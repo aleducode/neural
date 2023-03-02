@@ -52,6 +52,7 @@
                 video{
                     width: 100%;
                 }
+                
             </style>
         {% endblock %}
     </head>
@@ -96,16 +97,15 @@
         </nav>
 
         <!-- hero section start -->
-        <section class="section hero-section bg-ico-hero" id="home">
+        <section class="section hero-section bg-ico-hero" id="home" style="background-image: url({{header_landing.header_image.url}});">
             <div class="bg-overlay bg-primary"></div>
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-lg-5">
                         <div class="text-white-50">
-                            <h1 class="text-white font-weight-semibold mb-3 hero-title"> Bienvenidos a Neural Centro de Entrenamiento</h1>
+                            <h1 class="text-white font-weight-semibold mb-3 hero-title">{{header_landing.header_title|safe}}</h1>
                             <p class="font-size-14">
-                                Todo movieminto se hace desde la in/consciencia.
-                                Neural llegó para hacernos conscientes de cada movimiento.</p>
+                                {{header_landing.header_description|safe}}</p>
                         </div>
                     </div>
                 </div>
@@ -123,8 +123,7 @@
                         <div class="text-center mb-5">
                             <h4>Quienes somos</h4>
                         </div>
-                        <p class="text-muted">Neural es un centro de entrenamiento y fisioterapia, cuyos principales objetivos son generar consciencia e impacto, enfocado al deportista en formación, de proyección y alto rendimiento, contamos con una metodología de entrenamiento diferenciada bajo el contexto de NEUROCIENCIA APLICADA AL ENTRENAMIENTO DEPORTIVO.</p>
-                        <p class="text-muted">Además, contamos con servicios generales para el público NO deportista entendiendo la importancia de brindar a nuestra comunidad un bienestar físico y mental.</p>
+                        {{main_content.description|safe}}
                     </div>
                 </div>
                 <!-- end row -->
@@ -132,7 +131,7 @@
                 <div class="row align-items-center pt-4">
                     <div class="col-md-6 col-sm-8">
                         <div>
-                            <video src="{% static 'video/neural.mp4' %}" autoplay muted controls></video>
+                            <video src="{{main_content.video_services.url}}" autoplay muted controls></video>
                         </div>
                     </div>
                     <div class="col-md-5 ml-auto">
@@ -141,15 +140,7 @@
                                 <div class="features-number font-weight-semibold display-4 mr-3">01</div>
                                 <h4 class="mb-0">Servicios</h4>
                             </div>
-                            <p class="text-muted">Somos la nueva alternativa al entrenamiento tradicional, combinando tanto la parte física como mental y adaptándonos a tus necesidades específicas ofreciendo nuestros servicios de: </p>
-                            <div class="text-muted mt-4">
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Entrenamiento Funcional</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Neurociencia aplicada al entorno deportivo</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Preparación Física Deportiva</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Fisioterapia</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Nutrición</p>
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Línea Senior</p>
-                            </div>
+                            {{main_content.description_services|safe}}
                         </div>
                     </div>
                 </div>
@@ -162,16 +153,12 @@
                                 <div class="features-number font-weight-semibold display-4 mr-3">02</div>
                                 <h4 class="mb-0">Neurociencia aplicada al entorno deportivo</h4>
                             </div>
-                            <p class="text-muted">Nuestro entrenamiento físico cognitivo se basa en la mejora de las habilidades cognitivas (concentración, atención, toma de decisiones y resolución de problemas), habilidades visuales que faciliten una mejor toma de desiciones.</p>
-                            <div class="text-muted mt-4">
-                                <p class="mb-2"><i class="mdi mdi-circle-medium text-success mr-1"></i>Entrenamiento enfocado en tu disciplina.</p>
-                                <p><i class="mdi mdi-circle-medium text-success mr-1"></i>Personalizado y de acuerdo a tus necesidades.</p>
-                            </div>
+                            {{main_content.description_training|safe}}
                         </div>
                     </div>
                     <div class="col-md-6  col-sm-8 ml-md-auto">
                         <div class="mt-4 mr-md-0">
-                            <video src="{% static 'video/personalizado.mp4' %}" autoplay muted controls></video>
+                            <video src="{{main_content.video_trainng.url}}" autoplay muted controls></video>
                         </div>
                     </div>
 
@@ -197,105 +184,22 @@
                 <!-- end row -->
 
                 <div class="row">
+                    {% for service in main_content.services.all %}
                     <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Entrenamiento Funcional 🏋🏻‍♂️🏋🏼‍♀️</h5>
+                        <h5 class="mb-3">{{service.title}}</h5>
                         <div class="blog-box mb-4 mb-xl-0">
                             <div class="position-relative">
-                                <img src="{% static 'images/funcional.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                <img src="{{service.service_image.url}}" alt="" class="rounded img-fluid mx-auto d-block">
                             </div>
 
                             <div class="mt-4 text-muted">
 
-                                <p>Entrenamiento de una hora en dondesiempre estaras acompañado de un profesional que te va a guiar y va a estar atento de tu tecnica y postura; su principal objetivo es mejorar la condicion fisica a traves del ejercicio y estimulos mentales.</p>
+                                {{service.service_description|safe}}
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Neurociencia aplicada al entorno deportivo 🤼‍♂️🏆</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/neurociencia-1.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Se basa en la mejora de las capacidades cognitivas (concentración, atención, toma de decisiones y resolución de problemas), visuales y coordinativas, enfocadas al deporte en el que te desempeñas, para tener un rendimiento sobresaliente en la competencia 🥇🔥 Este servicio se presta de manera personalizada.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Preparación Física Deportiva</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/fisico1.jpg' %}" alt="350" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Nuestra preparación física deportiva se basa en mejorar las habilidades físicas, haciendo énfasis en fuerza y potencia, con el valor agregado de nuestro método Físico/Cognitivo. Servicio personalizado o Grupal.</p>
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
-
-                <div class="row">
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Nutrición🍉🍍🥑</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/nutricion.JPG' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Conoce tu cuerpo y cómo tu mente interviene para alimentarte, toma hábitos de vida saludable con la ayuda de nuestro servicio de Nutrición.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Fisioterapia 🚑🧘🏻‍♂️</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/fisioterapia.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Neural FISIO se centra en rehabilitar, tratar y prevenir patologías y lesiones osteomusculares que intervengan en el movimiento del cuerpo humano.</p>
-                            </div>
-                        </div>
-                    </div>
-                    {% comment %} <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Neural Kids💜💙💛</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/kids.png' %}" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>Es un programa que tiene como objetivo desarrollar las habilidades motrices básicas de los niños y niñas a través de la formación e iniciación deportiva  horizontal, con el valor agregado de nuestro método Físico/Cognitivo para el desarrollo de las habilidades cognitivas y visuales.</p>
-                            </div>
-                        </div>
-                    </div> {% endcomment %}
-                    <div class="col-xl-4 col-sm-6">
-                        <h5 class="mb-3">Entrenamiento Senior 🧑🏻‍🦳👨🏽‍🦳</h5>
-                        <div class="blog-box mb-4 mb-xl-0">
-                            <div class="position-relative">
-                                <img src="{% static 'images/senior1.jpg' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                            </div>
-
-                            <div class="mt-4 text-muted">
-
-                                <p>¡Regálale Salud Física y Mental a tu adulto mayor! -  Línea de entrenamiento especializada en el adulto mayor, en mantener su calidad de vida e independencia.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- end row -->
             </div>
             <!-- end container -->
         </section>
@@ -314,31 +218,31 @@
                 </div>
                 <!-- end row -->
                 <div class="row">
+                    {% for trainer in trainers %}
                     <div class="col-xl-4 col-sm-6">
                         <div class="card text-center team-box">
                             <div class="card-body">
                                 <div class="team-box mb-4 mb-xl-0">
                                     <div class="position-relative">
-                                        <img src="{% static 'images/training/diego-1.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
+                                        <img src="{{trainer.image.url}}" alt="" class="rounded img-fluid mx-auto d-block">
                                     </div>
                                 </div>
                                 <div class="mt-3">
-                                    <h5>Diego Marín</h5>
-                                    <h6 class="text-muted mb-0">Pf y Entrenador Físico/Cognitivo</h6>
+                                    <h5>{{trainer.name|safe}}</h5>
                                 </div>
                                 <div class="mt-4 text-wrap">
-                                    <p>Preparador físico deportivo del CEEF (Argentina), certificado como entrenador físico/cognitivo por ACUMEN, tengo más de 8 años de experiencia dentro del campo de entrenamiento y preparación física de deportistas de alto rendimiento, en formación y profesional.</p>
+                                    <p>{{trainer.description|safe}}</p>
                                 </div>
                             </div>
                             <div class="card-footer bg-transparent border-top">
                                 <div class="d-flex mb-0 team-social-links">
                                     <div class="flex-fill">
-                                        <a href="https://www.facebook.com/NeuralConsciente" data-toggle="tooltip" title="Facebook">
+                                        <a href="{{trainer.url_facebook}}" data-toggle="tooltip" title="Facebook">
                                             <i class="mdi mdi-facebook"></i>
                                         </a>
                                     </div>
                                     <div class="flex-fill">
-                                        <a href="https://www.instagram.com/diegomarin.pf/" data-toggle="tooltip" title="Instagram">
+                                        <a href="{{trainer.url_ig}}" data-toggle="tooltip" title="Instagram">
                                             <i class="mdi mdi-instagram"></i>
                                         </a>
                                     </div>
@@ -346,71 +250,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-sm-6">
-                        <div class="card text-center team-box">
-                            <div class="card-body">
-                                <div class="team-box mb-4 mb-xl-0">
-                                    <div class="position-relative">
-                                        <img src="{% static 'images/training/susana.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <h5>Susana Franco</h5>
-                                    <h6 class="text-muted mb-0">Fisioterapeuta</h6>
-                                </div>
-                                <div class="mt-4 text-wrap">
-                                    <p>Fisioterapeuta de la Fundación Universitaria María Cano, fui fisioterapeuta de la selección colombia sub 20 de fútbol playa, realicé mi práctica universitaria en el Club Atlético Nacional(2017) y soy una apasionada por el deporte, la salud, la prevención, la actividad física, mental y la rehabilitación.</p>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-transparent border-top">
-                                <div class="d-flex mb-0 team-social-links">
-                                    <div class="flex-fill">
-                                        <a href="https://www.facebook.com/NeuralConsciente" data-toggle="tooltip" title="Facebook">
-                                            <i class="mdi mdi-facebook"></i>
-                                        </a>
-                                    </div>
-                                    <div class="flex-fill">
-                                        <a href="https://www.instagram.com/susifranco.fisio/" data-toggle="tooltip" title="Instagram">
-                                            <i class="mdi mdi-instagram"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-sm-6">
-                        <div class="card text-center team-box">
-                            <div class="card-body">
-                                <div class="team-box mb-4 mb-xl-0">
-                                    <div class="position-relative">
-                                        <img src="{% static 'images/training/mateo1.png' %}" alt="" class="rounded img-fluid mx-auto d-block">
-                                    </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <h5>Mateo Escudero</h5>
-                                    <h6 class="text-muted mb-0">Preparador Físico</h6>
-                                </div>
-                                <div class="mt-4 text-wrap">
-                                    <p>técnico y tecnologo en entrenamiento físico y deportivo, destacado en competencias dentro del marco de la actividad física, tales como: Rumba, cardio step, entrenamiento funcional, musculación y preparación física con énfasis en el desarrollo del ámbito deportivo. "Todo logro empieza con la decisión de intentarlo"</p>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-transparent border-top">
-                                <div class="d-flex mb-0 team-social-links">
-                                    <div class="flex-fill">
-                                        <a href="https://www.facebook.com/NeuralConsciente" data-toggle="tooltip" title="Facebook">
-                                            <i class="mdi mdi-facebook"></i>
-                                        </a>
-                                    </div>
-                                    <div class="flex-fill">
-                                        <a href="https://www.instagram.com/neuralconsciente" data-toggle="tooltip" title="Instagram">
-                                            <i class="mdi mdi-instagram"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
                 <!-- end row -->
             </div>

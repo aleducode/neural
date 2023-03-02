@@ -20,3 +20,6 @@ django-redis==4.12.1  # https://github.com/jazzband/django-redis
 djangorestframework==3.11.1
 django-cors-headers==3.5.0
 djangorestframework-api-key
+
+# CKeditor
+django-ckeditor==6.0.0
