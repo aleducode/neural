@@ -202,16 +202,14 @@ class Command(BaseCommand):
                         'end': '19:00'
                     },
                     {
+                        'init': '19:00',
+                        'end': '20:00'
+                    },
+                    {
                         'init': '20:00',
                         'end': '21:00'
                     },
                 ],
-                'FIT_BOXING': [
-                    {
-                        'init': '19:00',
-                        'end': '20:00'
-                    },
-                ]
             },
             5: {
                 'FUNCIONAL_TRAINING': [
@@ -242,10 +240,6 @@ class Command(BaseCommand):
                     {
                         'init': '16:00',
                         'end': '17:00'
-                    },
-                    {
-                        'init': '17:00',
-                        'end': '18:00'
                     },
                     {
                         'init': '18:00',
@@ -291,8 +285,8 @@ class Command(BaseCommand):
             },
         }
 
-        now = date(2022, 12, 7)
-        days = 90
+        now = date(2023, 3, 1)
+        days = 290
         result = []
         for i in range(0, days):
             day = now + timedelta(days=i)
