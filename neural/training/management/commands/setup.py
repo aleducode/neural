@@ -285,8 +285,8 @@ class Command(BaseCommand):
             },
         }
 
-        now = date(2022, 12, 7)
-        days = 301
+        now = date(2023, 3, 1)
+        days = 290
         result = []
         for i in range(0, days):
             day = now + timedelta(days=i)
