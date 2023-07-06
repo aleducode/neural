@@ -271,7 +271,7 @@ class Command(BaseCommand):
                 'A_FUEGO': [
                     {
                         'init': '7:30',
-                        'end': '9:00'
+                        'end': '8:30'
                     },
                 ],
                 'SUPERSTAR': [
@@ -282,11 +282,21 @@ class Command(BaseCommand):
                 ]
             },
             7: {
+                'FUNCIONAL_TRAINING': [
+                    {
+                        'init': '09:00',
+                        'end': '10:00'
+                    },
+                    {
+                        'init': '10:00',
+                        'end': '11:00'
+                    },
+                ],
             },
         }
 
-        now = date(2023, 3, 1)
-        days = 290
+        now = date(2023, 7, 5)
+        days = 150
         result = []
         for i in range(0, days):
             day = now + timedelta(days=i)
