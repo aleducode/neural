@@ -53,7 +53,7 @@ class ScheduleV1View(LoginRequiredMixin, TemplateView):
         now = timezone.localdate()
         for i in range(0, 3):
             day = now + timedelta(days=i)
-            if day.isoweekday() != 7:
+            if day.isoweekday() != 8:
                 day_name = _(day.strftime("%A"))
                 days.append({
                     'date': f'{day}',
