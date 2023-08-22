@@ -22,10 +22,6 @@ class Command(BaseCommand):
                         'end': '7:00'
                     },
                     {
-                        'init': '7:00',
-                        'end': '8:00'
-                    },
-                    {
                         'init': '8:00',
                         'end': '9:00'
                     },
@@ -50,25 +46,27 @@ class Command(BaseCommand):
                         'end': '19:00'
                     },
                     {
+                        'init': '19:00',
+                        'end': '20:00'
+                    },
+                    {
                         'init': '20:00',
                         'end': '21:00'
                     },
                 ],
-                'CARDIO_STEP': [
+                'FIT_BOXING': [
                     {
-                        'init': '19:00',
-                        'end': '20:00'
+                        'init': '7:00',
+                        'end': '8:00'
                     },
                 ]
             },
             2: {
-                'RTG': [
+                'FUNCIONAL_TRAINING': [
                     {
                         'init': '5:00',
                         'end': '6:00'
                     },
-                ],
-                'FUNCIONAL_TRAINING': [
                     {
                         'init': '6:00',
                         'end': '7:00'
@@ -119,8 +117,8 @@ class Command(BaseCommand):
                         'end': '6:00'
                     },
                     {
-                        'init': '6:00',
-                        'end': '7:00'
+                        'init': '7:00',
+                        'end': '8:00'
                     },
                     {
                         'init': '8:00',
@@ -153,8 +151,8 @@ class Command(BaseCommand):
                 ],
                 'GAP': [
                     {
-                        'init': '7:00',
-                        'end': '8:00'
+                        'init': '6:00',
+                        'end': '7:00'
                     },
                     {
                         'init': '18:00',
@@ -163,7 +161,6 @@ class Command(BaseCommand):
                 ]
             },
             4: {
-
                 'FUNCIONAL_TRAINING': [
                     {
                         'init': '5:00',
@@ -202,14 +199,16 @@ class Command(BaseCommand):
                         'end': '19:00'
                     },
                     {
-                        'init': '19:00',
-                        'end': '20:00'
-                    },
-                    {
                         'init': '20:00',
                         'end': '21:00'
                     },
                 ],
+                'BALANCE': [
+                    {
+                        'init': '19:00',
+                        'end': '20:00'
+                    },
+                ]
             },
             5: {
                 'FUNCIONAL_TRAINING': [
@@ -242,6 +241,10 @@ class Command(BaseCommand):
                         'end': '17:00'
                     },
                     {
+                        'init': '17:00',
+                        'end': '18:00'
+                    },
+                    {
                         'init': '18:00',
                         'end': '19:00'
                     },
@@ -250,22 +253,12 @@ class Command(BaseCommand):
                         'end': '20:00'
                     },
                 ],
-                'RTG': [
-                    {
-                        'init': '17:00',
-                        'end': '18:00'
-                    },
-                ]
             },
             6: {
                 'FUNCIONAL_TRAINING': [
                     {
                         'init': '10:00',
                         'end': '11:00'
-                    },
-                    {
-                        'init': '11:00',
-                        'end': '12:00'
                     },
                 ],
                 'A_FUEGO': [
@@ -279,7 +272,13 @@ class Command(BaseCommand):
                         'init': '9:00',
                         'end': '10:00'
                     },
-                ]
+                ],
+                'RUMBA': [
+                    {
+                        'init': '11:00',
+                        'end': '12:00'
+                    },
+                ],
             },
             7: {
                 'FUNCIONAL_TRAINING': [
@@ -287,6 +286,8 @@ class Command(BaseCommand):
                         'init': '09:00',
                         'end': '10:00'
                     },
+                ],
+                'CARDIO_STEP': [
                     {
                         'init': '10:00',
                         'end': '11:00'
@@ -295,7 +296,7 @@ class Command(BaseCommand):
             },
         }
 
-        now = date(2023, 7, 5)
+        now = date(2023, 8, 21)
         days = 150
         result = []
         for i in range(0, days):
