@@ -74,12 +74,12 @@ class UserMembership(NeuralBaseModel):
         default=False,
     )
     init_date = models.DateField(
-        "Fecha de inicio",
+        "Fecha de inicio membresía",
         auto_now=False,
         help_text="Inicio de membresía"
     )
     expiration_date = models.DateField(
-        "Expiration force date",
+        "Fecha fin de membresía",
         auto_now=False,
         help_text="Fecha de expiración membresía",
         blank=True,
@@ -89,15 +89,14 @@ class UserMembership(NeuralBaseModel):
 
 
     def save(self, *args, **kwargs):
+        date_now = timezone.now().date()
         if self.membership_type == self.MembershipType.MENSUAL:
             self.expiration_date = self.init_date + timezone.timedelta(days=30)
-            self.days_duration = 30
         elif self.membership_type == self.MembershipType.QUARTER:
             self.expiration_date = self.init_date + timezone.timedelta(days=90)
-            self.days_duration = 90
         elif self.membership_type == self.MembershipType.SEMESTER:
             self.expiration_date = self.init_date + timezone.timedelta(days=183)
-            self.days_duration = 183
+        self.days_duration = (self.expiration_date - date_now).days
         super().save(*args, **kwargs)
     
     def __str__(self):
