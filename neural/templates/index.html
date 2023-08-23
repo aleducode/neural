@@ -60,7 +60,7 @@
             </div>
 
         </div>
-        <div class="row">
+        {% comment %} <div class="row">
           <div class="col-lg-6 offset-lg-3 mb-4">
               <h4 class="text-center">Servicios personalizados 💅</h4>
           </div>
@@ -92,7 +92,7 @@
           </a>
           </div>
 
-      </div>
+        </div> {% endcomment %}
         <!-- end row -->
     </div> <!-- container-fluid -->
 </div>
@@ -126,28 +126,26 @@
           {% endif %}
 
         });
-        var notificationShown = localStorage.getItem('notificationShown');
         {% if days_duration > 0 %}
+            var days_duration = {{ days_duration }};
             Swal.fire({
                 title: 'Membresía activa.',
-                text: "te quedan 30 días de tu membresía",
+                text: "te quedan " + days_duration + " para seguir entrenando.",
                 type:"success"
             });
-            localStorage.setItem('notificationShown', 'true');
         {% elif days_duration == 0 %}
             Swal.fire({
                 title: 'Membresía vencida.',
                 text: "tu membresía ha vencido, contáctate con nosotros para renovarla",
                 type:"warning"
             });
-            localStorage.setItem('notificationShown', 'true');
         {% endif %}
     </script>
     <script>
         function handleLinkClick() {
             Swal.fire({
                 title: 'Membresía vencida.',
-                text: "No puedes agendar entrenamiento hasta no renovar tu membresía.",
+                text: "tu membresía ha vencido, contáctate con nosotros para renovarla",
                 type:"warning"
             });
             return false;
