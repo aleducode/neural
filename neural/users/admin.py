@@ -1,10 +1,14 @@
+# Django
 from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
 from django.utils.translation import gettext_lazy as _
 
+# Models
+from neural.users.models import User, Ranking, Profile, Plan, UserMembership
 
+# Forms
 from neural.users.forms import UserChangeForm
-from neural.users.models import User, Ranking, Profile, Plan
+
 
 
 @admin.register(Plan)
@@ -18,6 +22,14 @@ class AdminProfileInline(admin.StackedInline):
     model = Profile
     verbose_name_plural = 'profile'
     autocomplete_fields = ['plan']
+
+
+class MembershipInline(admin.StackedInline):
+    model = UserMembership
+    ordering = ["-is_active"]
+    search_fields = ["user", "membership_type"]
+    readonly_fields = ["expiration_date"]
+    extra = 0
 
 
 @admin.register(User)
@@ -59,7 +71,7 @@ class UserAdmin(auth_admin.UserAdmin):
     search_fields = ["first_name", "last_name", "phone_number", "email"]
     list_filter = ["is_staff", "is_superuser"]
     ordering = ("date_joined",)
-    inlines = [AdminProfileInline]
+    inlines = [AdminProfileInline, MembershipInline]
 
 
 @admin.register(Ranking)

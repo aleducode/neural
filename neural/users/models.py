@@ -4,6 +4,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+from django.db.models import Q
+from django.utils import timezone
 
 # Utils
 from neural.utils.models import NeuralBaseModel
@@ -46,6 +48,72 @@ class User(NeuralBaseModel, AbstractUser):
 
     def get_short_name(self):
         return self.email
+
+
+class UserMembership(NeuralBaseModel):
+    """User membership model."""
+
+    class MembershipType(models.TextChoices):
+        """Membership type."""
+        MENSUAL = 'MENSUAL', 'Mensualidad'
+        QUARTER = 'QUARTER', 'Trimestre'
+        SEMESTER = 'SEMESTER', 'Semestre'
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='memberships'
+    )
+    membership_type = models.CharField(
+        max_length=10,
+        choices=MembershipType.choices,
+        default=MembershipType.MENSUAL
+    )
+    is_active = models.BooleanField(
+        'Active',
+        default=False,
+    )
+    init_date = models.DateField(
+        "Fecha de inicio",
+        auto_now=False,
+        help_text="Inicio de membresía"
+    )
+    expiration_date = models.DateField(
+        "Expiration force date",
+        auto_now=False,
+        help_text="Fecha de expiración membresía",
+        blank=True,
+        null=True,
+    )
+    days_duration = models.IntegerField(default=30)
+
+
+    def save(self, *args, **kwargs):
+        if self.membership_type == self.MembershipType.MENSUAL:
+            self.expiration_date = self.init_date + timezone.timedelta(days=30)
+            self.days_duration = 30
+        elif self.membership_type == self.MembershipType.QUARTER:
+            self.expiration_date = self.init_date + timezone.timedelta(days=90)
+            self.days_duration = 90
+        elif self.membership_type == self.MembershipType.SEMESTER:
+            self.expiration_date = self.init_date + timezone.timedelta(days=183)
+            self.days_duration = 183
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"User membership {self.user.email} - {self.user.phone_number} - {self.membership_type}"
+
+    class Meta:
+
+        verbose_name = "Membresía de usuario"
+        verbose_name_plural = "Membresías de usuarios"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user'],
+                condition=Q(is_active=True),
+                name='unique_membership'
+            )
+        ]
 
 
 class Plan(NeuralBaseModel):
