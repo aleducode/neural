@@ -2,7 +2,7 @@
 from config import celery_app
 from celery.schedules import crontab
 
-# Models    
+# Models
 from neural.users.models import UserMembership
 
 

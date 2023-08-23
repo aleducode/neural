@@ -10,7 +10,6 @@ from neural.users.models import User, Ranking, Profile, Plan, UserMembership
 from neural.users.forms import UserChangeForm
 
 
-
 @admin.register(Plan)
 class PlanAdmin(admin.ModelAdmin):
     list_display = ['name', 'description']

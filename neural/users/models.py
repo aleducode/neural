@@ -87,7 +87,6 @@ class UserMembership(NeuralBaseModel):
     )
     days_duration = models.IntegerField(default=30)
 
-
     def save(self, *args, **kwargs):
         date_now = timezone.now().date()
         if self.membership_type == self.MembershipType.MENSUAL:
@@ -98,7 +97,7 @@ class UserMembership(NeuralBaseModel):
             self.expiration_date = self.init_date + timezone.timedelta(days=183)
         self.days_duration = (self.expiration_date - date_now).days
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return f"User membership {self.user.email} - {self.user.phone_number} - {self.membership_type}"
 
