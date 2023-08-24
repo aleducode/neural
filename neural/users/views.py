@@ -56,6 +56,9 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         now_date = timezone.localdate()
         user = self.request.user
+        user_membership = user.memberships.filter(is_active=True)
+        if user_membership:
+            context['days_duration'] = user_membership.first().days_duration
         last_training = UserTraining.objects.filter(
             user=self.request.user, slot__date__gte=now_date, status=UserTraining.Status.CONFIRMED).last()
         profile = user.profile if hasattr(user, 'profile') else None

@@ -32,18 +32,18 @@
             </div>
 
             <div class="col-lg-4 offset-lg-2">
-                <a href="{% url 'training:schedule-v1' %}">
-                <div class="card border border-success">
-                    <div class="card-header bg-transparent border-success">
-                        <h5 class="my-0 text-success" style="font-size: x-large;"><i
-                                class="mdi mdi-yoga mr-3"></i>
-                                {% trans 'Agendar Entrenamiento' %} </h5>
+                <a {% if days_duration == 0 %}href="#" onclick="handleLinkClick()"{% else %}href="{% url 'training:schedule-v1' %}"{% endif %}>
+                    <div class="card border border-success">
+                        <div class="card-header bg-transparent border-success">
+                            <h5 class="my-0 text-success" style="font-size: x-large;"><i
+                                    class="mdi mdi-yoga mr-3"></i>
+                                    {% trans 'Agendar Entrenamiento' %} </h5>
+                        </div>
+                        <div class="card-body mt-0 pt-0">
+                            <h5>Selecciona horario y espacio de preferencia para tu entrenamiento.</h5>
+                        </div>
                     </div>
-                    <div class="card-body mt-0 pt-0">
-                        <h5>Selecciona horario y espacio de preferencia para tu entrenamiento.</h5>
-                    </div>
-                </div>
-            </a>
+                </a>
             </div>
             <div class="col-lg-4">
                 <a href="{% url 'training:my_schedule' %}">
@@ -60,7 +60,7 @@
             </div>
 
         </div>
-        <div class="row">
+        {% comment %} <div class="row">
           <div class="col-lg-6 offset-lg-3 mb-4">
               <h4 class="text-center">Servicios personalizados 💅</h4>
           </div>
@@ -92,7 +92,7 @@
           </a>
           </div>
 
-      </div>
+        </div> {% endcomment %}
         <!-- end row -->
     </div> <!-- container-fluid -->
 </div>
@@ -126,5 +126,29 @@
           {% endif %}
 
         });
+        {% if days_duration > 0 %}
+            var days_duration = {{ days_duration }};
+            Swal.fire({
+                title: 'Membresía activa.',
+                text: "te quedan " + days_duration + " para seguir entrenando.",
+                type:"success"
+            });
+        {% elif days_duration == 0 %}
+            Swal.fire({
+                title: 'Membresía vencida.',
+                text: "tu membresía ha vencido, contáctate con nosotros para renovarla",
+                type:"warning"
+            });
+        {% endif %}
+    </script>
+    <script>
+        function handleLinkClick() {
+            Swal.fire({
+                title: 'Membresía vencida.',
+                text: "tu membresía ha vencido, contáctate con nosotros para renovarla",
+                type:"warning"
+            });
+            return false;
+        }
     </script>
 {% endblock js %}
