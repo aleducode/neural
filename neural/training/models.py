@@ -88,7 +88,7 @@ class UserTraining(NeuralBaseModel):
     space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name='user_trainings', null=True, blank=True)
 
     def __str__(self):
-        return f'Entrenamiento: {self.user}'
+        return f'Entrenamiento: {self.user.get_full_name()} - {self.user}'
 
     @property
     def random_icon(self):
