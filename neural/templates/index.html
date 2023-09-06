@@ -126,6 +126,9 @@
           {% endif %}
 
         });
+
+        var days_duration = {{ days_duration }};
+
         {% if days_duration > 0 %}
             var days_duration = {{ days_duration }};
             Swal.fire({
@@ -133,7 +136,7 @@
                 text: "te quedan " + days_duration + " días para seguir entrenando.",
                 type:"success"
             });
-        {% elif days_duration <= 0 %}
+        {% else %}
             Swal.fire({
                 title: 'Membresía vencida.',
                 text: "tu membresía ha vencido, contáctate con nosotros para renovarla",
