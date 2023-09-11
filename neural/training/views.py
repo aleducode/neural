@@ -51,7 +51,7 @@ class ScheduleV1View(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         days = []
         now = timezone.localdate()
-        for i in range(0, 3):
+        for i in range(0, 7):
             day = now + timedelta(days=i)
             if day.isoweekday() != 8:
                 day_name = _(day.strftime("%A"))
@@ -142,11 +142,12 @@ class ScheduleDoneView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         training_session = self.get_object()
-        name_user = self.request.user.first_name
         date = training_session.slot.date
         init_hour = training_session.slot.hour_init
         end_hour = training_session.slot.hour_end
-        context["calendar_url"] = generate_calendar_google_invite(name_user, date, init_hour, end_hour)
+        context["date"] = date
+        context["init_hour"] = init_hour
+        context["end_hour"] = end_hour
         return context
 
 
