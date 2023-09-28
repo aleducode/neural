@@ -1,6 +1,7 @@
 """Training views."""
 
 import calendar
+from typing import Any
 
 # Django
 from django.contrib import messages
@@ -16,11 +17,12 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 
 # Models
-from neural.training.models import Slot, UserTraining
+from neural.training.models import Slot, UserTraining, Classes, TrainingType
 from neural.users.models import Ranking
 from neural.training.forms import SchduleForm
 from neural.utils.general import generate_calendar_google_invite
 from datetime import datetime
+from neural.training.forms import ClassesForm
 
 
 class ScheduleView(LoginRequiredMixin, FormView):
@@ -227,4 +229,31 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
         month = final_array.index(context['worst_month']) + 1
         context["worst_month_name"] = _(calendar.month_name[month])
         context['cancelled_trainings'] = cancelled_trainings.count()
+        return context
+
+class ClassCalendarView(TemplateView):
+    template_name = 'users/class_calendar.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["days_choices"] = Classes.DaysChoices.choices
+        return context
+    
+class ClassCalendarDetailView(FormView):
+    template_name = 'users/class_calendar_detail.html'
+    form_class = ClassesForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.day_name = self.kwargs.get("day")
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        classes = Classes.objects.filter(day=self.day_name).order_by("hour_init")
+        return classes
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["day_classes"] = self.get_queryset()
+        context["day_name"] = self.day_name
+        context["training_types"] = TrainingType.objects.all()
         return context

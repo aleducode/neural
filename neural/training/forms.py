@@ -1,9 +1,13 @@
 """Training forms."""
 
+from datetime import timedelta, datetime, time
+from typing import Any
 from django import forms
-from datetime import timedelta
-from neural.training.models import UserTraining, Slot, Space, ImagePopUp
 from django.utils.translation import gettext as _
+
+# Models
+from neural.training.models import UserTraining, Slot, Space, ImagePopUp, TrainingType
+
 
 days_wrapper = ['Hoy', 'Mañana', 'Pasado Mañana']
 
@@ -63,15 +67,15 @@ class SchduleForm(forms.Form):
             }
         )
     )
-    classes = forms.ChoiceField(
-        choices=Slot.TrainingType.choices,
-        label='Clases',
-        widget=forms.Select(
-            attrs={
-                'class': 'form-control',
-            }
-        )
-    )
+    # classes = forms.ChoiceField(
+    #     choices=Slot.TrainingType.choices,
+    #     label='Clases',
+    #     widget=forms.Select(
+    #         attrs={
+    #             'class': 'form-control',
+    #         }
+    #     )
+    # )
 
     def clean(self):
         """Veirify availables places."""
@@ -118,3 +122,30 @@ class ImagePopUpForm(forms.ModelForm):
     class Meta:
         model = ImagePopUp
         fields = '__all__'
+
+
+class ClassesForm(forms.Form):
+    """Classess form."""
+
+    hour_choices = [(f'{h:02d}:00', f'{h:02d}:00') for h in range(5, 22)]
+
+    training_type = forms.ModelChoiceField(
+        queryset=TrainingType.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+
+    hour_init = forms.ChoiceField(
+        label="Gonorrea",
+        choices=hour_choices,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )
+    hour_end = forms.ChoiceField(
+        choices=hour_choices,
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        })
+    )

@@ -1,6 +1,9 @@
 """Users views."""
 from datetime import timedelta
+from typing import Any
 
+# Django
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import login
 from django.conf import settings
 from django.contrib import messages
@@ -11,13 +14,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, FormView, View
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
-from neural.training.models import UserTraining, ImagePopUp
-from neural.landing.models import HeaderLanding, MainContentHeader, PersonalTrainer
+
+# Forms
 from neural.users.forms import SignUpForms
 from neural.users.forms import (
     CustomAuthenticationForm,
     ProfileForm
 )
+
+# Models
+from neural.training.models import UserTraining, ImagePopUp
+from neural.landing.models import HeaderLanding, MainContentHeader, PersonalTrainer
 from neural.users.models import User
 
 
@@ -72,8 +79,9 @@ class IndexView(LoginRequiredMixin, TemplateView):
             else:
                 translate_day = _(day.strftime("%A"))
                 day_name = f'El {translate_day}'
-            hour = last_training.slot.hour_init.strftime("%I:%M %p")
-            messages.warning(self.request, f'Recuerda:  Tu proximo entrenamiento es {day_name} a las {hour} !!!')
+
+            #hour = last_training.slot.hour_init.strftime("%I:%M %p")
+            messages.warning(self.request, f'Recuerda:  Tu proximo entrenamiento es {day_name} a las hour !!!')
         return context
 
 

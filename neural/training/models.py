@@ -1,5 +1,7 @@
 """User model."""
 
+from slugify import slugify
+
 # Django
 from django.utils import timezone
 from django.db import models
@@ -23,34 +25,63 @@ class Space(NeuralBaseModel):
         return f'{self.name}-{self.description}'
 
 
-class Slot(NeuralBaseModel):
+class TrainingType(NeuralBaseModel):
+    """Traingin type model."""
 
-    class TrainingType(models.TextChoices):
-        FUNCIONAL_TRAINING = 'FUNCIONAL_TRAINING', 'Funcional Training'
-        GAP_MMSS = 'GAP_MMSS', 'GAP'
-        CARDIO_STEP = 'CARDIO_STEP', 'Aeroibic Step'
-        SENIOR = 'SENIOR', 'Senior'
-        RTG = 'RTG', 'RTG'
-        PILATES = 'PILATES', 'Pilates'
-        FIT_BOXING = 'FIT_BOXING', 'Funcional box'
-        BALANCE = 'BALANCE', 'Balance'
-        SUPERSTAR = 'SUPERSTAR', 'Super Star'
-        CARDIOHIT = 'CARDIOHIT', 'Cardio Hit'
-        A_FUEGO = 'A_FUEGO', 'Solo pernil'
-        RUMBA = 'RUMBA', 'Rumba'
-
-    date = models.DateField()
-    hour_init = models.TimeField()
-    hour_end = models.TimeField()
-    max_places = models.IntegerField()
-    training_type = models.CharField(
-        max_length=50,
-        choices=TrainingType.choices,
-        default=TrainingType.FUNCIONAL_TRAINING,
-    )
+    name = models.CharField(max_length=255)
+    slug_name = models.SlugField(unique=True, max_length=100)
 
     def __str__(self):
-        return f'Clase {self.date} [{self.hour_init}-{self.hour_end}]'
+        """Return training type."""
+        return self.name
+
+    class Meta:
+        """Meta class."""
+
+        verbose_name = "Tipo de entrenamiento"
+        verbose_name_plural = "Tipos de entrenamientos"
+
+    def save(self, *args, **kwargs):
+        if not self.slug_name:
+            self.slug_name = slugify(self.name, separator='-')
+        super().save(*args, **kwargs)
+
+
+class Classes(NeuralBaseModel):
+    """Classes model."""
+    class DaysChoices(models.TextChoices):
+        MONDAY = 'MONDAY', 'Lunes'
+        TUESDAY = 'TUESDAY', 'Martes'
+        WEDNESDAY = 'WEDNESDAY', 'Miércoles'
+        THURSDAY = 'THURSDAY', 'Jueves'
+        FRIDAY = 'FRIDAY', 'Viernes'
+        SATURDAY = 'SATURDAY', 'Sábado'
+        SUNDAY = 'SUNDAY', 'Domingo'
+
+    day = models.CharField(max_length=10, choices=DaysChoices.choices, default=DaysChoices.MONDAY)
+    training_type = models.ForeignKey(TrainingType, on_delete=models.CASCADE, related_name='classes')
+    hour_init = models.TimeField()
+    hour_end = models.TimeField()
+
+    def __str__(self):
+        """Return training type."""
+        return f"{self.training_type} - {self.get_day_display()}"
+    
+    class Meta:
+        """Meta class."""
+
+        verbose_name = "Calendario de clases"
+        verbose_name_plural = "Calendario de clases"
+
+
+class Slot(NeuralBaseModel):
+
+    date = models.DateField()
+    max_places = models.IntegerField()
+    class_trainging = models.ForeignKey(Classes, on_delete=models.CASCADE, related_name='slots', blank=True, null=True)
+
+    def __str__(self):
+        return f'Clase {self.date}'
 
     @property
     def users_scheduled(self):

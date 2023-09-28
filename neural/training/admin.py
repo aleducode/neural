@@ -1,7 +1,7 @@
 """Training admin."""
 
 from django.contrib import admin
-from neural.training.models import UserTraining, Slot, Space, ImagePopUp
+from neural.training.models import UserTraining, Slot, Space, ImagePopUp, TrainingType, Classes
 from neural.training.forms import ImagePopUpForm
 
 
@@ -14,9 +14,23 @@ class UserTrainingInline(admin.TabularInline):
 @admin.register(Slot)
 class SlotAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
-    list_filter = ['date', 'hour_init']
-    list_display = ['pk', '__str__', 'date', 'hour_init', 'available_places', 'training_type']
+    list_filter = ['date']
+    list_display = ['date']
     inlines = [UserTrainingInline]
+
+@admin.register(TrainingType)
+class TrainingTypeAdmin(admin.ModelAdmin):
+    list_filter = ['name']
+    list_display = ['name', "slug_name"]
+    readonly_fields = ['slug_name']
+
+@admin.register(Classes)
+class ClassesAdmin(admin.ModelAdmin):
+    list_filter = ['day']
+    list_display = ['get_day_display', "training_type", "hour_init", "hour_end"]
+
+    def get_day_display(self, obj):
+        return obj.get_day_display()
 
 
 @admin.register(Space)
