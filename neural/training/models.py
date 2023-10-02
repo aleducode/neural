@@ -65,8 +65,8 @@ class Classes(NeuralBaseModel):
 
     def __str__(self):
         """Return training type."""
-        return f"{self.training_type} - {self.get_day_display()}"
-    
+        return f"{self.training_type} - {self.day}"
+
     class Meta:
         """Meta class."""
 
@@ -79,6 +79,10 @@ class Slot(NeuralBaseModel):
     date = models.DateField()
     max_places = models.IntegerField()
     class_trainging = models.ForeignKey(Classes, on_delete=models.CASCADE, related_name='slots', blank=True, null=True)
+
+
+    class Meta:
+        ordering = ['class_trainging__hour_init']
 
     def __str__(self):
         return f'Clase {self.date}'

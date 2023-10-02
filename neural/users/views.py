@@ -1,9 +1,7 @@
 """Users views."""
 from datetime import timedelta
-from typing import Any
 
 # Django
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import login
 from django.conf import settings
 from django.contrib import messages

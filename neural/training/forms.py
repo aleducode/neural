@@ -1,7 +1,6 @@
 """Training forms."""
 
-from datetime import timedelta, datetime, time
-from typing import Any
+from datetime import timedelta
 from django import forms
 from django.utils.translation import gettext as _
 

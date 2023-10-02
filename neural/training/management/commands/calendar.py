@@ -1,12 +1,11 @@
 """Sync Command."""
 
-import calendar
-
 # Django
 from django.core.management.base import BaseCommand
 
 # Models
 from neural.training.models import TrainingType, Classes
+
 
 class Command(BaseCommand):
 
@@ -15,7 +14,7 @@ class Command(BaseCommand):
 
         sessions = [
             {
-                "day": "Lunes",
+                "day": "MONDAY",
                 "training_type": {
                     'funcional-training': [
                         {
@@ -25,6 +24,10 @@ class Command(BaseCommand):
                         {
                             'init': '6:00',
                             'end': '7:00'
+                        },
+                        {
+                            'init': '7:00',
+                            'end': '8:00'
                         },
                         {
                             'init': '8:00',
@@ -68,7 +71,7 @@ class Command(BaseCommand):
                 }
             },
             {
-                "day": "Martes",
+                "day": "TUESDAY",
                 "training_type": {
                     'funcional-training': [
                         {
@@ -119,7 +122,7 @@ class Command(BaseCommand):
                 }
             },
             {
-                "day": "Miercoles",
+                "day": "WEDNESDAY",
                 "training_type": {
                     'funcional-training': [
                         {
@@ -172,7 +175,7 @@ class Command(BaseCommand):
                 }
             },
             {
-                "day": "Jueves",
+                "day": "THURSDAY",
                 "training_type": {
                     'funcional-training': [
                         {
@@ -225,7 +228,7 @@ class Command(BaseCommand):
                 }
             },
             {
-                "day": "Viernes",
+                "day": "FRIDAY",
                 "training_type": {
                     'funcional-training': [
                         {
@@ -272,7 +275,7 @@ class Command(BaseCommand):
                 }
             },
             {
-                "day": "Sabado",
+                "day": "SARTURDAY",
                 "training_type": {
                     'funcional-training': [
                         {
@@ -301,7 +304,7 @@ class Command(BaseCommand):
                 },
             },
             {
-                "day": "Domingo",
+                "day": "SUNDAY",
                 "training_type": {
                     'funcional-training': [
                         {
