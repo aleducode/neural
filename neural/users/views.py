@@ -77,9 +77,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
             else:
                 translate_day = _(day.strftime("%A"))
                 day_name = f'El {translate_day}'
-
-            #hour = last_training.slot.hour_init.strftime("%I:%M %p")
-            messages.warning(self.request, f'Recuerda:  Tu proximo entrenamiento es {day_name} a las hour !!!')
+            hour = last_training.slot.class_trainging.hour_init.strftime("%I:%M %p")
+            messages.warning(self.request, f'Recuerda:  Tu proximo entrenamiento es {day_name} a las {hour} !!!')
         return context
 
 

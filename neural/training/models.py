@@ -80,7 +80,6 @@ class Slot(NeuralBaseModel):
     max_places = models.IntegerField()
     class_trainging = models.ForeignKey(Classes, on_delete=models.CASCADE, related_name='slots', blank=True, null=True)
 
-
     class Meta:
         ordering = ['class_trainging__hour_init']
 

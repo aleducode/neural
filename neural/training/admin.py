@@ -22,7 +22,7 @@ class SlotAdmin(admin.ModelAdmin):
         if obj.class_trainging:
             return obj.class_trainging.hour_init
         return None
-    
+
     def class_training_hour_end(self, obj):
         if obj.class_trainging:
             return obj.class_trainging.hour_end

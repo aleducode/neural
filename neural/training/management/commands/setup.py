@@ -1,5 +1,4 @@
 """Sync Command."""
-import calendar
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from neural.training.models import Slot, Classes

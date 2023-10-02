@@ -322,13 +322,10 @@ class Command(BaseCommand):
         for session in sessions:
             day = session.get("day")
             training_data = session.get("training_type")
-            try:
-                for training_type, training_hours in training_data.items():
-                    training_instance = TrainingType.objects.get(slug_name=training_type)
-                    for hour in training_hours:
-                        init = hour.get('init')
-                        end = hour.get('end')
-                        Classes.objects.create(day=day, training_type=training_instance, hour_init=init, hour_end=end)
-            except Exception as e:
-                import ipdb; ipdb.set_trace()
+            for training_type, training_hours in training_data.items():
+                training_instance = TrainingType.objects.get(slug_name=training_type)
+                for hour in training_hours:
+                    init = hour.get('init')
+                    end = hour.get('end')
+                    Classes.objects.create(day=day, training_type=training_instance, hour_init=init, hour_end=end)
         print("Finish")
