@@ -72,6 +72,16 @@ class Classes(NeuralBaseModel):
 
         verbose_name = "Calendario de clases"
         verbose_name_plural = "Calendario de clases"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['day', 'hour_init', 'hour_end'],
+                name='unique_class_combination'
+            )
+        ]
+# @receiver(pre_delete, sender=Classes)
+# def prevent_deletion_with_related_user_training(sender, instance, **kwargs):
+#     if instance.slots.get().user_trainings.exists():
+#         messages.error(None, ('No se puede eliminar esta instancia de Classes porque tiene instancias de UserTraining relacionadas.'))
 
 
 class Slot(NeuralBaseModel):
@@ -81,10 +91,10 @@ class Slot(NeuralBaseModel):
     class_trainging = models.ForeignKey(Classes, on_delete=models.CASCADE, related_name='slots', blank=True, null=True)
 
     class Meta:
-        ordering = ['class_trainging__hour_init']
+        ordering = ['-date']
 
     def __str__(self):
-        return f'Clase {self.date}'
+        return f'Clase {self.date} - {self.class_trainging.hour_init} - {self.class_trainging.hour_end}'
 
     @property
     def users_scheduled(self):
