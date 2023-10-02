@@ -77,6 +77,9 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
                     <!-- item-->
+                    {% if user.is_staff %}
+                    <a class="dropdown-item text-info" href="{% url 'training:calendar' %}"><i class="bx bx-calendar-event font-size-16 align-middle mr-1"></i> Calendario</a>
+                    {% endif %}
                     <a class="dropdown-item text-danger" href="{% url 'users:logout' %}"><i class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i> Cerrar sesión</a>
                 </div>
             </div>

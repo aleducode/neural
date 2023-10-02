@@ -16,11 +16,11 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 
 # Models
-from neural.training.models import Slot, UserTraining
+from neural.training.models import Slot, UserTraining, Classes, TrainingType
 from neural.users.models import Ranking
 from neural.training.forms import SchduleForm
-from neural.utils.general import generate_calendar_google_invite
 from datetime import datetime
+from neural.training.forms import ClassesForm
 
 
 class ScheduleView(LoginRequiredMixin, FormView):
@@ -51,7 +51,7 @@ class ScheduleV1View(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         days = []
         now = timezone.localdate()
-        for i in range(0, 3):
+        for i in range(0, 7):
             day = now + timedelta(days=i)
             if day.isoweekday() != 8:
                 day_name = _(day.strftime("%A"))
@@ -85,17 +85,16 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
             pemission_to_schedule = False
             link = reverse_lazy('training:my_schedule')
             messages.error(self.request, f'Ya reservaste para este día si quieres modificarlo cancela tu clase activa <a href="{link}">aquí</a>', extra_tags='safe')
-
         if self.date == now_date:
             base_filter = Slot.objects.filter(
                 date=self.date,
-                hour_init__gte=now,
+                class_trainging__hour_init__gte=now,
             )
         else:
             base_filter = Slot.objects.filter(
                 date=self.date,
             )
-        context["sessions"] = base_filter.order_by('hour_init', 'training_type')
+        context["sessions"] = base_filter.order_by('class_trainging__hour_init')
         context['name_day'] = _(self.date_obj.strftime("%A"))
         context['date'] = self.date
         context['pemission_to_schedule'] = pemission_to_schedule
@@ -142,11 +141,12 @@ class ScheduleDoneView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         training_session = self.get_object()
-        name_user = self.request.user.first_name
         date = training_session.slot.date
-        init_hour = training_session.slot.hour_init
-        end_hour = training_session.slot.hour_end
-        context["calendar_url"] = generate_calendar_google_invite(name_user, date, init_hour, end_hour)
+        init_hour = training_session.slot.class_trainging.hour_init
+        end_hour = training_session.slot.class_trainging.hour_end
+        context["date"] = date
+        context["init_hour"] = init_hour
+        context["end_hour"] = end_hour
         return context
 
 
@@ -226,4 +226,33 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
         month = final_array.index(context['worst_month']) + 1
         context["worst_month_name"] = _(calendar.month_name[month])
         context['cancelled_trainings'] = cancelled_trainings.count()
+        return context
+
+
+class ClassCalendarView(TemplateView):
+    template_name = 'users/class_calendar.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["days_choices"] = Classes.DaysChoices.choices
+        return context
+
+
+class ClassCalendarDetailView(FormView):
+    template_name = 'users/class_calendar_detail.html'
+    form_class = ClassesForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.day_name = self.kwargs.get("day")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        classes = Classes.objects.filter(day=self.day_name).order_by("hour_init")
+        return classes
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["day_classes"] = self.get_queryset()
+        context["day_name"] = self.day_name
+        context["training_types"] = TrainingType.objects.all()
         return context

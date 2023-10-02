@@ -42,5 +42,5 @@ urlpatterns = [
         route='switch-user/<int:pk>/',
         view=user_views.SwitchUserView.as_view(),
         name='switch_user'
-    )
+    ),
 ]

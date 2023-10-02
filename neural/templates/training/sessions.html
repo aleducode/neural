@@ -44,17 +44,17 @@
                             <div class="card-body">
                                 <div class="media">
                                     <div class="mr-3 align-self-center">
-                                        <i class="{{session.training_type|get_icon}} h2 mb-0"></i>
+                                        <i class="{{session.class_trainging.training_type|get_icon}} h2 mb-0"></i>
                                     </div>
                                     <div class="media-body">
                                         <p class="text-muted mb-0 d-inline">
-                                            {{session.hour_init|date:"f"}} a
-                                            {{session.hour_end|date:"f A"}}
+                                            {{session.class_trainging.hour_init|date:"f"}} a
+                                            {{session.class_trainging.hour_end|date:"f A"}}
                                         </p>
                                         {% if session.available_places < 1 or not pemission_to_schedule %}
                                         <span class="badge badge-pill badge-danger d-inline">Acceso Denegado</span>
                                         {% endif %}
-                                        <h5 class="mb-0">{{session.get_training_type_display}} <span
+                                        <h5 class="mb-0">{{session.class_trainging.training_type.name}} <span
                                                 class="font-size-12" style="color:#0ca2df">| Cupos:
                                                 {{session.available_places}}</span></h5>
 

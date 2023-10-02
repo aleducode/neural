@@ -54,4 +54,14 @@ urlpatterns = [
         view=training_views.ResumeYear.as_view(),
         name='resume_year'
     ),
+    path(
+        route='class-calendar/',
+        view=training_views.ClassCalendarView.as_view(),
+        name='calendar'
+    ),
+    path(
+        route='class-calendar/<str:day>/',
+        view=training_views.ClassCalendarDetailView.as_view(),
+        name='detail-calendar'
+    )
 ]

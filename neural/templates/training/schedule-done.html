@@ -13,18 +13,13 @@
                                 <div class="col-lg-10">
                                     <h4 class="mt-4 font-weight-semibold">Entrenamiento Agendado!!</h4>
                                     <p class="text-info mt-3">
-                                        Ey {{request.user.first_name|title}}, ya te agendamos el entreno pero queremos que no lo ovides y por eso queremos que nos separes un espacio en tu calendario 😳
+                                        {% with init_am_pm=init_hour|date:"A" end_am_pm=end_hour|date:"A" %}
+                                        Ey {{ request.user.first_name|title }}, ya te agendamos el entreno para el día {{ date }} de {{ init_hour }} {{ init_am_pm }} hasta las {{ end_hour }} {{ end_am_pm }}, vamos con toda!! 💪🏼
+                                        {% endwith %}
                                     </p>
-
-                                    <div class="mt-4">
-                                        <!-- Button trigger modal -->
-                                        <div class="text-center">
-                                        <a href="{{calendar_url}}" target="_blank" class="btn btn-primary text-white">
-                                            Agregar a mi calendario <i class="bx bxl-google "></i>
-                                        </a>
                                     </div>
-                                        <a href="/index" class="btn btn-light mt-2">
-                                            No, Gracias.
+                                        <a href="/index" class="btn btn-success mt-2">
+                                            Entendido.
                                         </a>
                                     </div>
                                 </div>
