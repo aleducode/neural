@@ -130,8 +130,8 @@ class Command(BaseCommand):
                             'end': '6:00'
                         },
                         {
-                            'init': '7:00',
-                            'end': '8:00'
+                            'init': '6:00',
+                            'end': '7:00'
                         },
                         {
                             'init': '8:00',
@@ -150,8 +150,8 @@ class Command(BaseCommand):
                             'end': '17:00'
                         },
                         {
-                            'init': '17:00',
-                            'end': '18:00'
+                            'init': '18:00',
+                            'end': '19:00'
                         },
                         {
                             'init': '19:00',
@@ -164,12 +164,12 @@ class Command(BaseCommand):
                     ],
                     'gap': [
                         {
-                            'init': '6:00',
-                            'end': '7:00'
+                            'init': '7:00',
+                            'end': '8:00'
                         },
                         {
-                            'init': '18:00',
-                            'end': '19:00'
+                            'init': '17:00',
+                            'end': '18:00'
                         },
                     ]
                 }
@@ -211,8 +211,8 @@ class Command(BaseCommand):
                             'end': '18:00'
                         },
                         {
-                            'init': '18:00',
-                            'end': '19:00'
+                            'init': '19:00',
+                            'end': '20:00'
                         },
                         {
                             'init': '20:00',
@@ -221,8 +221,8 @@ class Command(BaseCommand):
                     ],
                     'balance': [
                         {
-                            'init': '19:00',
-                            'end': '20:00'
+                            'init': '18:00',
+                            'end': '19:00'
                         },
                     ]
                 }
@@ -275,15 +275,19 @@ class Command(BaseCommand):
                 }
             },
             {
-                "day": "SARTURDAY",
+                "day": "SATURDAY",
                 "training_type": {
                     'funcional-training': [
                         {
                             'init': '10:00',
                             'end': '11:00'
                         },
+                        {
+                            'init': '11:00',
+                            'end': '12:00'
+                        },
                     ],
-                    'a-fuego': [
+                    'solo-pernil': [
                         {
                             'init': '7:30',
                             'end': '8:30'
@@ -295,39 +299,36 @@ class Command(BaseCommand):
                             'end': '10:00'
                         },
                     ],
-                    'rumba': [
-                        {
-                            'init': '11:00',
-                            'end': '12:00'
-                        },
-                    ],
                 },
             },
-            {
-                "day": "SUNDAY",
-                "training_type": {
-                    'funcional-training': [
-                        {
-                            'init': '09:00',
-                            'end': '10:00'
-                        },
-                    ],
-                    'aeroibic-step': [
-                        {
-                            'init': '10:00',
-                            'end': '11:00'
-                        },
-                    ],
-                }
-            },
+            # {
+            #     "day": "SUNDAY",
+            #     "training_type": {
+            #         'funcional-training': [
+            #             {
+            #                 'init': '09:00',
+            #                 'end': '10:00'
+            #             },
+            #         ],
+            #         'aeroibic-step': [
+            #             {
+            #                 'init': '10:00',
+            #                 'end': '11:00'
+            #             },
+            #         ],
+            #     }
+            # },
         ]
         for session in sessions:
             day = session.get("day")
             training_data = session.get("training_type")
-            for training_type, training_hours in training_data.items():
-                training_instance = TrainingType.objects.get(slug_name=training_type)
-                for hour in training_hours:
-                    init = hour.get('init')
-                    end = hour.get('end')
-                    Classes.objects.create(day=day, training_type=training_instance, hour_init=init, hour_end=end)
+            try:
+                for training_type, training_hours in training_data.items():
+                    training_instance = TrainingType.objects.get(slug_name=training_type)
+                    for hour in training_hours:
+                        init = hour.get('init')
+                        end = hour.get('end')
+                        Classes.objects.create(day=day, training_type=training_instance, hour_init=init, hour_end=end)
+            except Exception as e:
+                import ipdb; ipdb.set_trace()
         print("Finish")

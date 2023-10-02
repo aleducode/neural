@@ -19,7 +19,7 @@ class Command(BaseCommand):
             5: 'SATURDAY',
             6: 'SUNDAY'
         }
-        now = date(2023, 9, 28)
+        now = date(2023, 10, 1)
         result = []
         for i in range(0, 7):
             day = now + timedelta(days=i)
@@ -34,4 +34,9 @@ class Command(BaseCommand):
                     }
                 )
                 result.append(slot.pk)
+        class_training = Classes.objects.filter(training_type__slug_name="funcional-training").first()
+        old_slots = Slot.objects.filter(date__lt=now)
+        for slot in old_slots:
+            slot.class_trainging = class_training
+            slot.save()
         Slot.objects.filter(date__gte=timezone.now()).exclude(pk__in=result).delete()
