@@ -51,7 +51,7 @@ class ScheduleV1View(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         days = []
         now = timezone.localdate()
-        for i in range(0, 7):
+        for i in range(0, Classes.objects.distinct("day").count()):
             day = now + timedelta(days=i)
             if day.isoweekday() != 8:
                 day_name = _(day.strftime("%A"))

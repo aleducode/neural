@@ -1,6 +1,8 @@
 """Training admin."""
 
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from neural.training.models import UserTraining, Slot, Space, ImagePopUp, TrainingType, Classes
 from neural.training.forms import ImagePopUpForm
 
@@ -46,6 +48,15 @@ class ClassesAdmin(admin.ModelAdmin):
     list_filter = ['day']
     list_display = ['day', "training_type", "hour_init", "hour_end"]
 
+    def delete_view(self, request, object_id, extra_context=None):
+        obj = self.get_object(request, object_id)
+        if obj.slots.get().user_trainings.exists():
+            error_message = ("No se puede eliminar esta Clase porque tiene entrenamientos agendados.")
+            self.message_user(request, error_message, level='error')
+            return HttpResponseRedirect(reverse('admin:training_classes_change', args=[object_id]))
+
+        return super().delete_view(request, object_id, extra_context=extra_context)
+
 
 @admin.register(Space)
 class SpaceAdmin(admin.ModelAdmin):
@@ -54,8 +65,16 @@ class SpaceAdmin(admin.ModelAdmin):
 
 @admin.register(UserTraining)
 class UserTrainingAdmin(admin.ModelAdmin):
-    list_display = ['user', 'slot', 'status']
+    list_display = ['user', 'slot_info', 'status']
     search_fields = ['user__first_name', 'user__last_name', 'user__email']
+
+    def slot_info(self, obj):
+        slot = obj.slot
+        if slot:
+            slot_info_str = f"{slot.date} {slot.class_trainging.hour_init} - {slot.class_trainging.hour_end}"
+        else:
+            slot_info_str = "N/A"
+        return slot_info_str
 
 
 @admin.register(ImagePopUp)

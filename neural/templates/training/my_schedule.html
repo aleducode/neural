@@ -40,8 +40,8 @@
                                                     {% if event.is_now %}<span
                                                         class="badge badge-pill badge-success float-left mr-1">HOY
                                                     </span>{% endif %} {{event.slot.date|date:"l j"}} de
-                                                    {{event.slot.hour_init|date:"f"}} a
-                                                    {{event.slot.hour_end|date:"f A"}} <span class="text-danger"></span>
+                                                    {{event.slot.class_trainging.hour_init|date:"f"}} a
+                                                    {{event.slot.class_trainging.hour_end|date:"f A"}} <span class="text-danger"></span>
                                                 </div>
                                                 <a onclick="cancelSession('{{event.pk}}')" href="#">Cancelar</a>
                                                 {% endlanguage %}
