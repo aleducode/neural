@@ -103,7 +103,7 @@
       <div class="modal-content">
       <div class="modal-header">
           <h3>Ya está disponible tu resumen del 2023 🏆🏆</h3>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <button type="button" class="close" data-dismiss="modal" onclick="closeResume()">&times;</button>
       </div>
       <div class="modal-body text-center">
         <a  href="{% url 'training:resume_year' %}"
@@ -164,7 +164,13 @@
         }
     </script>
     <script>
+      if (!localStorage.getItem('closeResume')){
+        $("#resume").modal('show');
+      }
       // show resume one time
-      $("#resume").modal('show');
+      function closeResume(){
+        // save in local storage when close modal
+        localStorage.setItem('closeResume', true);
+      }
     </script>
 {% endblock js %}
