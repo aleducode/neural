@@ -67,6 +67,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
         last_training = UserTraining.objects.filter(
             user=self.request.user, slot__date__gte=now_date, status=UserTraining.Status.CONFIRMED).last()
         profile = user.profile if hasattr(user, 'profile') else None
+        resume_year = user.rankings.exists()
+        context["resume_year"] = resume_year
         context['profile'] = profile
         if last_training:
             day = last_training.slot.date

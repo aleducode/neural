@@ -185,7 +185,7 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
         )
         cancelled_trainings = UserTraining.objects.filter(
             user=self.request.user,
-            slot__date__year=now.year,
+            created__year=now.year,
             status=UserTraining.Status.CANCELLED
         )
         if trainings.count() == 0:
@@ -198,24 +198,25 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
             total=Count('slot__date__week_day')).order_by('-total').first()
         context["best_day_name"] = _(calendar.day_name[best_day['slot__date__week_day'] - 1]) if best_day else None
 
-        # Best train
-        best_train = trainings.values('slot__training_type').annotate(
-            total=Count('slot__training_type')).order_by('-total').first()
-        context["best_train"] = Slot.TrainingType[best_train['slot__training_type']].label if best_train else None
+        # Best training
+        best_train = trainings.values('slot__class_trainging__training_type').annotate(
+            total=Count('slot__class_trainging__training_type')).order_by('-total').first()
+        if best_train:
+            context["best_train"] = TrainingType.objects.get(pk=best_train['slot__class_trainging__training_type']).name
         # Best train hours
-        best_train_hour = trainings.values('slot__hour_init').annotate(
-            total=Count('slot__hour_init')).order_by('-total').first()
-        context["best_train_hour"] = best_train_hour['slot__hour_init'] if best_train_hour else None
+        best_train_hour = trainings.values('slot__class_trainging__hour_init').annotate(
+            total=Count('slot__class_trainging__hour_init')).order_by('-total').first()
+        context["best_train_hour"] = best_train_hour['slot__class_trainging__hour_init'] if best_train_hour else None
 
-        array_per_month = trainings.values('slot__date__month').annotate(
-            total=Count('slot__date__month')
-        ).order_by('slot__date__month')
+        array_per_month = trainings.values('created__month').annotate(
+            total=Count('created__month')
+        ).order_by('created__month').distinct()
         final_array = []
         for date in range(1, 13):
-            if not array_per_month.filter(slot__date__month=date).exists():
+            if not array_per_month.filter(created__month=date).exists():
                 final_array.append(0)
             else:
-                final_array.append(array_per_month.get(slot__date__month=date)['total'])
+                final_array.append(array_per_month.get(created__month=date)['total'])
         context['array_per_month'] = final_array
         context['best_month'] = max(final_array)
         month = final_array.index(context['best_month']) + 1
