@@ -154,6 +154,25 @@
                         </div>
                     </div>
                 </div>
+                <div class="simplebar-content" style="padding: 0px;">
+                <h3 class="text-info">TOP 10</h3>
+                {% for i in top_10 %}
+                  <li class="active">
+                      <a href="#">
+                          <div class="media">
+                              <div class="align-self-center mr-3">
+                                  <h2 class="ml-4">{{i.position}}</h2>
+                              </div>
+
+                              <div class="media-body overflow-hidden">
+                                  <h5 class="text-truncate font-size-14 mb-1 mt-2">{{i.user.get_full_name|title}}</h5>
+                              </div>
+                          </div>
+                      </a>
+                  </li>
+                  {% endfor %}
+
+              </div>
             </div>
               <div class="card">
                 <div class="card-body">

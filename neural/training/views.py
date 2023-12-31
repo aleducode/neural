@@ -174,8 +174,10 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         ranking = self.request.user.rankings.last()
+        top_10 = Ranking.objects.all().order_by("position").select_related("user")[:10]
         total_ranking = Ranking.objects.count()
         context['total_ranking'] = total_ranking
+        context['top_10'] = top_10
         context['ranking'] = ranking
         now = timezone.localtime()
         trainings = UserTraining.objects.filter(
