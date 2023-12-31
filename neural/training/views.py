@@ -184,12 +184,12 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
             user=self.request.user,
             slot__date__year=now.year,
             status=UserTraining.Status.CONFIRMED
-        )
+        ).distinct()
         cancelled_trainings = UserTraining.objects.filter(
             user=self.request.user,
-            created__year=now.year,
+            slot__date__year=now.year,
             status=UserTraining.Status.CANCELLED
-        )
+        ).distinct()
         if trainings.count() == 0:
             return context
         context['trainings'] = trainings.count()
@@ -207,7 +207,9 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
             context["best_train"] = TrainingType.objects.get(pk=best_train['slot__class_trainging__training_type']).name
         # Best train hours
         best_train_hour = trainings.values('slot__class_trainging__hour_init').annotate(
-            total=Count('slot__class_trainging__hour_init')).order_by('-total').first()
+            total=Count('slot__class_trainging__hour_init')).exclude(
+                slot__class_trainging__hour_init="05:00"
+                ).order_by('-total').first()
         context["best_train_hour"] = best_train_hour['slot__class_trainging__hour_init'] if best_train_hour else None
 
         array_per_month = trainings.values('created__month').annotate(

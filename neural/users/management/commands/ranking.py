@@ -17,7 +17,7 @@ class Command(BaseCommand):
             status=UserTraining.Status.CONFIRMED
             ).values('user').annotate(
             training_count=Count('user'),
-        ).order_by('-training_count').exclude(user__pk=13)
+        ).order_by('-training_count').exclude(user__pk=13).distinct()
         index = 1
         for user_data in all_user_training:
             user = User.objects.get(pk=user_data['user'])
