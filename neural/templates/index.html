@@ -25,9 +25,6 @@
         {% endlanguage %}
         <div class="row">
             <div class="col-lg-6 offset-lg-3 mb-4 text-center">
-              <a type="button" class="btn btn-warning waves-effect waves-light" href="{% url 'training:resume_year' %}">
-                🤩 Ver resumen del año
-              </a>
                 <h4 class="text-center mt-3">¡Hola!</h4>
                 <h5 class="text-center"> 💪 {{request.user.get_full_name|title}} 🏋️‍♀️</h5>
 
@@ -165,15 +162,5 @@
             });
             return false;
         }
-    </script>
-    <script>
-      if (!localStorage.getItem('closeResume')){
-        $("#resume").modal('show');
-      }
-      // show resume one time
-      function closeResume(){
-        // save in local storage when close modal
-        localStorage.setItem('closeResume', true);
-      }
     </script>
 {% endblock js %}
