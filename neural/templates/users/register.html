@@ -44,7 +44,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="card-body pt-0"> 
+						<div class="card-body pt-0">
 							<div>
 								<a href="/">
 									<div class="avatar-md profile-user-wid mb-4">
@@ -59,50 +59,50 @@
 									{% csrf_token %}
 									{% if form.errors %}
 									<p class="alert alert-danger">
-										
+
 										{% for key, value in form.errors.items  %}
 											{{value.0}}
 										{% endfor %}
-											
+
 									</p>
 
 									{% endif %}
 									<div class="form-group">
 										<label for="username">Nombres</label>
-										{{form.first_name}} 
+										{{form.first_name}}
 									</div>
 									<div class="form-group">
 										<label for="userpassword">Apellidos</label>
-										{{form.last_name}}   
+										{{form.last_name}}
 									</div>
 									<div class="form-group">
 										<label for="useremail">Email</label>
-										{{form.email}} 
+										{{form.email}}
 									</div>
 									<div class="form-group">
 										<label for="useremail">Número de whatsapp</label>
-										{{form.phone_number}} 
+										{{form.phone_number}}
 									</div>
 									<div class="form-group">
 										<label for="useremail">Contraseña</label>
-										{{form.password}} 
+										{{form.password}}
 									</div>
 									<div class="form-group">
 										<label for="useremail">Confirmar contraseña</label>
-										{{form.password_confirmation}} 
+										{{form.password_confirmation}}
 									</div>
 									<div class="mt-4">
 										<button class="btn btn-primary btn-block waves-effect waves-light" type="submit">Registrarme</button>
 									</div>
 								</form>
 							</div>
-		
+
 						</div>
 					</div>
 					<div class="mt-5 text-center">
 						<div>
 							<p>Ya tenés cuenta ? <a href="{% url 'users:login' %}" class="font-weight-medium text-primary"> Inicia sesión</a> </p>
-							<p>© 2021. Creado en medallo con  <i class="mdi mdi-heart text-info"></i> mi fai.</p>
+							<p>© 2024. Creado en medallo con  <i class="mdi mdi-heart text-info"></i> mi fai.</p>
 						</div>
 					</div>
 
