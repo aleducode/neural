@@ -12,15 +12,15 @@ from neural.users.forms import UserChangeForm
 
 @admin.register(Plan)
 class PlanAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description']
-    search_fields = ['name', 'description']
-    ordering = ['name']
+    list_display = ["name", "description"]
+    search_fields = ["name", "description"]
+    ordering = ["name"]
 
 
 class AdminProfileInline(admin.StackedInline):
     model = Profile
-    verbose_name_plural = 'profile'
-    autocomplete_fields = ['plan']
+    verbose_name_plural = "profile"
+    autocomplete_fields = ["plan"]
 
 
 class MembershipInline(admin.StackedInline):
@@ -33,7 +33,6 @@ class MembershipInline(admin.StackedInline):
 
 @admin.register(User)
 class UserAdmin(auth_admin.UserAdmin):
-
     fieldsets = (
         (None, {"fields": ("phone_number", "password")}),
         (_("Personal info"), {"fields": ("first_name", "last_name", "email")}),
@@ -75,7 +74,7 @@ class UserAdmin(auth_admin.UserAdmin):
 
 @admin.register(Ranking)
 class RankingAdmin(admin.ModelAdmin):
-    list_display = ['user', 'position', 'trainings']
-    search_fields = ['user__email', 'user__first_name', 'user__last_name']
-    readonly_fields = ['user']
-    ordering = ['position']
+    list_display = ["user", "position", "trainings"]
+    search_fields = ["user__email", "user__first_name", "user__last_name"]
+    readonly_fields = ["user"]
+    ordering = ["position"]

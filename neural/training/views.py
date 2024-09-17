@@ -24,28 +24,30 @@ from neural.training.forms import ClassesForm
 
 
 class ScheduleView(LoginRequiredMixin, FormView):
-    template_name = 'training/schedule.html'
+    template_name = "training/schedule.html"
     form_class = SchduleForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        kwargs['now'] = timezone.localdate()
+        kwargs["user"] = self.request.user
+        kwargs["now"] = timezone.localdate()
         return kwargs
 
     def form_invalid(self, form):
         for field, value in form.errors.items():
-            if field not in ['__all__']:
-                form.fields[field].widget.attrs['class'] = 'form-control is-invalid'
+            if field not in ["__all__"]:
+                form.fields[field].widget.attrs["class"] = "form-control is-invalid"
         return super().form_invalid(form)
 
     def form_valid(self, form):
         schedule = form.save()
-        return HttpResponseRedirect(reverse_lazy('training:schedule-done', kwargs={'pk': schedule.pk}))
+        return HttpResponseRedirect(
+            reverse_lazy("training:schedule-done", kwargs={"pk": schedule.pk})
+        )
 
 
 class ScheduleV1View(LoginRequiredMixin, TemplateView):
-    template_name = 'training/schedule-v1.html'
+    template_name = "training/schedule-v1.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -55,19 +57,17 @@ class ScheduleV1View(LoginRequiredMixin, TemplateView):
             day = now + timedelta(days=i)
             if day.isoweekday() != 8:
                 day_name = _(day.strftime("%A"))
-                days.append({
-                    'date': f'{day}',
-                    'day': day_name})
-        context['days'] = days
+                days.append({"date": f"{day}", "day": day_name})
+        context["days"] = days
         return context
 
 
 class TrainingByDateView(LoginRequiredMixin, TemplateView):
-    template_name = 'training/sessions.html'
+    template_name = "training/sessions.html"
     format_date = "%Y-%m-%d"
 
     def dispatch(self, request, *args, **kwargs):
-        self.date = kwargs.get('date')
+        self.date = kwargs.get("date")
         self.date_obj = datetime.strptime(self.date, self.format_date)
         return super().dispatch(request, *args, **kwargs)
 
@@ -80,11 +80,15 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
         if UserTraining.objects.filter(
             slot__date=self.date,
             user=self.request.user,
-            status=UserTraining.Status.CONFIRMED
+            status=UserTraining.Status.CONFIRMED,
         ).exists():
             pemission_to_schedule = False
-            link = reverse_lazy('training:my_schedule')
-            messages.error(self.request, f'Ya reservaste para este día si quieres modificarlo cancela tu clase activa <a href="{link}">aquí</a>', extra_tags='safe')
+            link = reverse_lazy("training:my_schedule")
+            messages.error(
+                self.request,
+                f'Ya reservaste para este día si quieres modificarlo cancela tu clase activa <a href="{link}">aquí</a>',
+                extra_tags="safe",
+            )
         if self.date == now_date:
             base_filter = Slot.objects.filter(
                 date=self.date,
@@ -94,22 +98,22 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
             base_filter = Slot.objects.filter(
                 date=self.date,
             )
-        context["sessions"] = base_filter.order_by('class_trainging__hour_init')
-        context['name_day'] = _(self.date_obj.strftime("%A"))
-        context['date'] = self.date
-        context['pemission_to_schedule'] = pemission_to_schedule
+        context["sessions"] = base_filter.order_by("class_trainging__hour_init")
+        context["name_day"] = _(self.date_obj.strftime("%A"))
+        context["date"] = self.date
+        context["pemission_to_schedule"] = pemission_to_schedule
         return context
 
 
 class TrainingSlotView(LoginRequiredMixin, DetailView):
-    template_name = 'training/seats.html'
+    template_name = "training/seats.html"
     queryset = Slot.objects.all()
     success_url = reverse_lazy("training:schedule-done")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         slot = self.get_object()
-        context['slot'] = slot
+        context["slot"] = slot
         return context
 
     def post(self, request, *args, **kwargs):
@@ -118,24 +122,26 @@ class TrainingSlotView(LoginRequiredMixin, DetailView):
         # Check again spaces
         if not slot.available_places:
             messages.error(
-                self.request, 'Este espacio de entreno se ha llenado, intenta seleccionando otro horario.')
+                self.request,
+                "Este espacio de entreno se ha llenado, intenta seleccionando otro horario.",
+            )
             return render(
                 self.request,
-                self.template_name, {
-                    'slot': slot,
-                })
+                self.template_name,
+                {
+                    "slot": slot,
+                },
+            )
         schedule, _ = UserTraining.objects.update_or_create(
-            slot=slot,
-            user=self.request.user,
-            defaults={
-                "status": "CONFIRMED"
-            }
+            slot=slot, user=self.request.user, defaults={"status": "CONFIRMED"}
         )
-        return HttpResponseRedirect(reverse_lazy('training:schedule-done', kwargs={'pk': schedule.pk}))
+        return HttpResponseRedirect(
+            reverse_lazy("training:schedule-done", kwargs={"pk": schedule.pk})
+        )
 
 
 class ScheduleDoneView(LoginRequiredMixin, DetailView):
-    template_name = 'training/schedule-done.html'
+    template_name = "training/schedule-done.html"
     queryset = UserTraining.objects.all()
 
     def get_context_data(self, **kwargs):
@@ -151,91 +157,115 @@ class ScheduleDoneView(LoginRequiredMixin, DetailView):
 
 
 class MyScheduleView(LoginRequiredMixin, TemplateView):
-    template_name = 'training/my_schedule.html'
+    template_name = "training/my_schedule.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         now = timezone.localtime()
-        context['user_slots'] = UserTraining.objects.filter(
+        context["user_slots"] = UserTraining.objects.filter(
             user=self.request.user,
             slot__date__gte=now,
-            status=UserTraining.Status.CONFIRMED
-        ).order_by('slot__date')[:7]
+            status=UserTraining.Status.CONFIRMED,
+        ).order_by("slot__date")[:7]
         return context
 
 
 class InfoView(LoginRequiredMixin, TemplateView):
-    template_name = 'training/info.html'
+    template_name = "training/info.html"
 
 
 class ResumeYear(LoginRequiredMixin, TemplateView):
-    template_name = 'training/resume.html'
+    template_name = "training/resume.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         ranking = self.request.user.rankings.last()
         top_10 = Ranking.objects.all().order_by("position").select_related("user")[:10]
         total_ranking = Ranking.objects.count()
-        context['total_ranking'] = total_ranking
-        context['top_10'] = top_10
-        context['ranking'] = ranking
+        context["total_ranking"] = total_ranking
+        context["top_10"] = top_10
+        context["ranking"] = ranking
         now = timezone.localtime()
         trainings = UserTraining.objects.filter(
             user=self.request.user,
             slot__date__year=now.year,
-            status=UserTraining.Status.CONFIRMED
+            status=UserTraining.Status.CONFIRMED,
         ).distinct()
         cancelled_trainings = UserTraining.objects.filter(
             user=self.request.user,
             slot__date__year=now.year,
-            status=UserTraining.Status.CANCELLED
+            status=UserTraining.Status.CANCELLED,
         ).distinct()
         if trainings.count() == 0:
             return context
-        context['trainings'] = trainings.count()
+        context["trainings"] = trainings.count()
         context["reaction"] = "🤩" if trainings.count() >= 20 else "🤟"
 
         # Day selected
-        best_day = trainings.values('slot__date__week_day').annotate(
-            total=Count('slot__date__week_day')).order_by('-total').first()
-        context["best_day_name"] = _(calendar.day_name[best_day['slot__date__week_day'] - 1]) if best_day else None
+        best_day = (
+            trainings.values("slot__date__week_day")
+            .annotate(total=Count("slot__date__week_day"))
+            .order_by("-total")
+            .first()
+        )
+        context["best_day_name"] = (
+            _(calendar.day_name[best_day["slot__date__week_day"] - 1])
+            if best_day
+            else None
+        )
 
         # Best training
-        best_train = trainings.values('slot__class_trainging__training_type').annotate(
-            total=Count('slot__class_trainging__training_type')).order_by('-total').first()
+        best_train = (
+            trainings.values("slot__class_trainging__training_type")
+            .annotate(total=Count("slot__class_trainging__training_type"))
+            .order_by("-total")
+            .first()
+        )
         if best_train:
-            context["best_train"] = TrainingType.objects.get(pk=best_train['slot__class_trainging__training_type']).name
+            context["best_train"] = TrainingType.objects.get(
+                pk=best_train["slot__class_trainging__training_type"]
+            ).name
         # Best train hours
-        best_train_hour = trainings.values('slot__class_trainging__hour_init').annotate(
-            total=Count('slot__class_trainging__hour_init')).exclude(
-                slot__class_trainging__hour_init="05:00"
-                ).order_by('-total').first()
-        context["best_train_hour"] = best_train_hour['slot__class_trainging__hour_init'] if best_train_hour else None
+        best_train_hour = (
+            trainings.values("slot__class_trainging__hour_init")
+            .annotate(total=Count("slot__class_trainging__hour_init"))
+            .exclude(slot__class_trainging__hour_init="05:00")
+            .order_by("-total")
+            .first()
+        )
+        context["best_train_hour"] = (
+            best_train_hour["slot__class_trainging__hour_init"]
+            if best_train_hour
+            else None
+        )
 
-        array_per_month = trainings.values('created__month').annotate(
-            total=Count('created__month')
-        ).order_by('created__month').distinct()
+        array_per_month = (
+            trainings.values("created__month")
+            .annotate(total=Count("created__month"))
+            .order_by("created__month")
+            .distinct()
+        )
         final_array = []
         for date in range(1, 13):
             if not array_per_month.filter(created__month=date).exists():
                 final_array.append(0)
             else:
-                final_array.append(array_per_month.get(created__month=date)['total'])
-        context['array_per_month'] = final_array
-        context['best_month'] = max(final_array)
-        month = final_array.index(context['best_month']) + 1
+                final_array.append(array_per_month.get(created__month=date)["total"])
+        context["array_per_month"] = final_array
+        context["best_month"] = max(final_array)
+        month = final_array.index(context["best_month"]) + 1
         context["best_month_name"] = _(calendar.month_name[month])
 
         # Worst month
-        context['worst_month'] = min(final_array)
-        month = final_array.index(context['worst_month']) + 1
+        context["worst_month"] = min(final_array)
+        month = final_array.index(context["worst_month"]) + 1
         context["worst_month_name"] = _(calendar.month_name[month])
-        context['cancelled_trainings'] = cancelled_trainings.count()
+        context["cancelled_trainings"] = cancelled_trainings.count()
         return context
 
 
 class ClassCalendarView(TemplateView):
-    template_name = 'users/class_calendar.html'
+    template_name = "users/class_calendar.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -244,7 +274,7 @@ class ClassCalendarView(TemplateView):
 
 
 class ClassCalendarDetailView(FormView):
-    template_name = 'users/class_calendar_detail.html'
+    template_name = "users/class_calendar_detail.html"
     form_class = ClassesForm
 
     def dispatch(self, request, *args, **kwargs):

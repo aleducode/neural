@@ -62,7 +62,7 @@ services:
     image: neural_production_flower
     command: /start-flower
 
-  
+
   awscli:
     build:
       context: .

@@ -8,17 +8,16 @@ from neural.training.models import Slot, Space
 
 
 class SlotModelSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Slot
         fields = (
-            'id',
-            'date',
-            'hour_init',
-            'hour_end',
-            'max_places',
-            'training_type',
-            'available_places'
+            "id",
+            "date",
+            "hour_init",
+            "hour_end",
+            "max_places",
+            "training_type",
+            "available_places",
         )
 
     hour_init = serializers.TimeField(format="%I:%M %p")
@@ -29,8 +28,8 @@ class SeatModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Space
         fields = (
-            'id',
-            'slug_name',
-            'name',
-            'description',
+            "id",
+            "slug_name",
+            "name",
+            "description",
         )

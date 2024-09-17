@@ -1,4 +1,5 @@
 """Users views."""
+
 from datetime import timedelta
 
 # Django
@@ -15,10 +16,7 @@ from django.utils.translation import gettext as _
 
 # Forms
 from neural.users.forms import SignUpForms
-from neural.users.forms import (
-    CustomAuthenticationForm,
-    ProfileForm
-)
+from neural.users.forms import CustomAuthenticationForm, ProfileForm
 
 # Models
 from neural.training.models import UserTraining, ImagePopUp
@@ -32,82 +30,90 @@ class LoginView(auth_views.LoginView):
     authentication_form = CustomAuthenticationForm
     redirect_authenticated_user = True
     form_class = CustomAuthenticationForm
-    template_name = 'users/login.html'
+    template_name = "users/login.html"
 
 
 class LogoutView(LoginRequiredMixin, auth_views.LogoutView):
     """logout view."""
+
     pass
 
 
 class LandingView(TemplateView):
-    template_name = 'landing/index.html'
+    template_name = "landing/index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         image_pop_up = ImagePopUp.objects.filter(is_active=True).first()
-        context['header_landing'] = HeaderLanding.objects.get()
+        context["header_landing"] = HeaderLanding.objects.get()
         context["main_content"] = MainContentHeader.objects.get()
         context["trainers"] = PersonalTrainer.objects.all()
-        context['image_pop_up'] = image_pop_up
+        context["image_pop_up"] = image_pop_up
         return context
 
 
 class IndexView(LoginRequiredMixin, TemplateView):
-    template_name = 'index.html'
+    template_name = "index.html"
 
     def get_context_data(self, **kwargs):
         from django.contrib import messages
+
         context = super().get_context_data(**kwargs)
         now_date = timezone.localdate()
         user = self.request.user
         user_membership = user.memberships.filter(is_active=True)
         if user_membership:
-            context['days_duration'] = user_membership.first().days_duration
+            context["days_duration"] = user_membership.first().days_duration
         last_training = UserTraining.objects.filter(
-            user=self.request.user, slot__date__gte=now_date, status=UserTraining.Status.CONFIRMED).last()
-        profile = user.profile if hasattr(user, 'profile') else None
+            user=self.request.user,
+            slot__date__gte=now_date,
+            status=UserTraining.Status.CONFIRMED,
+        ).last()
+        profile = user.profile if hasattr(user, "profile") else None
         resume_year = user.rankings.exists()
         context["resume_year"] = resume_year
-        context['profile'] = profile
+        context["profile"] = profile
         if last_training:
             day = last_training.slot.date
             if day == now_date:
-                day_name = 'hoy'
+                day_name = "hoy"
             elif day == now_date + timedelta(days=1):
-                day_name = 'Mañana'
+                day_name = "Mañana"
             else:
                 translate_day = _(day.strftime("%A"))
-                day_name = f'El {translate_day}'
+                day_name = f"El {translate_day}"
             hour = last_training.slot.class_trainging.hour_init.strftime("%I:%M %p")
-            messages.warning(self.request, f'Recuerda:  Tu proximo entrenamiento es {day_name} a las {hour} !!!')
+            messages.warning(
+                self.request,
+                f"Recuerda:  Tu proximo entrenamiento es {day_name} a las {hour} !!!",
+            )
         return context
 
 
 class PendingView(LoginRequiredMixin, TemplateView):
-    template_name = 'users/pending_membership.html'
+    template_name = "users/pending_membership.html"
 
     def dispatch(self, request, *args, **kwargs):
         user = request.user
         if request.user.is_authenticated:
             if user.is_verified:
-                return HttpResponseRedirect(reverse_lazy('users:index'))
+                return HttpResponseRedirect(reverse_lazy("users:index"))
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        phone_neural = f'57{settings.NEURAL_PHONE}'
-        message = f'https://wa.me/{phone_neural}?text=Hola+Neural+estoy+listo+para+iniciar+mis+entrenos+mi+nombre+es+{user.first_name}+{user.last_name}.'
-        context['message'] = message
+        phone_neural = f"57{settings.NEURAL_PHONE}"
+        message = f"https://wa.me/{phone_neural}?text=Hola+Neural+estoy+listo+para+iniciar+mis+entrenos+mi+nombre+es+{user.first_name}+{user.last_name}."
+        context["message"] = message
         return context
 
 
 class SignUpView(FormView):
-    template_name = 'users/register.html'
+    template_name = "users/register.html"
     form_class = SignUpForms
 
-    success_url = reverse_lazy('users:pending')
+    success_url = reverse_lazy("users:pending")
 
     def form_valid(self, form):
         user = form.save()
@@ -117,41 +123,41 @@ class SignUpView(FormView):
 
 
 class SwitchUserView(LoginRequiredMixin, View):
-    template_name = 'users/index.html'
+    template_name = "users/index.html"
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_superuser:
             return super().dispatch(request, *args, **kwargs)
-        return HttpResponseRedirect(reverse_lazy('users:index'))
+        return HttpResponseRedirect(reverse_lazy("users:index"))
 
     def get(self, request, *args, **kwargs):
-        pk = self.kwargs['pk']
+        pk = self.kwargs["pk"]
         user_to_switch = User.objects.get(pk=pk)
         login(self.request, user_to_switch)
-        return HttpResponseRedirect(reverse_lazy('users:index'))
+        return HttpResponseRedirect(reverse_lazy("users:index"))
 
 
 class ProfileView(LoginRequiredMixin, FormView):
-    template_name = 'users/profile.html'
+    template_name = "users/profile.html"
     form_class = ProfileForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
     def get_initial(self):
         initial = super().get_initial()
         user = self.request.user
-        profile = user.profile if hasattr(user, 'profile') else None
+        profile = user.profile if hasattr(user, "profile") else None
         if profile:
-            initial['plan'] = profile.plan
-            initial['birthdate'] = profile.birthdate
-            initial['address'] = profile.address
-            initial['emergency_contact'] = profile.emergency_contact
-            initial['emergency_contact_phone'] = profile.emergency_contact_phone
-            initial['profession'] = profile.profession
-            initial['instagram'] = profile.instagram
+            initial["plan"] = profile.plan
+            initial["birthdate"] = profile.birthdate
+            initial["address"] = profile.address
+            initial["emergency_contact"] = profile.emergency_contact
+            initial["emergency_contact_phone"] = profile.emergency_contact_phone
+            initial["profession"] = profile.profession
+            initial["instagram"] = profile.instagram
         return initial
 
     def form_valid(self, form):
@@ -159,5 +165,5 @@ class ProfileView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        messages.success(self.request, 'Perfil actualizado correctamente')
-        return reverse_lazy('users:profile')
+        messages.success(self.request, "Perfil actualizado correctamente")
+        return reverse_lazy("users:profile")

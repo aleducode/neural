@@ -18,7 +18,6 @@ class UserChangeForm(admin_forms.UserChangeForm):
 
 
 class UserCreationForm(admin_forms.UserCreationForm):
-
     error_message = admin_forms.UserCreationForm.error_messages.update(
         {"duplicate_username": _("This username has already been taken.")}
     )
@@ -54,24 +53,25 @@ class CustomAuthenticationForm(forms.Form):
 
     email = forms.EmailField(
         label="Correo electrónico",
-        widget=forms.TextInput(attrs={'autofocus': True, 'class': 'form-control'}))
+        widget=forms.TextInput(attrs={"autofocus": True, "class": "form-control"}),
+    )
     password = forms.CharField(
         label="Contraseña",
         strip=False,
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
     )
 
     error_messages = {
-        'invalid_login': (
+        "invalid_login": (
             "Please enter a correct email and password. Note that both "
             "fields may be case-sensitive."
         ),
-        'inactive': "This account is inactive.",
+        "inactive": "This account is inactive.",
     }
 
     def clean(self):
-        email = self.cleaned_data.get('email')
-        password = self.cleaned_data.get('password')
+        email = self.cleaned_data.get("email")
+        password = self.cleaned_data.get("password")
 
         if email is not None and password:
             self.user_cache = authenticate(self.request, email=email, password=password)
@@ -95,8 +95,8 @@ class CustomAuthenticationForm(forms.Form):
         """
         if not user.is_active:
             raise forms.ValidationError(
-                self.error_messages['inactive'],
-                code='inactive',
+                self.error_messages["inactive"],
+                code="inactive",
             )
 
     def get_user(self):
@@ -104,8 +104,8 @@ class CustomAuthenticationForm(forms.Form):
 
     def get_invalid_login_error(self):
         return forms.ValidationError(
-            self.error_messages['invalid_login'],
-            code='invalid_login',
+            self.error_messages["invalid_login"],
+            code="invalid_login",
         )
 
 
@@ -114,76 +114,82 @@ class SignUpForms(forms.Form):
 
     password = forms.CharField(
         max_length=70,
-        label='',
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+        label="",
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+    )
     password_confirmation = forms.CharField(
         max_length=70,
-        label='',
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+        label="",
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+    )
 
     first_name = forms.CharField(
         min_length=2,
         max_length=50,
-        label='',
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
+        label="",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
     last_name = forms.CharField(
         min_length=2,
         max_length=50,
-        label='',
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
+        label="",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
 
     phone_regex = RegexValidator(
-        regex=r'\+?1?\d{9,15}$',
-        message='el numero de teléfono debe estár en el formato +573000000000'
+        regex=r"\+?1?\d{9,15}$",
+        message="el numero de teléfono debe estár en el formato +573000000000",
     )
 
     phone_number = forms.CharField(
         validators=[phone_regex],
         min_length=2,
         max_length=50,
-        label='',
-        initial='+57',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ejemplo +57 300 000 00 00'}))
+        label="",
+        initial="+57",
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Ejemplo +57 300 000 00 00"}
+        ),
+    )
 
     email = forms.CharField(
         min_length=6,
         max_length=70,
-        label='',
-        widget=forms.EmailInput(
-            attrs={'class': 'form-control'})
+        label="",
+        widget=forms.EmailInput(attrs={"class": "form-control"}),
     )
 
     def clean_phone_number(self):
         """Phone number must be unique."""
-        phone_number = self.cleaned_data['phone_number']
+        phone_number = self.cleaned_data["phone_number"]
         phone_number_taken = User.objects.filter(phone_number=phone_number).exists()
         if phone_number_taken:
-            raise forms.ValidationError('Número de teléfono ya registrado.')
+            raise forms.ValidationError("Número de teléfono ya registrado.")
         return phone_number
 
     def clean_email(self):
         """Email must be unique."""
-        email = self.cleaned_data['email']
+        email = self.cleaned_data["email"]
         email_taken = User.objects.filter(email=email).exists()
         if email_taken:
-            raise forms.ValidationError('Email ya registrado.')
+            raise forms.ValidationError("Email ya registrado.")
         return email
 
     def clean(self):
         """Veirify password confirmation match."""
         data = super().clean()
-        password = data['password']
-        password_confirmation = data['password_confirmation']
+        password = data["password"]
+        password_confirmation = data["password_confirmation"]
 
         if password != password_confirmation:
-            raise forms.ValidationError('Las contraseñas no coinciden')
+            raise forms.ValidationError("Las contraseñas no coinciden")
         return data
 
     def save(self):
         """Create user and profile."""
         data = self.cleaned_data
-        data.pop('password_confirmation')
-        data['username'] = data['email']
+        data.pop("password_confirmation")
+        data["username"] = data["email"]
         user = User.objects.create_user(**data)
         return user
 
@@ -192,38 +198,45 @@ class ProfileForm(forms.Form):
     """Profile form."""
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
+        self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
-    plan = forms.ModelChoiceField(queryset=Plan.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}))
-    birthdate = forms.DateField(widget=forms.TextInput(
-        attrs={
-            'class': 'form-control',
-            'type': 'date',
-            "value": "2000-01-01"
-        }
-    ))
-    address = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    emergency_contact = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'class': 'form-control',
-            'placeholder': 'Nombre de contacto de emergencia'
-        }
-    ))
-    emergency_contact_phone = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'class': 'form-control', 'placeholder': 'Número de contacto de emergencia'
-        }))
-    profession = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    plan = forms.ModelChoiceField(
+        queryset=Plan.objects.all(),
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    birthdate = forms.DateField(
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "type": "date", "value": "2000-01-01"}
+        )
+    )
+    address = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control"}))
+    emergency_contact = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Nombre de contacto de emergencia",
+            }
+        )
+    )
+    emergency_contact_phone = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Número de contacto de emergencia",
+            }
+        )
+    )
+    profession = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control"})
+    )
     instagram = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        required=False, widget=forms.TextInput(attrs={"class": "form-control"})
     )
 
     def save(self):
         """Update user's profile data."""
         profle, _ = Profile.objects.update_or_create(
-            user=self.user,
-            defaults=self.cleaned_data
+            user=self.user, defaults=self.cleaned_data
         )
         return profle

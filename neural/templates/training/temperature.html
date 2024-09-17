@@ -22,22 +22,22 @@
                     </div>
                     {% endif %}
                     <form method="POST">
-            
+
                         {% csrf_token %}
                         <div class="form-group">
-                      
+
                             {{form.temperature}}
                             <div class="invalid-feedback">
                                 {% for error in form.temperature.errors %}
                                 {{error}}
                                 {% endfor %}
                             </div>
-            
+
                         </div>
-                    
+
                         <button type="submit" class="btn btn-lg btn-block btn-info w-lg waves-effect waves-light"
                             style="color:white">Guardar</button>
-            
+
                     </form>
                 </div>
             </div>
@@ -54,7 +54,7 @@
     slot = document.getElementById('id_slot')
     space = document.getElementById('id_space')
     training = document.getElementById('id_classes')
-    
+
     function clean_selector(id_selector){
         obj = document.getElementById(id_selector)
         obj.disabled = true;

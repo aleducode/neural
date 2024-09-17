@@ -2,12 +2,19 @@
 from django.contrib import admin
 
 # Models
-from neural.landing.models import HeaderLanding, MainContentHeader, ServicesLanding, PersonalTrainer
+from neural.landing.models import (
+    HeaderLanding,
+    MainContentHeader,
+    ServicesLanding,
+    PersonalTrainer,
+)
 
 
 @admin.register(ServicesLanding)
 class ServicesLandingAdmin(admin.ModelAdmin):
-    list_display = ["title",]
+    list_display = [
+        "title",
+    ]
 
 
 @admin.register(HeaderLanding)
@@ -22,4 +29,6 @@ class MainContentHeaderAdmin(admin.ModelAdmin):
 
 @admin.register(PersonalTrainer)
 class PersonalTrainerAdmin(admin.ModelAdmin):
-    list_display = ["name",]
+    list_display = [
+        "name",
+    ]

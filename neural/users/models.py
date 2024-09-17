@@ -17,30 +17,33 @@ class User(NeuralBaseModel, AbstractUser):
     Extend from Django abstract user, change the username field to email
     and add some extra info
     """
+
     email = models.EmailField(
-        'email address',
+        "email address",
         unique=True,
         error_messages={
-            'unique': 'A user with that email already exist',
-        }
+            "unique": "A user with that email already exist",
+        },
     )
     phone_regex = RegexValidator(
-        regex=r'\+?1?\d{9,15}$',
-        message='phone number must be entered in the format +99999999999'
+        regex=r"\+?1?\d{9,15}$",
+        message="phone number must be entered in the format +99999999999",
     )
-    phone_number = models.CharField(validators=[phone_regex], max_length=17, unique=True)
+    phone_number = models.CharField(
+        validators=[phone_regex], max_length=17, unique=True
+    )
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username", "first_name", "last_name"]
 
     is_client = models.BooleanField(
-        'client',
+        "client",
         default=True,
     )
     is_verified = models.BooleanField(
-        'verified',
+        "verified",
         default=False,
-        help_text='set to true when address email have verified'
+        help_text="set to true when address email have verified",
     )
 
     def __str__(self):
@@ -55,28 +58,21 @@ class UserMembership(NeuralBaseModel):
 
     class MembershipType(models.TextChoices):
         """Membership type."""
-        MENSUAL = 'MENSUAL', 'Mensualidad'
-        QUARTER = 'QUARTER', 'Trimestre'
-        SEMESTER = 'SEMESTER', 'Semestre'
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='memberships'
-    )
+        MENSUAL = "MENSUAL", "Mensualidad"
+        QUARTER = "QUARTER", "Trimestre"
+        SEMESTER = "SEMESTER", "Semestre"
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="memberships")
     membership_type = models.CharField(
-        max_length=10,
-        choices=MembershipType.choices,
-        default=MembershipType.MENSUAL
+        max_length=10, choices=MembershipType.choices, default=MembershipType.MENSUAL
     )
     is_active = models.BooleanField(
-        'Active',
+        "Active",
         default=False,
     )
     init_date = models.DateField(
-        "Fecha de inicio membresía",
-        auto_now=False,
-        help_text="Inicio de membresía"
+        "Fecha de inicio membresía", auto_now=False, help_text="Inicio de membresía"
     )
     expiration_date = models.DateField(
         "Fecha fin de membresía",
@@ -102,14 +98,11 @@ class UserMembership(NeuralBaseModel):
         return f"User membership {self.user.email} - {self.user.phone_number} - {self.membership_type}"
 
     class Meta:
-
         verbose_name = "Membresía de usuario"
         verbose_name_plural = "Membresías de usuarios"
         constraints = [
             models.UniqueConstraint(
-                fields=['user'],
-                condition=Q(is_active=True),
-                name='unique_membership'
+                fields=["user"], condition=Q(is_active=True), name="unique_membership"
             )
         ]
 
@@ -120,6 +113,7 @@ class Plan(NeuralBaseModel):
     A plan is a set of trainings that a user can
     do in a specific period of time.
     """
+
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=500)
 
@@ -128,8 +122,12 @@ class Plan(NeuralBaseModel):
 
 
 class Profile(NeuralBaseModel):
-    user = models.OneToOneField('users.User', on_delete=models.CASCADE, related_name='profile')
-    plan = models.ForeignKey('users.Plan', on_delete=models.CASCADE, related_name='profiles')
+    user = models.OneToOneField(
+        "users.User", on_delete=models.CASCADE, related_name="profile"
+    )
+    plan = models.ForeignKey(
+        "users.Plan", on_delete=models.CASCADE, related_name="profiles"
+    )
     birthdate = models.DateField(blank=True, null=True)
     address = models.CharField(max_length=500, blank=True, null=True)
     emergency_contact = models.CharField(max_length=500, blank=True, null=True)
@@ -148,12 +146,15 @@ class Ranking(NeuralBaseModel):
     uear. It is used to determine the best user for a
     year.
     """
-    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='rankings')
+
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="rankings"
+    )
     position = models.PositiveIntegerField(unique=True)
     trainings = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f'{self.user} - {self.position}'
+        return f"{self.user} - {self.position}"
 
     class Meta:
-        unique_together = ('user', 'position')
+        unique_together = ("user", "position")
