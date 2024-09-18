@@ -18,32 +18,12 @@ from django.utils.translation import gettext as _
 # Models
 from neural.training.models import Slot, UserTraining, Classes, TrainingType
 from neural.users.models import Ranking
-from neural.training.forms import SchduleForm
 from datetime import datetime
 from neural.training.forms import ClassesForm
 
 
-class ScheduleView(LoginRequiredMixin, FormView):
+class ScheduleView(LoginRequiredMixin, TemplateView):
     template_name = "training/schedule.html"
-    form_class = SchduleForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        kwargs["now"] = timezone.localdate()
-        return kwargs
-
-    def form_invalid(self, form):
-        for field, value in form.errors.items():
-            if field not in ["__all__"]:
-                form.fields[field].widget.attrs["class"] = "form-control is-invalid"
-        return super().form_invalid(form)
-
-    def form_valid(self, form):
-        schedule = form.save()
-        return HttpResponseRedirect(
-            reverse_lazy("training:schedule-done", kwargs={"pk": schedule.pk})
-        )
 
 
 class ScheduleV1View(LoginRequiredMixin, TemplateView):

@@ -30,7 +30,7 @@
 
             </div>
 
-            <div class="col-lg-4 offset-lg-2">
+            <div class="col-lg-6">
                 <a {% if days_duration <= 0 %}href="#" onclick="handleLinkClick()"{% else %}href="{% url 'training:schedule-v1' %}"{% endif %}>
                     <div class="card border border-success">
                         <div class="card-header bg-transparent border-success">
@@ -44,7 +44,21 @@
                     </div>
                 </a>
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-6">
+              <a {% if days_duration <= 0 %}href="#" onclick="handleLinkClick()"{% else %}href="{% url 'training:schedule' %}"{% endif %}>
+                  <div class="card border border-primary">
+                      <div class="card-header bg-transparent border-primary">
+                          <h5 class="my-0 text-primary" style="font-size: x-large;"><i
+                                  class="bx bx-run  mr-3"></i>
+                                  {% trans 'Agendar preparación física grupal ' %} </h5>
+                      </div>
+                      <div class="card-body mt-0 pt-0">
+                          <h5>Running, formativo y preparación física.</h5>
+                      </div>
+                  </div>
+              </a>
+          </div>
+            <div class="col-lg-6">
                 <a href="{% url 'training:my_schedule' %}">
                 <div class="card border border-info">
                     <div class="card-header bg-transparent border-info">
