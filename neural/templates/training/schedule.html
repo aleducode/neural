@@ -18,49 +18,58 @@
 <div class="page-content">
   <div class="container-fluid">
     <div class="col-xl-6 offset-lg-3">
-      <a href="{% url 'users:index' %}">Regresar</a>
+      <a href="{% url 'users:index' %}?{{request.GET.urlencode}}">Regresar</a>
       <div class="card mt-2">
         <div class="card-body">
           <h3 class="mb-4 text-center">Selecciona tipo de preparación</h3>
-          <div class="col-lg-6">
-            <div class="card card-bordered">
-              <div class="row no-gutters align-items-center">
-                <div class="col-md-4">
-                  <img class="card-img img-fluid round-border" src="{% static 'images/run.jpg' %}" alt="Card image">
+          <div class="col-lg-12">
+            <a href="{% url 'training:schedule-v1' %}?is_group=True&type=grupal-preparacion-fisica">
+              <div class="card card-bordered">
+                <div class="row no-gutters align-items-center">
+                  <div class="col-md-4">
+                    <img class="card-img img-fluid round-border" src="{% static 'images/run.jpg' %}" alt="Card image">
+                  </div>
+                  <div class="col-md-8">
+                    <div class="card-body">
+                      <h5 class="card-title">Grupal running</h5>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-md-8">
-                  <div class="card-body">
-                    <h5 class="card-title">Grupal running</h5>
+              </div>
+            </a>
+            <a href="{% url 'training:schedule-v1' %}?is_group=True&type=grupal-formativo">
+              <div class="card card-bordered ">
+                <div class="row no-gutters align-items-center">
+                  <div class="col-md-4">
+                    <img class="card-img img-fluid round-border" src="{% static 'images/young.webp' %}"
+                      alt="Card image">
+                  </div>
+                  <div class="col-md-8">
+                    <div class="card-body">
+                      <h5 class="card-title">Grupal formativo</h5>
 
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="card card-bordered ">
-              <div class="row no-gutters align-items-center">
-                <div class="col-md-4">
-                  <img class="card-img img-fluid round-border" src="{% static 'images/young.webp' %}" alt="Card image">
-                </div>
-                <div class="col-md-8">
-                  <div class="card-body">
-                    <h5 class="card-title">Grupal formativo</h5>
+            </a>
+            <a href="{% url 'training:schedule-v1' %}?is_group=True&type=grupal-running">
 
+              <div class="card card-bordered ">
+                <div class="row no-gutters align-items-center">
+                  <div class="col-md-4">
+                    <img class="card-img img-fluid round-border" src="{% static 'images/neuro.webp' %}"
+                      alt="Card image">
+                  </div>
+                  <div class="col-md-8">
+                    <div class="card-body">
+                      <h5 class="card-title">Grupal preparación física</h5>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="card card-bordered ">
-              <div class="row no-gutters align-items-center">
-                <div class="col-md-4">
-                  <img class="card-img img-fluid round-border" src="{% static 'images/neuro.webp' %}" alt="Card image">
-                </div>
-                <div class="col-md-8">
-                  <div class="card-body">
-                    <h5 class="card-title">Grupal preparación física</h5>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </a>
+
           </div>
         </div>
       </div>

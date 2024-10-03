@@ -5,7 +5,7 @@
 <div class="page-content">
     <div class="container-fluid">
         <div class="col-xl-6 offset-lg-3">
-            <a href="{% url 'users:index' %}">Regresar</a>
+            <a href="{% url 'users:index' %}?{{request.GET.urlencode}}">Regresar</a>
             <div class="card mt-2">
                 <div class="card-body">
                     <h3 class="mb-4 text-center">Seleccionar Día</h3>
@@ -17,7 +17,7 @@
 
                                     {% for day in days %}
 
-                                    <a href="{% url 'training:training-types' day.date %}">
+                                    <a href="{% url 'training:training-types' day.date %}?{{request.GET.urlencode}}">
                                         <div class="col-sm-4">
                                             <div>
                                                 <div class="font-size-24 text-primary mb-2">
@@ -28,7 +28,7 @@
                                                 <h5>{{day.day}}</h5>
 
                                                 <div class="mt-3 mb-2">
-                                                    <a href="{% url 'training:training-types' day.date %}" class="btn btn-primary btn-sm w-md">Ver Clases</a>
+                                                    <a href="{% url 'training:training-types' day.date %}?{{request.GET.urlencode}}" class="btn btn-primary btn-sm w-md">Ver Clases</a>
                                                 </div>
                                                 <hr>
                                             </div>

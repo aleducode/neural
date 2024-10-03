@@ -25,6 +25,12 @@ from neural.training.forms import ClassesForm
 class ScheduleView(LoginRequiredMixin, TemplateView):
     template_name = "training/schedule.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.localtime()
+        context["date"] = now
+        return context
+
 
 class ScheduleV1View(LoginRequiredMixin, TemplateView):
     template_name = "training/schedule-v1.html"
@@ -33,11 +39,32 @@ class ScheduleV1View(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         days = []
         now = timezone.localdate()
-        for i in range(0, Classes.objects.distinct("day").count()):
-            day = now + timedelta(days=i)
-            if day.isoweekday() != 8:
+        custom_filters = {}
+        if self.request.GET.get("is_group"):
+            custom_filters["class_trainging__training_type__is_group"] = True
+        if self.request.GET.get("type"):
+            custom_filters["class_trainging__training_type__slug_name"] = (
+                self.request.GET.get("type")
+            )
+        if custom_filters:
+            slots = (
+                Slot.objects.filter(
+                    **custom_filters, date__range=[now, now + timedelta(days=7)]
+                )
+                .values_list("date", flat=True)
+                .order_by("date")
+                .distinct()
+            )
+            for slot in slots:
+                day = slot
                 day_name = _(day.strftime("%A"))
                 days.append({"date": f"{day}", "day": day_name})
+        else:
+            for i in range(0, 7):
+                day = now + timedelta(days=i)
+                if day.isoweekday() != 8:
+                    day_name = _(day.strftime("%A"))
+                    days.append({"date": f"{day}", "day": day_name})
         context["days"] = days
         return context
 
@@ -56,6 +83,16 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
         now = timezone.localtime()
         now_date = timezone.localtime().strftime(self.format_date)
         context = super().get_context_data(**kwargs)
+        filter_dict = {
+            "date": self.date_obj,
+            "class_trainging__training_type__is_group": self.request.GET.get(
+                "is_group", False
+            ),
+        }
+        if self.request.GET.get("type"):
+            filter_dict["class_trainging__training_type__slug_name"] = (
+                self.request.GET.get("type")
+            )
         # Permissions
         if UserTraining.objects.filter(
             slot__date=self.date,
@@ -70,14 +107,9 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
                 extra_tags="safe",
             )
         if self.date == now_date:
-            base_filter = Slot.objects.filter(
-                date=self.date,
-                class_trainging__hour_init__gte=now,
-            )
-        else:
-            base_filter = Slot.objects.filter(
-                date=self.date,
-            )
+            filter_dict["class_trainging__hour_init__gte"] = now
+
+        base_filter = Slot.objects.filter(**filter_dict)
         context["sessions"] = base_filter.order_by("class_trainging__hour_init")
         context["name_day"] = _(self.date_obj.strftime("%A"))
         context["date"] = self.date

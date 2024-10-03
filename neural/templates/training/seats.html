@@ -21,11 +21,11 @@
     {% endif %}
     {% endlanguage %}
     <div class="col-xl-6 offset-lg-3">
-      <a href="{% url 'training:training-types' slot.date|date:"Y-m-d" %}">Regresar</a>
+      <a href="{% url 'training:training-types' slot.date|date:'Y-m-d' %}">Regresar</a>
       <div class="card mt-2 ml-0 mr-0 pl-0 pr-0">
         <div class="card-body ml-0 mr-0 pl-0 pr-0 text-center">
           <h3 class="text-center">Confirmar Entreno:</h3>
-          <h4 class="text-center mt-0 mb-4"><small>{{slot.get_training_type_display}} |
+          <h4 class="text-center mt-0 mb-4"><small>{{slot.class_trainging.training_type.name}} |
               {{slot.date|date:"l d"}}</small></h4>
 
           <div class="product-color">

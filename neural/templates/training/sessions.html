@@ -17,7 +17,7 @@
 <div class="page-content">
     <div class="container-fluid">
         <div class="col-xl-6 offset-lg-3">
-            <a href="{% url 'training:schedule-v1' %}">Regresar</a>
+            <a href="{% url 'training:schedule-v1' %}?{{request.GET.urlencode}}">Regresar</a>
             <h3 class="text-center mb-0">{{name_day}}</h3>
             <h4 class="text-center mt-0 mb-4"><small>{{date}}</small></h4>
             {% if messages %}

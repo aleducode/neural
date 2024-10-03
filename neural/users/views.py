@@ -64,11 +64,15 @@ class IndexView(LoginRequiredMixin, TemplateView):
         user_membership = user.memberships.filter(is_active=True)
         if user_membership:
             context["days_duration"] = user_membership.first().days_duration
-        last_training = UserTraining.objects.filter(
-            user=self.request.user,
-            slot__date__gte=now_date,
-            status=UserTraining.Status.CONFIRMED,
-        ).last()
+        last_training = (
+            UserTraining.objects.filter(
+                user=self.request.user,
+                slot__date__gte=now_date,
+                status=UserTraining.Status.CONFIRMED,
+            )
+            .select_related("slot__class_trainging__training_type")
+            .last()
+        )
         profile = user.profile if hasattr(user, "profile") else None
         resume_year = user.rankings.exists()
         context["resume_year"] = resume_year
@@ -83,9 +87,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
                 translate_day = _(day.strftime("%A"))
                 day_name = f"El {translate_day}"
             hour = last_training.slot.class_trainging.hour_init.strftime("%I:%M %p")
+            training_name = last_training.slot.class_trainging.training_type.name
             messages.warning(
                 self.request,
-                f"Recuerda:  Tu proximo entrenamiento es {day_name} a las {hour} !!!",
+                f"Recuerda:  Tu proximo entrenamiento es {training_name} {day_name} a las {hour} !!!",
             )
         return context
 

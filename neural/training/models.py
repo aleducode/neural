@@ -30,6 +30,7 @@ class TrainingType(NeuralBaseModel):
 
     name = models.CharField(max_length=255)
     slug_name = models.SlugField(unique=True, max_length=100)
+    is_group = models.BooleanField(default=True)
 
     def __str__(self):
         """Return training type."""
@@ -79,15 +80,10 @@ class Classes(NeuralBaseModel):
         verbose_name_plural = "Calendario de clases"
         constraints = [
             models.UniqueConstraint(
-                fields=["day", "hour_init", "hour_end"], name="unique_class_combination"
+                fields=["day", "hour_init", "hour_end", "training_type"],
+                name="unique_class_combination",
             )
         ]
-
-
-# @receiver(pre_delete, sender=Classes)
-# def prevent_deletion_with_related_user_training(sender, instance, **kwargs):
-#     if instance.slots.get().user_trainings.exists():
-#         messages.error(None, ('No se puede eliminar esta instancia de Classes porque tiene instancias de UserTraining relacionadas.'))
 
 
 class Slot(NeuralBaseModel):

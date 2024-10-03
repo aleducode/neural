@@ -52,7 +52,8 @@ class SlotAdmin(admin.ModelAdmin):
 @admin.register(TrainingType)
 class TrainingTypeAdmin(admin.ModelAdmin):
     list_filter = ["name"]
-    list_display = ["name", "slug_name"]
+    list_display = ["name", "slug_name", "is_group"]
+    list_editable = ["is_group"]
     readonly_fields = ["slug_name"]
 
 
