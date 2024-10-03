@@ -9,7 +9,12 @@ from datetime import timedelta
 class Command(BaseCommand):
     def handle(self, *args, **options):
         """Handle command usage."""
-        names = ["Grupal running", "Grupal formativo", "Grupal preparación física"]
+        names = [
+            "Grupal running",
+            "Grupal formativo",
+            "Grupal preparación física",
+            "Preparación Fisica CASDA",
+        ]
         for name in names:
             training_type, _ = TrainingType.objects.get_or_create(name=name)
             print(f"Training type {name} created")
@@ -35,6 +40,10 @@ class Command(BaseCommand):
                         ],
                         "Grupal preparación física": [
                             {"start": "15:00", "end": "16:00"},
+                            {"start": "18:00", "end": "19:00"},
+                        ],
+                        "Preparación Fisica CASDA": [
+                            {"start": "07:00", "end": "08:00"},
                             {"start": "18:00", "end": "19:00"},
                         ],
                     }
