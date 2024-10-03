@@ -52,13 +52,15 @@ class ScheduleV1View(LoginRequiredMixin, TemplateView):
                     **custom_filters, date__range=[now, now + timedelta(days=7)]
                 )
                 .values_list("date", flat=True)
-                .order_by("date")
+                .order_by("-date")
                 .distinct()
             )
             for slot in slots:
                 day = slot
                 day_name = _(day.strftime("%A"))
                 days.append({"date": f"{day}", "day": day_name})
+            # Sort by date
+            days = sorted(days, key=lambda x: x["date"])
         else:
             for i in range(0, 7):
                 day = now + timedelta(days=i)
@@ -108,7 +110,6 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
             )
         if self.date == now_date:
             filter_dict["class_trainging__hour_init__gte"] = now
-
         base_filter = Slot.objects.filter(**filter_dict)
         context["sessions"] = base_filter.order_by("class_trainging__hour_init")
         context["name_day"] = _(self.date_obj.strftime("%A"))

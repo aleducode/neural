@@ -14,11 +14,16 @@ class Command(BaseCommand):
             training_type, _ = TrainingType.objects.get_or_create(name=name)
             print(f"Training type {name} created")
             # For today into each day until 3 months
-            Classes.objects.filter(training_type=training_type).delete()
+            Slot.objects.filter(
+                class_trainging__training_type=training_type,
+                # ONLY WEEKENDS
+                date__week_day__in=[6, 7],
+            ).delete()
             for i in range(0, 90):
                 date = timezone.now() + timedelta(days=i)
                 # Only weekdays
                 if date.weekday() < 5:
+                    print(date.weekday())
                     hours = {
                         "Grupal running": [
                             {"start": "05:30", "end": "06:30"},

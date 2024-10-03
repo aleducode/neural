@@ -3,6 +3,7 @@
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.db import models
 from neural.training.models import (
     UserTraining,
     Slot,
@@ -23,15 +24,28 @@ class UserTrainingInline(admin.TabularInline):
 @admin.register(Slot)
 class SlotAdmin(admin.ModelAdmin):
     date_hierarchy = "date"
-    list_filter = ["date"]
+    list_filter = ["date", "class_trainging__training_type"]
     list_display = [
         "date",
         "class_training_name",
         "class_training_hour_init",
         "class_training_hour_end",
         "max_places",
+        "reserved_spaces",
     ]
     inlines = [UserTrainingInline]
+
+    def get_queryset(self, request):
+        # Add new column
+        qs = (
+            super()
+            .get_queryset(request)
+            .annotate(reserved_spaces=models.Count("user_trainings"))
+        )
+        return qs
+
+    def reserved_spaces(self, obj):
+        return obj.reserved_spaces
 
     def class_training_hour_init(self, obj):
         if obj.class_trainging:
