@@ -12,8 +12,10 @@ class Command(BaseCommand):
         names = ["Grupal running", "Grupal formativo", "Grupal preparación física"]
         for name in names:
             training_type, _ = TrainingType.objects.get_or_create(name=name)
+            print(f"Training type {name} created")
             # For today into each day until 3 months
-            for i in range(0, 30):
+            Classes.objects.filter(training_type=training_type).delete()
+            for i in range(0, 90):
                 date = timezone.now() + timedelta(days=i)
                 # Only weekdays
                 if date.weekday() < 5:
@@ -36,10 +38,8 @@ class Command(BaseCommand):
                         session, _ = Classes.objects.get_or_create(
                             day=day_choice,
                             training_type=training_type,
-                            defaults=dict(
-                                hour_init=hour.get("start"),
-                                hour_end=hour.get("end"),
-                            ),
+                            hour_init=hour.get("start"),
+                            hour_end=hour.get("end"),
                         )
                         Slot.objects.update_or_create(
                             date=date,
