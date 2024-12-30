@@ -42,7 +42,7 @@ urlpatterns = [
     ),
     path(route="info", view=training_views.InfoView.as_view(), name="info"),
     path(
-        route="resumen-2023",
+        route="resumen-2024",
         view=training_views.ResumeYear.as_view(),
         name="resume_year",
     ),

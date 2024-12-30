@@ -112,6 +112,19 @@
 {% endblock content %}
 
 {% block modal %}
+<div id="resume" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+      <div class="modal-content">
+      <div class="modal-header">
+          <h3>Ya está disponible tu resumen del 2024 🏆🏆</h3>
+          <button type="button" class="close" data-dismiss="modal" onclick="closeResume()">&times;</button>
+      </div>
+      <div class="modal-body text-center">
+        <a  href="{% url 'training:resume_year' %}"
+        class="btn btn-primary btn-lg waves-effect waves-light text-white">Ir a verlooooo</a>
+      </div>
+  </div>
+</div>
 <div id="myModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
       <div class="modal-content">
@@ -130,8 +143,19 @@
 {% endblock modal %}
 
 {% block js %}
+<script>
+  $(document).ready(function(){
+    // count 3 seconds to show the modal
+      $("#resume").modal('toggle');
+  });
+</script>
     <script>
         $(document).ready(function(){
+
+          // count 3 seconds to show the modal
+          setTimeout(function(){
+            $("#resume").modal('toggle');
+          }, 3000);
 
           {% if not profile %}
           $("#myModal").modal('toggle');

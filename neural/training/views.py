@@ -192,6 +192,8 @@ class ResumeYear(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        years_in_the_app = timezone.localdate() - self.request.user.created.date()
+        context["years_in_the_app"] = years_in_the_app.days // 365
         ranking = self.request.user.rankings.last()
         top_10 = Ranking.objects.all().order_by("position").select_related("user")[:10]
         total_ranking = Ranking.objects.count()

@@ -33,13 +33,13 @@
 
         {% if not trainings %}
         <div class="card-body">
-          <h3 class="text-danger mt-3">No está disponible el resumen del 2023 debido a tu poca asistencia a neural,🥹</h3>
+          <h3 class="text-danger mt-3">No está disponible el resumen del 2024 debido a tu poca asistencia a neural,🥹</h3>
         </div>
         {% else %}
 
 
         <div class="card-body">
-          <h4 class=" text-center text-primary mt-3">Resumen 2023 de {{request.user.first_name|title}} entrenando en Neural. 😛</h4>
+          <h4 class=" text-center text-primary mt-3">Resumen 2024 de {{request.user.first_name|title}} entrenando en Neural. 😛</h4>
           <div class="col-12 text-center">
             <img src="{% static 'images/3d.png' %}" alt="" width="40%" class="img-fluid">
           </div>
@@ -48,7 +48,13 @@
               <div class="card">
                 <div class="card-body">
                   <div class="text-center">
-
+                    <div class="mb-4">
+                        <i class="bx bx-calendar text-primary display-4"></i>
+                    </div>
+                    <h3>{{years_in_the_app}} Año</h3>
+                    <p>entrenando en neural, que craaaack.</p>
+                </div>
+                  <div class="text-center">
                     <p class="font-16 text-muted mb-2"></p>
                     <h3><a href="#" class="text-dark">Total de entrenos: <span class="text-muted font-16">{{trainings}}
                           veces {{reaction}}</span> </a></h3>
@@ -215,7 +221,7 @@
               {% endif %}
               <div class="card bg-primary text-white text-center p-3">
                 <blockquote class="card-blockquote mb-0">
-                  <p>Este fué tu resumen del 2023 en Neural, fué un placer para nosotros contar con vos.</p>
+                  <p>Este fué tu resumen del 2024 en Neural, fué un placer para nosotros contar con vos.</p>
                   <footer class="blockquote-footer text-white font-size-12">
                     Sí te pareció chimbita esto, compartilo en tus redes ❤️ <cite title="Source Title">
                       Att: Team Neural y alejo (el parcero de tecnología)
