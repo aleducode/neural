@@ -13,7 +13,7 @@ class Command(BaseCommand):
         Ranking.objects.all().delete()
         all_user_training = (
             UserTraining.objects.filter(
-                slot__date__year=timezone.now().year,
+                slot__date__year=2024,
                 status=UserTraining.Status.CONFIRMED,
             )
             .values("user")
