@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="12" viewBox="0 0 30 12">
+  <g id="workoout-icon" transform="translate(-87 -157)">
+    <g id="Rectangle_32" data-name="Rectangle 32" transform="translate(87 159)" fill="none" stroke="#7f7f7f" stroke-width="1">
+      <rect width="4" height="8" rx="2" stroke="none"/>
+      <rect x="0.5" y="0.5" width="3" height="7" rx="1.5" fill="none"/>
+    </g>
+    <g id="Rectangle_36" data-name="Rectangle 36" transform="translate(94 161)" fill="none" stroke="#7f7f7f" stroke-width="1">
+      <rect width="16" height="4" stroke="none"/>
+      <rect x="0.5" y="0.5" width="15" height="3" fill="none"/>
+    </g>
+    <g id="Rectangle_34" data-name="Rectangle 34" transform="translate(90 157)" fill="none" stroke="#7f7f7f" stroke-width="1">
+      <rect width="5" height="12" rx="2.5" stroke="none"/>
+      <rect x="0.5" y="0.5" width="4" height="11" rx="2" fill="none"/>
+    </g>
+    <g id="Rectangle_35" data-name="Rectangle 35" transform="translate(109 157)" fill="none" stroke="#7f7f7f" stroke-width="1">
+      <rect width="5" height="12" rx="2.5" stroke="none"/>
+      <rect x="0.5" y="0.5" width="4" height="11" rx="2" fill="none"/>
+    </g>
+    <g id="Rectangle_33" data-name="Rectangle 33" transform="translate(113 159)" fill="none" stroke="#7f7f7f" stroke-width="1">
+      <rect width="4" height="8" rx="2" stroke="none"/>
+      <rect x="0.5" y="0.5" width="3" height="7" rx="1.5" fill="none"/>
+    </g>
+  </g>
+</svg>

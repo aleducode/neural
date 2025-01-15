@@ -1,128 +1,104 @@
 {% load static %}
 <!doctype html>
-
 <html lang="en">
 
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="application-name" content="FitnessUIUX" />
+  <meta name="apple-mobile-web-app-title" content="FitnessUIUX" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+  <link rel="apple-touch-icon" href="{% static 'assets/img/favicon.ico'%}" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Iniciar sesión</title>
+  <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.ico' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&family=SUSE:wght@100..800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --adminuiux-content-font: "Open Sans", sans-serif;
+      --adminuiux-content-font-weight: 400;
+      --adminuiux-title-font: "SUSE", sans-serif;
+      --adminuiux-title-font-weight: 600
+    }
+  </style>
 
-	<meta charset="utf-8" />
-	<title>Iniciar sesión</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta content="Neural conciente app" name="description" />
-	<meta content="Neural" name="author" />
-	<!-- App favicon -->
-	<link rel="shortcut icon" href="{% static 'images/brain.png' %}">
-
-	<!-- Bootstrap Css -->
-	<link href="{% static 'backoffice/assets/css/bootstrap.min.css' %}" id="bootstrap-style" rel="stylesheet"
-		type="text/css" />
-	<!-- Icons Css -->
-	<link href="{% static 'backoffice/assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
-	<!-- App Css-->
-	<link href="{% static 'backoffice/assets/css/app.min.css' %}" id="app-style" rel="stylesheet" type="text/css" />
-
+  <script defer="defer" src="{% static 'assets/js/app.js' %}"></script>
+  <link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
 </head>
 
-<body>
+<body
+  class="main-bg main-bg-opac roundedui adminuiux-header-standard adminuiux-sidebar-standard theme-purple adminuiux-header-transparent adminuiux-sidebar-fill-theme bg-white scrollup"
+  data-theme="theme-orange" data-sidebarfill="adminuiux-sidebar-fill-theme" data-bs-spy="scroll"
+  data-bs-target="#list-example" data-bs-smooth-scroll="true" tabindex="0"
+  data-sidebarlayout="adminuiux-sidebar-standard" data-headerlayout="adminuiux-header-standard"
+  data-headerfill="adminuiux-header-transparent">
+  <div class="pageloader">
+    <div class="container h-100">
+      <div class="row justify-content-center align-items-center text-center h-100 pb-ios">
+        <div class="col-12 mb-auto pt-4"></div>
 
-	<div class="account-pages my-5 pt-sm-5">
-		<div class="container">
-			<div class="row justify-content-center">
-				<div class="col-md-8 col-lg-6 col-xl-5">
-					<div class="card overflow-hidden">
-						<div class="bg-soft-primary">
-							<div class="row">
-								<div class="col-7">
-									<div class="text-primary p-4">
-										<h5 class="text-primary">Bienvenidx !</h5>
-										<p>Neural consciente.</p>
-									</div>
-								</div>
-								<div class="col-5 align-self-end">
-									<img src="{% static 'backoffice/assets/images/profile-img.png' %}" alt=""
-										class="img-fluid">
-								</div>
-							</div>
-						</div>
-						<div class="card-body pt-0">
-							<div>
-								<a href="">
-									<div class="avatar-md profile-user-wid mb-4">
-										<span class="avatar-title rounded-circle bg-light">
-											<img src="{% static 'images/brain.png' %}" alt="" class="rounded-circle"
-												height="54">
-										</span>
-									</div>
-								</a>
-							</div>
-							<div class="p-2">
-								<form class="form-horizontal" method="post">
-									{% if form.errors %}
-									<p class="alert alert-danger">Oe, sabe que, contraseña o usuario incorrecto neeea </p>
+        <div class="col-auto"><img src="{% static 'images/brain.png' %}" alt="" class="height-80 mb-3">
+          <p class="h2 mb-0 text-theme-accent-1">AdminUIUX</p>
+          <p class="display-3 text-theme-1 fw-bold mb-4">Fitness</p>
+          <div class="loader3 mb-2 mx-auto"></div>
+        </div>
+        <div class="col-12 mt-auto pb-4">
+          <p class="small text-secondary">Please wait we are preparing awesome things...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <main class="flex-shrink-0 pt-0 position-relative h-100">
+    <div class="container-fluid z-index-1 position-relative">
+      <div class="auth-wrapper d-flex flex-column minvheight-100">
+        <div class="row gx-3 align-items-center justify-content-center py-3 mt-auto">
+          <div class="col-11 col-sm-8 col-md-11 col-xl-11 col-xxl-10 login-box">
+            <div class="mb-4"><img src="{% static 'images/brain.png' %}" class="width-50 mx-auto mb-3" alt=""><br>
+              <h2 class="text-theme-accent-1 mb-0">Bienvenidx a</h2>
+              <h1 class="fw-bold text-theme-1"><b>Neural</b></h1>
+            </div>
+            <form  method="post">
+              {% if form.errors %}
+              <p class="alert alert-danger">Oe, sabe que, contraseña o usuario incorrecto neeea </p>
+              {% endif %}
+              {% csrf_token %}
+            <div class="form-floating mb-3">{{form.email}}<label for="emailadd">
+                  Correo electrónico
+                </label></div>
+            <div class="position-relative">
+              <div class="form-floating mb-3">{{form.password}}<label for="passwd">Contraseña</label></div><button
+                class="btn btn-square btn-link text-theme-1 position-absolute end-0 top-0 mt-2 me-2"><i
+                  class="bi bi-eye"></i></button>
+            </div>
+            <div class="row gx-3 align-items-center mb-3">
+              <div class="col">
+                <div class="form-check"><input class="form-check-input" type="checkbox" name="rememberme"
+                    id="rememberme"> <label class="form-check-label" for="rememberme">Recuerdame</label></div>
+              </div>
+              <div class="col-auto"><a href="fitness-forgot-password.html" class="">Olvidaste tu contraseña?</a></div>
+            </div>
+            <button class="btn btn-lg btn-theme w-100 mb-4" type="submit">
+              Iniciar sesión
+            </button>
+          </form>
+            <div class="small text-secondary text-center mb-4">No tienes cuenta? <a href="fitness-signup.html"
+                class="">Crea una gratuita</a></div>
 
-									{% endif %}
-									{% csrf_token %}
-									<div class="form-group">
-										<label for="username">{{form.email.label}}</label>
-										{{form.email}}
-									</div>
-
-									<div class="form-group">
-										<label for="userpassword">{{form.password.label}}</label>
-										{{form.password}}
-									</div>
-
-									<div class="custom-control custom-checkbox">
-										<input type="checkbox" class="custom-control-input" id="customControlInline">
-										<label class="custom-control-label" for="customControlInline">Recordarme</label>
-									</div>
-
-
-
-									<div class="mt-3">
-										<button class="btn btn-primary btn-block waves-effect waves-light"
-											type="submit">
-											Iniciar Sesión
-										</button>
-										<a class="btn btn-light btn-block waves-effect waves-light"
-										href="{% url 'users:signup' %}">
-										Registrarme 💪
-									</a>
-									</div>
-
-									<div class="mt-4 text-center">
-										<a href="https://wa.me/573052655596?text=Hola%20olvide%20mi%20contraseña%20de%20la%20app%20neural" target="_blank" class="text-muted"><i class="mdi mdi-lock mr-1"></i>
-											¿Olvidaste tu contraseña?
-										</a>
-									</div>
-								</form>
-							</div>
-
-						</div>
-					</div>
-					<div class="mt-5 text-center">
-
-						<div>
-							<p>© 2024 Neural. Creado en Medallo con <i class="mdi mdi-heart text-info"></i> mi fai.
-							</p>
-						</div>
-					</div>
-
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- JAVASCRIPT -->
-
-	<script src="{% static 'backoffice/assets/libs/jquery/jquery.min.js' %}"></script>
-	<script src="{% static 'backoffice/assets/libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-	<script src="{% static 'backoffice/assets/libs/metismenu/metisMenu.min.js' %}"></script>
-	<script src="{% static 'backoffice/assets/libs/simplebar/simplebar.min.js' %}"></script>
-	<script src="{% static 'backoffice/assets/libs/node-waves/waves.min.js' %}"></script>
-
-	<!-- App js -->
-	<script src="{% static 'js/app.js' %}"></script>
+          </div>
+        </div>
+        <footer class="adminuiux-footer mt-auto">
+          <div class="container-fluid text-center"><span class="small">Copyright @2025, <a
+                target="_blank">Neural consciente</a>💙</span></div>
+        </footer>
+      </div>
+    </div>
+  </main>
+  <script src="{% static 'assets/js/fitness/fitness-auth.js' %}"></script>
 </body>
 
 </html>

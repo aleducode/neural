@@ -4,7 +4,6 @@ from django import forms
 from django.contrib.auth import (
     authenticate,
 )
-from django.core.validators import RegexValidator
 from django.contrib.auth import forms as admin_forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -74,7 +73,9 @@ class CustomAuthenticationForm(forms.Form):
         password = self.cleaned_data.get("password")
 
         if email is not None and password:
-            self.user_cache = authenticate(self.request, email=email, password=password)
+            self.user_cache = authenticate(
+                self.request, email=email.lower(), password=password
+            )
             if self.user_cache is None:
                 raise self.get_invalid_login_error()
             else:
@@ -136,20 +137,21 @@ class SignUpForms(forms.Form):
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
 
-    phone_regex = RegexValidator(
-        regex=r"\+?1?\d{9,15}$",
-        message="el numero de teléfono debe estár en el formato +573000000000",
-    )
-
     phone_number = forms.CharField(
-        validators=[phone_regex],
+        min_length=2,
+        max_length=50,
+        label="",
+        initial="",
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Ejemplo +57 300 000 00 00"}
+        ),
+    )
+    phone_prefix = forms.CharField(
         min_length=2,
         max_length=50,
         label="",
         initial="+57",
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "placeholder": "Ejemplo +57 300 000 00 00"}
-        ),
+        widget=forms.TextInput(attrs={"class": "form-control", "readonly": True}),
     )
 
     email = forms.CharField(
@@ -162,6 +164,7 @@ class SignUpForms(forms.Form):
     def clean_phone_number(self):
         """Phone number must be unique."""
         phone_number = self.cleaned_data["phone_number"]
+        phone_number = f"+{self.data['phone_prefix']}{phone_number}"
         phone_number_taken = User.objects.filter(phone_number=phone_number).exists()
         if phone_number_taken:
             raise forms.ValidationError("Número de teléfono ya registrado.")
@@ -190,6 +193,7 @@ class SignUpForms(forms.Form):
         data = self.cleaned_data
         data.pop("password_confirmation")
         data["username"] = data["email"]
+        data.pop("phone_prefix", None)
         user = User.objects.create_user(**data)
         return user
 

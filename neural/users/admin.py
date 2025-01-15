@@ -67,7 +67,7 @@ class UserAdmin(auth_admin.UserAdmin):
         "is_superuser",
     ]
     search_fields = ["first_name", "last_name", "phone_number", "email"]
-    list_filter = ["is_staff", "is_superuser"]
+    list_filter = ["is_staff", "is_superuser", "created"]
     ordering = ("date_joined",)
     inlines = [AdminProfileInline, MembershipInline]
 

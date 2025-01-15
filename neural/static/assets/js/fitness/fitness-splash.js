@@ -1,0 +1,2 @@
+/*! For license information please see fitness-splash.js.LICENSE.txt */
+"use strict";document.addEventListener("DOMContentLoaded",(function(){new Swiper(".swipernavsplash",{slidesPerView:1,spaceBetween:0,autoplay:{delay:2500,disableOnInteraction:!0},pagination:{el:".swiper-pagination",type:"bullets"}})}));
