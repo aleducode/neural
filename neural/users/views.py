@@ -19,8 +19,7 @@ from neural.users.forms import SignUpForms
 from neural.users.forms import CustomAuthenticationForm, ProfileForm
 
 # Models
-from neural.training.models import UserTraining, ImagePopUp
-from neural.landing.models import HeaderLanding, MainContentHeader, PersonalTrainer
+from neural.training.models import UserTraining
 from neural.users.models import User
 
 
@@ -37,19 +36,6 @@ class LogoutView(LoginRequiredMixin, auth_views.LogoutView):
     """logout view."""
 
     pass
-
-
-class LandingView(TemplateView):
-    template_name = "landing/index.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        image_pop_up = ImagePopUp.objects.filter(is_active=True).first()
-        context["header_landing"] = HeaderLanding.objects.get()
-        context["main_content"] = MainContentHeader.objects.get()
-        context["trainers"] = PersonalTrainer.objects.all()
-        context["image_pop_up"] = image_pop_up
-        return context
 
 
 class IndexView(LoginRequiredMixin, TemplateView):

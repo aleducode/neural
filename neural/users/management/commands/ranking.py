@@ -2,7 +2,6 @@
 
 from django.core.management.base import BaseCommand
 from django.db.models import Count
-from django.utils import timezone
 from neural.users.models import User, Ranking
 from neural.training.models import UserTraining
 
