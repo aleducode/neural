@@ -62,38 +62,37 @@
               <h2 class="text-theme-accent-1 mb-0">Bienvenidx a</h2>
               <h1 class="fw-bold text-theme-1"><b>Neural</b></h1>
             </div>
-            <form  method="post">
+            <form method="post">
               {% if form.errors %}
               <p class="alert alert-danger">Oe, sabe que, contraseña o usuario incorrecto neeea </p>
               {% endif %}
               {% csrf_token %}
-            <div class="form-floating mb-3">{{form.email}}<label for="emailadd">
+              <div class="form-floating mb-3">{{form.email}}<label for="emailadd">
                   Correo electrónico
                 </label></div>
-            <div class="position-relative">
-              <div class="form-floating mb-3">{{form.password}}<label for="passwd">Contraseña</label></div><button
-                class="btn btn-square btn-link text-theme-1 position-absolute end-0 top-0 mt-2 me-2"><i
-                  class="bi bi-eye"></i></button>
-            </div>
-            <div class="row gx-3 align-items-center mb-3">
-              <div class="col">
-                <div class="form-check"><input class="form-check-input" type="checkbox" name="rememberme"
-                    id="rememberme"> <label class="form-check-label" for="rememberme">Recuerdame</label></div>
+              <div class="position-relative">
+                <div class="form-floating mb-3">{{form.password}}<label for="passwd">Contraseña</label></div><button
+                  class="btn btn-square btn-link text-theme-1 position-absolute end-0 top-0 mt-2 me-2"><i
+                    class="bi bi-eye"></i></button>
               </div>
-              <div class="col-auto"><a href="fitness-forgot-password.html" class="">Olvidaste tu contraseña?</a></div>
-            </div>
-            <button class="btn btn-lg btn-theme w-100 mb-4" type="submit">
-              Iniciar sesión
-            </button>
-          </form>
-            <div class="small text-secondary text-center mb-4">No tienes cuenta? <a href="fitness-signup.html"
+              <div class="row gx-3 align-items-center mb-3">
+                <div class="col">
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="rememberme"
+                      id="rememberme"> <label class="form-check-label" for="rememberme">Recuerdame</label></div>
+                </div>
+                <div class="col-auto"><a href="/password_reset" class="">Olvidaste tu contraseña?</a></div>
+              </div>
+              <button class="btn btn-lg btn-theme w-100 mb-4" type="submit">
+                Iniciar sesión
+              </button>
+            </form>
+            <div class="small text-secondary text-center mb-4">No tienes cuenta? <a href="{% url 'users:signup' %}"
                 class="">Crea una gratuita</a></div>
-
           </div>
         </div>
         <footer class="adminuiux-footer mt-auto">
-          <div class="container-fluid text-center"><span class="small">Copyright @2025, <a
-                target="_blank">Neural consciente</a>💙</span></div>
+          <div class="container-fluid text-center"><span class="small">Copyright @2025, <a target="_blank">Neural
+                consciente</a>💙</span></div>
         </footer>
       </div>
     </div>

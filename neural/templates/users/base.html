@@ -12,7 +12,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="white" />
   <link rel="apple-touch-icon" href="{% static 'assets/img/favicon.ico'%}" />
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>Iniciar sesión</title>
+  <title>
+
+    {% block title %}
+    Neural
+    {% endblock title %}
+
+  </title>
   <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.ico' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -12,6 +12,7 @@ services:
     image: neural_local_django
     depends_on:
       - postgres
+      - mailhog
     volumes:
       - .:/app:z
     env_file:
@@ -43,6 +44,12 @@ services:
       - postgres
     ports: []
     command: /start-celeryworker
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    container_name: neural_local_mailhog
+    ports:
+      - '8025:8025'
 
   celerybeat:
     <<: *django
