@@ -1,180 +1,286 @@
-{% extends 'base.html' %}
-{% load static %}
-{% load i18n %}
+{% extends 'users/base.html' %}
+{% load static i18n static %}
+{% block title %}Inicio{% endblock %}
 
-{% block content %}
-<div class="page-content">
+{% block css %}
+<link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
+{% endblock css %}
 
-    <div class="container-fluid">
-        {% language 'es' %}
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                    aria-hidden="true">&times;</span>
-            </button>
-            {% if 'safe' in message.tags %}
-            {{ message|safe }}
-        {% else %}
-            {{ message }}
-        {% endif %}
-
+{% block container %}
+<div class="adminuiux-wrap">
+  {% include 'shared/sidebar.html' %}
+  <main class="adminuiux-content has-sidebar" onclick="contentClick()">
+    <div class="container mt-3" id="main-content">
+      <div class="row gx-3 align-items-center">
+        <div class="col-auto mb-4">
+          <figure class="avatar avatar-60 rounded-circle coverimg align-middle"><img
+              src="{% static 'assets/img/fitness/image-6.jpg' %}" alt=""></figure>
         </div>
-        {% endfor %}
-        {% endif %}
-        {% endlanguage %}
-        <div class="row">
-            <div class="col-lg-6 offset-lg-3 mb-4 text-center">
-                <h4 class="text-center mt-3">¡Hola!</h4>
-                <h5 class="text-center"> 💪 {{request.user.get_full_name|title}} 🏋️‍♀️</h5>
-
-            </div>
-
-            <div class="col-lg-6">
-                <a {% if days_duration <= 0 %}href="#" onclick="handleLinkClick()"{% else %}href="{% url 'training:schedule-v1' %}"{% endif %}>
-                    <div class="card border border-success">
-                        <div class="card-header bg-transparent border-success">
-                            <h5 class="my-0 text-success" style="font-size: x-large;"><i
-                                    class="mdi mdi-yoga mr-3"></i>
-                                    {% trans 'Agendar Entrenamiento funcional' %} </h5>
-                        </div>
-                        <div class="card-body mt-0 pt-0">
-                            <h5>Selecciona horario y espacio de preferencia para tu entrenamiento.</h5>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-6">
-              <a {% if days_duration <= 0 %}href="#" onclick="handleLinkClick()"{% else %}href="{% url 'training:schedule' %}"{% endif %}>
-                  <div class="card border border-primary">
-                      <div class="card-header bg-transparent border-primary">
-                          <h5 class="my-0 text-primary" style="font-size: x-large;"><i
-                                  class="bx bx-run  mr-3"></i>
-                                  {% trans 'Agendar preparación física grupal ' %} </h5>
-                      </div>
-                      <div class="card-body mt-0 pt-0">
-                          <h5>Running, formativo y preparación física.</h5>
-                      </div>
+        <div class="col-9 col-sm-8 col-md-9 col-xl mb-4">
+          <h1 class="fw-bold text-theme-accent-1 mb-0">Oe, <span>{{request.user.first_name|title}}</span></h1>
+          <h4 class="text-theme-1">Bienvenidx a neural app</h4>
+        </div>
+        <div class="col-12 col-lg-4 col-xl-3">
+          <div class="card adminuiux-card border-0 bg-theme-r-gradient mb-3">
+            <div class="card-body">
+              <div class="row gx-3 align-items-center">
+                <div class="col mb-0 mb-lg-2">
+                  <h6>{{last_training.message}}</h6>
+                  <div class="progress bg-white-opacity height-dynamic mb-1" role="progressbar"
+                    aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                    style="--h-dynamic:5px">
+                    <div class="progress-bar bg-white" style="width: 100%"></div>
                   </div>
-              </a>
-          </div>
-            <div class="col-lg-6">
-                <a href="{% url 'training:my_schedule' %}">
-                <div class="card border border-info">
-                    <div class="card-header bg-transparent border-info">
-                        <h5 class="my-0 text-info" style="font-size: x-large;"><i
-                                class="mdi mdi-calendar mr-3"></i>Ver mi Agenda</h5>
-                    </div>
-                    <div class="card-body mt-0 pt-0">
-                        <h5>Tus entrenamientos programados para la semana.</h5>
-                    </div>
+                  <p class="small opacity-75">Nos vemos</p>
                 </div>
-            </a>
+                <div class="col-auto col-lg-12"><a href="{% url 'training:my_schedule' %}" class="btn btn-accent btn-square"><i
+                      class="bi bi-pencil"></i></a></div>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
+      <div class="swiper swipernav mb-3">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide width-140">
+            <div class="card adminuiux-card theme-red">
+              <div class="card-header">
+                <div class="row">
+                  <div class="col">
+                    <h6>Racha</h6>
+                  </div>
+                  <div class="col-auto"><i class="bi bi-star text-sucess"></i></div>
+                </div>
+                <small class="fz-10">Asistencia semanal</small>
+              </div>
+              <div class="card-body pt-0 px-0">
+                <div class="height-100 w-100 mx-auto position-relative"><canvas id="lineheart"></canvas>
+                  <div class="position-absolute bottom-0 start-0 w-100 px-3">
+                    <div class="row align-items-center justify-content-center h-100">
+                      <div class="col-12 lh-20">
+                        <h4 class="h4 mb-0">80</h4>
+                        <p class="small opacity-75">Semana(s)</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide width-140">
+            <div class="card adminuiux-card theme-orange">
+              <div class="card-header">
+                <div class="row">
+                  <div class="col">
+                    <h6>Calorias</h6>
+                  </div>
+                  <div class="col-auto"><i class="bi bi-speedometer text-theme-1"></i></div>
+                </div>
+                <small class="fz-10">Durante la semana</small>
+              </div>
+              <div class="card-body text-center pt-0">
+                <div class="avatar avatar-100 mx-auto position-relative">
+                  <div id="circleprogressorange1"></div>
+                  <div class="position-absolute top-0 start-0 w-100 h-100">
+                    <div class="row align-items-center justify-content-center h-100">
+                      <div class="col-auto lh-20">
+                        <h4 class="h4 mb-0">365</h4>
+                        <p class="small opacity-75">kcal</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide width-140">
+            <div class="card adminuiux-card theme-green">
+              <div class="card-header">
+                <div class="row">
+                  <div class="col">
+                    <h6>Entrenos</h6>
+                  </div>
+                  <div class="col-auto"><i class="bi bi-person-walking text-theme-1"></i></div>
+                </div>
+                <small class="fz-10">Durante la semana</small>
+              </div>
+              <div class="card-body text-center pt-0">
+                <div class="avatar avatar-100 mx-auto position-relative">
+                  <div id="circleprogressgreen2"></div>
+                  <div class="position-absolute top-0 start-0 w-100 h-100">
+                    <div class="row align-items-center justify-content-center h-100">
+                      <div class="col-auto lh-20">
+                        <h4 class="h4 mb-0">7532</h4>
+                        <p class="small opacity-75">Steps</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="swiper-slide width-190">
+            <div class="card adminuiux-card theme-purple">
+              <div class="card-header">
+                <div class="row">
+                  <div class="col">
+                    <h6>Horas</h6>
+                  </div>
+                  <div class="col-auto"><i class="bi bi-calendar-date text-theme-1"></i></div>
+                </div>
+                <small class="fz-10">Dedicadas durante la semana</small>
+              </div>
+              <div class="card-body text-center pt-0">
+                <div class="avatar avatar-60 mx-auto position-relative mb-3">
+                  <div id="circleprogresspurple1"></div>
+                </div>
+                <h4 class="h4 mb-0">7.4 <span class="fw-normal fs-14 opacity-75">Hours</span></h4>
+              </div>
+            </div>
+          </div>
+
 
         </div>
-        {% comment %} <div class="row">
-          <div class="col-lg-6 offset-lg-3 mb-4">
-              <h4 class="text-center">Servicios personalizados 💅</h4>
-          </div>
-
-          <div class="col-lg-4 offset-lg-2">
-              <a href="https://wa.me/573052655596?text=Hola%20Soy%20{{user.get_full_name}}%20Estoy%20intersado%20en%20entreno%20personalizado" target="_blank">
-              <div class="card border border-primary">
-                  <div class="card-header bg-transparent border-primary">
-                      <h5 class="my-0 text-primary" style="font-size: x-large;">
-                        <i class="mdi mdi-biathlon mr-3"></i>Entreno personalizado</h5>
+      </div>
+      <div class="row gx-3 align-items-center mb-3">
+        <div class="col">
+          <h6>Menú</h6>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card adminuiux-card mb-3">
+            <div class="card-body">
+              <div class="row gx-3">
+                <div class="col-4 mb-3">
+                  <figure class="w-100 height-110 rounded coverimg"><img
+                      src="{% static 'assets/img/fitness/image-5.jpg' %}" alt="" style="display: none;"></figure>
+                </div>
+                <div class="col-8 mb-3">
+                  <div class="row gx-3 align-items-center mb-2">
+                    <div class="col">
+                      <p><span class="badge badge-sm badge-light text-bg-theme-1 theme-cyan"><i
+                        class="bi bi-patch-check-fill"></i> Functional</span></p>
+                    </div>
+                    <div class="col-auto"><button class="btn btn-sm btn-square btn-link theme-red"><i
+                          class="bi bi-heart-fill"></i></button></div>
                   </div>
-                  <div class="card-body mt-0 pt-0">
-                      <h5>Tienes un profe para hacer un entreno especial, adaptado a tus necesidades.</h5>
-                  </div>
+                  <h6 class="text-truncated">
+                    Agendar Entrenamiento funcional</h6>
+                  <p class="small text-secondary">Sesiones diarias</p>
+                </div>
               </div>
-          </a>
-          </div>
-          <div class="col-lg-4">
-              <a href="https://wa.me/+573052655596?text=Hola%20Soy%20{{user.get_full_name}}%20Estoy%20intersado%20en%20servicio%20de%20fisio" target="_blank">
-              <div class="card border border-danger">
-                  <div class="card-header bg-transparent border-danger">
-                      <h5 class="my-0 text-danger" style="font-size: x-large;"><i
-                              class="mdi mdi-medical-bag mr-3"></i>¡Me dueleee!</h5>
-                  </div>
-                  <div class="card-body mt-0 pt-0">
-                      <h5>Necesitas que te revisemos un dolor, una molestia, se le tiene...</h5>
-                  </div>
+              <div class="row gx-3 align-items-center">
+                <div class="col">
+                  <p class="text-theme-1 theme-yellow"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                      class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                      class="bi bi-star-fill"></i><br><small class="text-secondary"></small></p>
+                </div>
+                <div class="col-auto"><a href="{% url 'training:schedule-v1' %}" class="btn btn-sm btn-link">Ver <i
+                      class="bi bi-chevron-right"></i></a></div>
               </div>
-          </a>
+            </div>
           </div>
-
-        </div> {% endcomment %}
-        <!-- end row -->
-    </div> <!-- container-fluid -->
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card adminuiux-card mb-3">
+            <div class="card-body">
+              <div class="row gx-3">
+                <div class="col-4 mb-3">
+                  <figure class="w-100 height-110 rounded coverimg"><img
+                      src="{% static 'assets/img/fitness/image-4.jpg' %}" alt="" style="display: none;"></figure>
+                </div>
+                <div class="col-8 mb-3">
+                  <div class="row gx-3 align-items-center mb-2">
+                    <div class="col">
+                      <p><span class="badge badge-sm badge-light text-bg-theme-1 theme-cyan"><i
+                            class="bi bi-calendar"></i> Calendario</span></p>
+                    </div>
+                    <div class="col-auto"><button class="btn btn-sm btn-square btn-link theme-red"><i
+                          class="bi bi-heart-fill"></i></button></div>
+                  </div>
+                  <h6 class="text-truncated">Ver mi agenda</h6>
+                  <p class="small text-secondary">Sesiones agendadas.</p>
+                </div>
+              </div>
+              <div class="row gx-3 align-items-center">
+                <div class="col">
+                  <p class="text-theme-1 theme-yellow"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                      class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                      class="bi bi-star-fill"></i><br><small class="text-secondary"></small></p>
+                </div>
+                <div class="col-auto"><a href="{% url 'training:my_schedule' %}" class="btn btn-sm btn-link">Ver <i
+                      class="bi bi-chevron-right"></i></a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
-{% endblock content %}
-
-{% block modal %}
-<div id="myModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-      <div class="modal-content">
-      <div class="modal-header">
-          <h3>OEEEEEE🤪🤪</h3>
-
-      </div>
-      <div class="modal-body text-center">
-        <img src="{% static 'images/giphy.gif' %}" alt="" class="img-fluid">
-        <h4 class="mt-2">Queremos conocerte un poco mas, andá y contanos un par de cositas 👇👇</h4>
-        <a  href="{% url 'users:profile' %}"
-        class="btn btn-primary btn-lg waves-effect waves-light text-white">Completar perfil</a>
-      </div>
+<footer class="adminuiux-mobile-footer hide-on-scrolldown style-1">
+  <div class="container">
+    <ul class="nav nav-pills nav-justified">
+      <li class="nav-item">
+        <a class="nav-link" href="/">
+          <span>
+            <i class="nav-icon bi bi-columns-gap"></i>
+            <span class="nav-text">Inicio</span>
+          </span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="fitness-workout.html">
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg"
+              class="nav-icon" viewBox="0 0 20 10">
+              <g id="workout-icon" transform="translate(-87 -157)">
+                <g id="Rectangle_32" data-name="Rectangle 32" transform="translate(87 159)" fill="none" stroke=""
+                  stroke-width="1">
+                  <rect width="4" height="8" rx="2" stroke="none" />
+                  <rect x="0.5" y="0.5" width="3" height="7" rx="1.5" fill="none" />
+                </g>
+                <g id="Rectangle_36" data-name="Rectangle 36" transform="translate(93 161)" fill="none" stroke=""
+                  stroke-width="1">
+                  <rect width="8" height="4" stroke="none" />
+                  <rect x="0.5" y="0.5" width="7" height="3" fill="none" />
+                </g>
+                <g id="Rectangle_34" data-name="Rectangle 34" transform="translate(90 157)" fill="none" stroke=""
+                  stroke-width="1">
+                  <rect width="4" height="12" rx="2" stroke="none" />
+                  <rect x="0.5" y="0.5" width="3" height="11" rx="1.5" fill="none" />
+                </g>
+                <g id="Rectangle_35" data-name="Rectangle 35" transform="translate(100 157)" fill="none" stroke=""
+                  stroke-width="1">
+                  <rect width="4" height="12" rx="2" stroke="none" />
+                  <rect x="0.5" y="0.5" width="3" height="11" rx="1.5" fill="none" />
+                </g>
+                <g id="Rectangle_33" data-name="Rectangle 33" transform="translate(103 159)" fill="none" stroke=""
+                  stroke-width="1">
+                  <rect width="4" height="8" rx="2" stroke="none" />
+                  <rect x="0.5" y="0.5" width="3" height="7" rx="1.5" fill="none" />
+                </g>
+              </g>
+            </svg> <span class="nav-text">Agendar</span></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="fitness-report.html"><span><i
+              class="nav-icon bi bi-graph-up-arrow"></i> <span class="nav-text">Report</span></span></a></li>
+      <li class="nav-item">
+        <a class="nav-link" href="fitness-profile.html"><span>
+            <figure class="avatar avatar-20 rounded-circle coverimg align-middle mb-2"><img
+                src="{% static 'assets/img/fitness/image-6.jpg' %}" alt=""></figure><br><span class="nav-text">Profile</span>
+          </span></a></li>
+    </ul>
   </div>
-</div>
-{% endblock modal %}
+</footer>
 
+<footer class="adminuiux-footer mt-auto">
+  <div class="container-fluid text-center"><span class="small">Copyright @2025, <a
+target="_blank">Neural consciente</a>💙</span></div>
+</footer>
+
+{% endblock %}
 {% block js %}
-<script>
-  $(document).ready(function(){
-    // count 3 seconds to show the modal
-      $("#resume").modal('toggle');
-  });
-</script>
-    <script>
-        $(document).ready(function(){
-
-          // count 3 seconds to show the modal
-          setTimeout(function(){
-            $("#resume").modal('toggle');
-          }, 3000);
-
-          {% if not profile %}
-          $("#myModal").modal('toggle');
-          {% endif %}
-
-        });
-
-        var days_duration = {{ days_duration }};
-
-        {% if days_duration > 0 %}
-            var days_duration = {{ days_duration }};
-            Swal.fire({
-                title: 'Membresía activa.',
-                text: "te quedan " + days_duration + " días para seguir entrenando.",
-                type:"success"
-            });
-        {% else %}
-            Swal.fire({
-                title: 'Membresía vencida.',
-                text: "tu membresía ha vencido, contáctate con nosotros para renovarla",
-                type:"warning"
-            });
-        {% endif %}
-    </script>
-    <script>
-        function handleLinkClick() {
-            Swal.fire({
-                title: 'Membresía vencida.',
-                text: "tu membresía ha vencido, contáctate con nosotros para renovarla",
-                type:"warning"
-            });
-            return false;
-        }
-    </script>
+<script src="{% static 'assets/js/fitness/fitness-dashboard.js' %}"></script>
 {% endblock js %}

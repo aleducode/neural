@@ -158,3 +158,60 @@ class Ranking(NeuralBaseModel):
 
     class Meta:
         unique_together = ("user", "position")
+
+
+class UserStrike(NeuralBaseModel):
+    """User strike model.
+
+    A strike is a week inline with assistances to the gym.
+    """
+
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="strikes"
+    )
+    weeks = models.PositiveIntegerField(default=0)
+
+    is_current = models.BooleanField(
+        "Current",
+        default=False,
+    )
+
+    class Meta:
+        verbose_name = "Strike"
+        verbose_name_plural = "Strikes"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user"], condition=Q(is_current=True), name="unique_strike"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} - {self.weeks} weeks"
+
+
+class UserStats(NeuralBaseModel):
+    """User stats model.
+
+    A stats is a set of data that a user get for a specific
+    week. It is used to determine the user performance in a
+    week.
+    """
+
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="stats"
+    )
+    week = models.PositiveIntegerField(default=0)
+    trainings = models.PositiveIntegerField(default=0)
+    calories = models.PositiveIntegerField(default=0)
+    hours = models.PositiveIntegerField(default=0)
+    trainings = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Stats"
+        verbose_name_plural = "Stats"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "week"], name="unique_stats")
+        ]
+
+    def __str__(self):
+        return f"{self.user} - {self.week} - {self.trainings} trainings"

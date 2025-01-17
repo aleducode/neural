@@ -6,7 +6,7 @@ from django.views import defaults as default_views
 from django.contrib.auth import views
 from neural.users.authentications import (
     PasswordResetConfirmViewCustom,
-    PasswordResetCustomView
+    PasswordResetCustomView,
 )
 
 urlpatterns = [

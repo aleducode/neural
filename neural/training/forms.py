@@ -3,27 +3,10 @@
 from django import forms
 
 # Models
-from neural.training.models import ImagePopUp, TrainingType
+from neural.training.models import TrainingType
 
 
 days_wrapper = ["Hoy", "Mañana", "Pasado Mañana"]
-
-
-class ImagePopUpForm(forms.ModelForm):
-    """Admin form image pop up."""
-
-    def clean(self):
-        """Check min and max lenght."""
-        is_active = ImagePopUp.objects.filter(is_active=True).count()
-        if is_active > 0:
-            raise forms.ValidationError(
-                "Ya hay una imagen con estado activo, elimina está si quieres agregar una nueva."
-            )
-        return super().clean()
-
-    class Meta:
-        model = ImagePopUp
-        fields = "__all__"
 
 
 class ClassesForm(forms.Form):

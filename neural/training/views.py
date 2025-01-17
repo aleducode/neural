@@ -175,11 +175,20 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         now = timezone.localtime()
-        context["user_slots"] = UserTraining.objects.filter(
-            user=self.request.user,
-            slot__date__gte=now,
-            status=UserTraining.Status.CONFIRMED,
-        ).order_by("slot__date")[:7]
+        context["user_slots"] = (
+            UserTraining.objects.filter(
+                user=self.request.user,
+                slot__date__gte=now,
+                status=UserTraining.Status.CONFIRMED,
+            )
+            .order_by("slot__date")
+            .select_related(
+                "user",
+                "slot",
+                "slot__class_trainging",
+                "slot__class_trainging__training_type",
+            )[:7]
+        )
         return context
 
 

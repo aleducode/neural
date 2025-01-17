@@ -9,16 +9,14 @@ import logging
 from django import forms
 from django.conf import settings
 from django.urls import reverse_lazy
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import login
-from django.contrib import messages
 from django.contrib.auth.views import PasswordResetConfirmView, PasswordResetView
 from django.views.generic import TemplateView, View
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import SetPasswordForm
-from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 

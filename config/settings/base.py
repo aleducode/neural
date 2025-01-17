@@ -65,13 +65,11 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = [
     "django_celery_beat",
-    "ckeditor",
 ]
 
 LOCAL_APPS = [
     "neural.users.apps.UsersConfig",
     "neural.training.apps.SessionsConfig",
-    "neural.landing.apps.LandingConfig",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

@@ -8,11 +8,9 @@ from neural.training.models import (
     UserTraining,
     Slot,
     Space,
-    ImagePopUp,
     TrainingType,
     Classes,
 )
-from neural.training.forms import ImagePopUpForm
 
 
 class UserTrainingInline(admin.TabularInline):
@@ -24,6 +22,7 @@ class UserTrainingInline(admin.TabularInline):
 @admin.register(Slot)
 class SlotAdmin(admin.ModelAdmin):
     date_hierarchy = "date"
+    search_fields = ["class_trainging__training_type__name"]
     list_filter = ["date", "class_trainging__training_type"]
     list_display = [
         "date",
@@ -99,6 +98,14 @@ class SpaceAdmin(admin.ModelAdmin):
 class UserTrainingAdmin(admin.ModelAdmin):
     list_display = ["user", "slot_info", "status"]
     search_fields = ["user__first_name", "user__last_name", "user__email"]
+    autocomplete_fields = ["user", "slot"]
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("user", "slot", "slot__class_trainging")
+        )
 
     def slot_info(self, obj):
         slot = obj.slot
@@ -107,9 +114,3 @@ class UserTrainingAdmin(admin.ModelAdmin):
         else:
             slot_info_str = "N/A"
         return slot_info_str
-
-
-@admin.register(ImagePopUp)
-class ImagePopUpAdmin(admin.ModelAdmin):
-    list_display = ["image_name", "image", "is_active"]
-    form = ImagePopUpForm

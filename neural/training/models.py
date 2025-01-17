@@ -146,25 +146,5 @@ class UserTraining(NeuralBaseModel):
         return f"Entrenamiento: {self.user.get_full_name()} - {self.user}"
 
     @property
-    def random_icon(self):
-        import random
-
-        icons = ["bx bx-cycling", "bx bx-football", "bx bx-dumbbell"]
-        index = random.randint(0, len(icons) - 1)
-        return icons[index]
-
-    @property
     def is_now(self):
         return self.slot.date == timezone.localdate()
-
-
-class ImagePopUp(NeuralBaseModel):
-    """Image pop up."""
-
-    image_name = models.CharField(max_length=255)
-    image = models.ImageField(upload_to="pop_ups")
-    is_active = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name = "Image pop up"
-        verbose_name_plural = "Images pop ups"

@@ -1,2 +1,156 @@
-/*! For license information please see fitness-dashboard.js.LICENSE.txt */
-"use strict";document.addEventListener("DOMContentLoaded",(function(){window.randomScalingFactor=function(){return Math.round(20*Math.random())};var t=document.getElementById("areachartblue1").getContext("2d"),a=t.createLinearGradient(0,0,0,100);a.addColorStop(0,"rgba(3, 174, 210, 1)"),a.addColorStop(1,"rgba(3, 174, 210, 0)");var r={type:"bar",data:{labels:["1","2","3","4","5","7","8","9","10","11","12"],datasets:[{label:"# of Votes",data:[randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()],radius:0,backgroundColor:a,borderColor:"#015EC2",borderWidth:0,borderRadius:4,fill:!0,tension:.5}]},options:{maintainAspectRatio:!1,plugins:{legend:{display:!1},tooltip:{enabled:!0}},scales:{y:{display:!1,beginAtZero:!0},x:{display:!1}}}},o=new Chart(t,r);setInterval((function(){r.data.datasets.forEach((function(t){t.data=t.data.map((function(){return randomScalingFactor()}))})),o.update()}),3e3);var e=document.getElementById("summarychart").getContext("2d");(d=e.createLinearGradient(0,0,0,180)).addColorStop(0,"rgba(252, 122, 30, 0.85)"),d.addColorStop(1,"rgba(252, 122, 30, 0)");var n={type:"line",data:{labels:["10:30","11:00","11:30","12:00","12:30","01:00","01:30"],datasets:[{label:"# of hours",data:[randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()],radius:0,backgroundColor:d,borderColor:"#5840ef",borderWidth:0,fill:!0,tension:.5}]},options:{animation:!0,maintainAspectRatio:!1,plugins:{legend:{display:!1}},scales:{y:{display:!1,beginAtZero:!0},x:{grid:{display:!1},display:!0,beginAtZero:!0}}}},i=new Chart(e,n);setInterval((function(){n.data.datasets.forEach((function(t){t.data=t.data.map((function(){return randomScalingFactor()}))})),i.update()}),3e3);var d,l=document.getElementById("lineheart").getContext("2d");(d=l.createLinearGradient(0,0,0,100)).addColorStop(0,"rgba(200, 0, 54, 0.25)"),d.addColorStop(1,"rgba(200, 0, 54, 0)");var s={type:"line",data:{labels:["10:30","11:00","11:30","12:00","12:30","01:00","01:30"],datasets:[{label:"# of hours",data:[randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()],radius:0,backgroundColor:d,borderColor:"#c80036",borderWidth:1,fill:!0,tension:0}]},options:{animation:!0,maintainAspectRatio:!1,plugins:{legend:{display:!1}},scales:{y:{display:!1,beginAtZero:!0},x:{grid:{display:!1},display:!1,beginAtZero:!0}}}},c=new Chart(l,s);setInterval((function(){s.data.datasets.forEach((function(t){t.data=t.data.map((function(){return randomScalingFactor()}))})),c.update()}),3e3);var g=document.getElementById("doughnutchart").getContext("2d");new Chart(g,{type:"doughnut",data:{labels:["Exercise","Diet","Medicine","Other"],datasets:[{label:"fitness Categories",data:[45,30,25,10],backgroundColor:["#08a046","#fc7a1e","#03aed2","#ffffff"],borderWidth:0}]},options:{responsive:!0,cutout:60,tooltips:{position:"nearest",yAlign:"bottom"},plugins:{legend:{display:!1,position:"top"},title:{display:!1,text:"Chart.js Doughnut Chart"}},layout:{padding:0}}});new ProgressBar.Circle(circleprogressblue1,{color:"rgba(72, 86, 150, 1)",strokeWidth:10,trailWidth:10,easing:"easeInOut",trailColor:"rgba(72, 86, 150, 0.15)",duration:1400,text:{autoStyleContainer:!1},from:{color:"rgba(72, 86, 150, 1)",width:10},to:{color:"rgba(72, 86, 150, 1)",width:10},step:function(t,a){a.path.setAttribute("stroke",t.color),a.path.setAttribute("stroke-width",t.width);var r=Math.round(100*a.value());0===r?a.setText(""):a.setText(r+"<small>%<small>")}}).animate(.85),new ProgressBar.Circle(circleprogressgreen1,{color:"rgba(252, 122, 30, 1)",strokeWidth:10,trailWidth:10,easing:"easeInOut",trailColor:"rgba(252, 122, 30, 0.15)",duration:1400,text:{autoStyleContainer:!1},from:{color:"rgba(252, 122, 30, 1)",width:10},to:{color:"rgba(252, 122, 30, 1)",width:10},step:function(t,a){a.path.setAttribute("stroke",t.color),a.path.setAttribute("stroke-width",t.width);var r=Math.round(100*a.value());0===r?a.setText(""):a.setText(r+"<small>%<small>")}}).animate(.65),new ProgressBar.Circle(circleprogressgreen2,{color:"rgba(8, 160, 70, 1)",strokeWidth:5,trailWidth:10,easing:"easeInOut",trailColor:"rgba(8, 160, 70, 0.15)",duration:1400,text:{autoStyleContainer:!1},from:{color:"rgba(8, 160, 70, 0)",width:5},to:{color:"rgba(8, 160, 70, 1)",width:5},step:function(t,a){a.path.setAttribute("stroke",t.color),a.path.setAttribute("stroke-width",t.width)}}).animate(.7);var u=new ProgressBar.Circle(circleprogresspurple1,{color:"rgba(71, 28, 168, 1)",strokeWidth:10,trailWidth:10,easing:"easeInOut",trailColor:"rgba(71, 28, 168, 0.15)",duration:1400,text:{autoStyleContainer:!1},from:{color:"rgba(71, 28, 168, 1)",width:10},to:{color:"rgba(71, 28, 168, 1)",width:10},step:function(t,a){a.path.setAttribute("stroke",t.color),a.path.setAttribute("stroke-width",t.width);var r=Math.round(100*a.value());0===r?a.setText(""):a.setText(r+"<small>%<small>")}});u.text.style.fontSize="16px",u.animate(.5),new ProgressBar.Circle(circleprogressorange1,{color:"rgba(252, 122, 30, 1)",strokeWidth:8,trailWidth:2,easing:"easeInOut",trailColor:"rgba(252, 122, 30, 0.15)",duration:1400,text:{autoStyleContainer:!1},from:{color:"rgba(252, 122, 30, 0)",width:8},to:{color:"rgba(252, 122, 30, 1)",width:8},step:function(t,a){a.path.setAttribute("stroke",t.color),a.path.setAttribute("stroke-width",t.width)}}).animate(.65)}));
+/*! investment dashboard.js | Adminuiux 2023-2024 */
+
+"use strict";
+
+document.addEventListener("DOMContentLoaded", function () {
+    /* chart js areachart summary  */
+    window.randomScalingFactor = function () {
+        return Math.round(Math.random() * 20);
+    }
+
+    /* summary chart */
+    var lineheartchart = document.getElementById('lineheart').getContext('2d');
+    var gradient2 = lineheartchart.createLinearGradient(0, 0, 0, 100);
+    gradient2.addColorStop(0, 'rgba(0, 200, 10, 0.25)');
+    gradient2.addColorStop(1, 'rgba(0, 200, 117, 0)');
+
+    var lineheartConfig = {
+        type: 'line',
+        data: {
+            labels: ['10:30', '11:00', '11:30', '12:00', '12:30', '01:00', '01:30'],
+            datasets: [{
+                label: '# of hours',
+                data: [
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                ],
+                radius: 0,
+                backgroundColor: gradient2,
+                borderColor: '#28a745',
+                borderWidth: 1,
+                fill: true,
+                tension: 0.0,
+            }]
+        },
+        options: {
+            animation: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false,
+                },
+            },
+            scales: {
+                y: {
+                    display: false,
+                    beginAtZero: true,
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    display: false,
+                    beginAtZero: true,
+                }
+            }
+        }
+    }
+    var lineheart = new Chart(lineheartchart, lineheartConfig);
+    /* my area chart randomize */
+    setInterval(function () {
+        lineheartConfig.data.datasets.forEach(function (dataset) {
+            dataset.data = dataset.data.map(function () {
+                return randomScalingFactor();
+            });
+        });
+        lineheart.update();
+    }, 3000);
+
+    /* circular progress */
+    /* green circular progress */
+    var progressCirclesgreen2 = new ProgressBar.Circle(circleprogressgreen2, {
+        color: 'rgba(8, 160, 70, 1)',
+        // This has to be the same size as the maximum width to
+        // prevent clipping
+        strokeWidth: 5,
+        trailWidth: 10,
+        easing: 'easeInOut',
+        trailColor: 'rgba(8, 160, 70, 0.15)',
+        duration: 1400,
+        text: {
+            autoStyleContainer: false
+        },
+        from: { color: 'rgba(8, 160, 70, 0)', width: 5 },
+        to: { color: 'rgba(8, 160, 70, 1)', width: 5 },
+        // Set default step function for all animate calls
+        step: function (state, circle) {
+            circle.path.setAttribute('stroke', state.color);
+            circle.path.setAttribute('stroke-width', state.width);
+        }
+    });
+    // progressCirclesgreen2.text.style.fontSize = '20px';
+    progressCirclesgreen2.animate(0.70);  // Number from 0.0 to 1.0
+
+    // /* purple circular progress */
+    var progressCirclespurple1 = new ProgressBar.Circle(circleprogresspurple1, {
+        color: 'rgba(71, 28, 168, 1)',
+        // This has to be the same size as the maximum width to
+        // prevent clipping
+        strokeWidth: 10,
+        trailWidth: 10,
+        easing: 'easeInOut',
+        trailColor: 'rgba(71, 28, 168, 0.15)',
+        duration: 1400,
+        text: {
+            autoStyleContainer: false
+        },
+        from: { color: 'rgba(71, 28, 168, 1)', width: 10 },
+        to: { color: 'rgba(71, 28, 168, 1)', width: 10 },
+        // Set default step function for all animate calls
+        step: function (state, circle) {
+            circle.path.setAttribute('stroke', state.color);
+            circle.path.setAttribute('stroke-width', state.width);
+
+            var value = Math.round(circle.value() * 100);
+            if (value === 0) {
+                circle.setText('');
+            } else {
+                circle.setText(value + "<small>%<small>");
+            }
+        }
+    });
+    progressCirclespurple1.text.style.fontSize = '16px';
+    progressCirclespurple1.animate(0.50);  // Number from 0.0 to 1.0
+
+
+    /* orange progress */
+    var progressCirclesorange1 = new ProgressBar.Circle(circleprogressorange1, {
+        color: 'rgba(252, 122, 30, 1)',
+        // This has to be the same size as the maximum width to
+        // prevent clipping
+        strokeWidth: 8,
+        trailWidth: 2,
+        easing: 'easeInOut',
+        trailColor: 'rgba(252, 122, 30, 0.15)',
+        duration: 1400,
+        text: {
+            autoStyleContainer: false
+        },
+        from: { color: 'rgba(252, 122, 30, 0)', width: 8 },
+        to: { color: 'rgba(252, 122, 30, 1)', width: 8 },
+        // Set default step function for all animate calls
+        step: function (state, circle) {
+            circle.path.setAttribute('stroke', state.color);
+            circle.path.setAttribute('stroke-width', state.width);
+        }
+    });
+    // progressCirclesgreen1.text.style.fontSize = '20px';
+    progressCirclesorange1.animate(0.65);  // Number from 0.0 to 1.0
+
+})

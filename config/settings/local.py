@@ -34,7 +34,9 @@ INSTALLED_APPS += ["django_extensions"]  # noqa F405
 
 # EMAIL
 # ------------------------------------------------------------------------------
-EMAIL_BACKEND = env("DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_BACKEND = env(
+    "DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
+)
 EMAIL_TIMEOUT = 3600
 EMAIL_USE_TLS = False
 EMAIL_HOST = env("EMAIL_HOST", default="mailhog")

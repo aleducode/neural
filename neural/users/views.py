@@ -42,8 +42,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
     template_name = "index.html"
 
     def get_context_data(self, **kwargs):
-        from django.contrib import messages
-
         context = super().get_context_data(**kwargs)
         now_date = timezone.localdate()
         user = self.request.user
@@ -74,10 +72,11 @@ class IndexView(LoginRequiredMixin, TemplateView):
                 day_name = f"El {translate_day}"
             hour = last_training.slot.class_trainging.hour_init.strftime("%I:%M %p")
             training_name = last_training.slot.class_trainging.training_type.name
-            messages.warning(
-                self.request,
-                f"Recuerda:  Tu proximo entrenamiento es {training_name} {day_name} a las {hour} !!!",
-            )
+            context["last_training"] = {
+                "day": day_name,
+                "hour": hour,
+                "message": f"Recuerda:  Tu proximo entrenamiento es {training_name} {day_name} a las {hour}",
+            }
         return context
 
 
