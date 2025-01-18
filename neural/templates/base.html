@@ -1,134 +1,91 @@
 {% load static %}
-{% load i18n %}
-
 <!doctype html>
-<html lang="es">
-
+<html lang="en">
 
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="application-name" content="FitnessUIUX" />
+  <meta name="apple-mobile-web-app-title" content="FitnessUIUX" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+  <link rel="apple-touch-icon" href="{% static 'assets/img/favicon.ico'%}" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>
 
-	<meta charset="utf-8"/>
-    <title>Neural Consciente{% block title %}{% endblock %}</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:locale" content="es_CO" />
-	<!-- Primary Meta Tags -->
-    <meta name="title" content="Neural Consciente">
-    <meta name="description" content="Neural consciente, agenda tu entrenamiento.">
+    {% block title %}
+    Neural
+    {% endblock title %}
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://neural.com.co">
-    <meta property="og:title" content="Neural Consciente">
-    <meta property="og:description" content="Neural consciente, agenda tu entrenamiento.">
-    <meta property="og:image" content="{% static 'images/BLANCO.png' %}">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://neural.com.co">
-    <meta property="twitter:title" content="Neural Consciente">
-    <meta property="twitter:description" content="Neural consciente, agenda tu entrenamiento.">
-    <meta property="twitter:image" content="{% static 'images/BLANCO.png' %}">
-
-
-	<!-- App favicon -->
-    <link rel="shortcut icon" href="{% static 'images/brain.png' %}">
-     <!-- Sweet Alert-->
-     <link href="{% static 'backoffice/assets/libs/sweetalert2/sweetalert2.min.css' %}" rel="stylesheet" type="text/css" />
-
-	<!-- Bootstrap Css -->
-	<link href="{% static 'backoffice/assets/css/bootstrap.min.css' %}" rel="stylesheet"/>
-	<!-- Icons Css -->
-	<link href="{% static 'backoffice/assets/css/icons.min.css' %}" rel="stylesheet"/>
-	<!-- App Css-->
-	<link href="{% static 'backoffice/assets/css/app.min.css' %}" rel="stylesheet"/>
-
-
-	{% block styles %}
-    {% endblock %}
-
-</head>
-<style>
-    #page-header-notifications-dropdown {
-        width: 56px;
+  </title>
+  <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.ico' %}">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&family=SUSE:wght@100..800&display=swap"
+  rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.15.10/sweetalert2.css"  />
+  <style>
+    :root {
+      --adminuiux-content-font: "Open Sans", sans-serif;
+      --adminuiux-content-font-weight: 400;
+      --adminuiux-title-font: "SUSE", sans-serif;
+      --adminuiux-title-font-weight: 600
     }
-    .footer > div:nth-child(1) {
-        max-width: 100%;
-        }
-</style>
-<body data-topbar="dark" data-layout="horizontal">
+  </style>
 
-    <!-- Begin page -->
-    <div id="layout-wrapper">
-        <header id="page-topbar" class="text-center">
-            <div class="row">
-            <div class="col-6 offset-3">
-                <a class="logo" href="/index">
-                    <img src="{% static 'images/BLANCO.png' %}"alt="" class="img-fluid" style= "max-height:55px">
-                </a>
-            </div>
-            <div class="col-3 text-right">
-            <div class="dropdown d-inline-block">
-                <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <img class="rounded-circle header-profile-user" src="{% static 'images/brain.png' %}"
-                        alt="Header Avatar">
-                    <span class="d-none d-xl-inline-block ml-1">Perfil</span>
-                    <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right">
-                    <!-- item-->
-                    {% if user.is_staff %}
-                    <a class="dropdown-item text-info" href="{% url 'training:calendar' %}"><i class="bx bx-calendar-event font-size-16 align-middle mr-1"></i> Calendario</a>
-                    {% endif %}
-                    <a class="dropdown-item text-danger" href="{% url 'users:logout' %}"><i class="bx bx-power-off font-size-16 align-middle mr-1 text-danger"></i> Cerrar sesión</a>
-                </div>
-            </div>
-            </div>
+  <script defer="defer" src="{% static 'assets/js/app.js' %}"></script>
+  <link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
+
+  {% block css %}
+
+  {% endblock css %}
+</head>
+
+<body
+    class="main-bg main-bg-opac roundedui adminuiux-header-standard adminuiux-sidebar-standard theme-orange adminuiux-header-transparent adminuiux-sidebar-fill-theme bg-white scrollup"
+    data-theme="theme-orange" data-sidebarfill="adminuiux-sidebar-fill-theme" data-bs-spy="scroll"
+    data-bs-target="#list-example" data-bs-smooth-scroll="true" tabindex="0"
+    data-sidebarlayout="adminuiux-sidebar-standard" data-headerlayout="adminuiux-header-standard"
+    data-headerfill="adminuiux-header-transparent">
+    <div class="pageloader">
+      <div class="container h-100">
+        <div class="row justify-content-center align-items-center text-center h-100 pb-ios">
+          <div class="col-12 mb-auto pt-4"></div>
+
+          <div class="col-auto"><img src="{% static 'images/brain.png' %}" alt="" class="height-80 mb-3">
+            <p class="h2 mb-0 text-theme-accent-1">Neural</p>
+            <p class="display-3 text-theme-1 fw-bold mb-4">Consciente</p>
+            <div class="loader3 mb-2 mx-auto"></div>
+          </div>
+          <div class="col-12 mt-auto pb-4">
+            <p class="small text-secondary">Cargando...</p>
+          </div>
         </div>
+      </div>
+    </div>
+    <div class="adminuiux-wrap">
+        <main class="adminuiux-content has-sidebar" onclick="contentClick()">
+            <div class="container mt-2 height-dynamic" id="main-content" style="--h-dynamic: calc(100vh - 70px)">
+                <div class="row h-100 justify-content-center align-items-center">
+                    <div class="col-auto">
+                        <div class="text-center mb-3">
+                            <h1 class="fw-bold text-theme-accent-1 mb-0"></h1>
+                            <h4 class="text-theme-1">
 
-        </header>
+                              {% block content %}
 
-        <div class="main-content">
-        {% block content %}
+                              {% endblock content %}
 
-        {% endblock content %}
-        </div>
-            <footer class="footer" >
-                <div class="container-fluid" class="m-0 p-0" style="background-color:#f2f2f5">
-                    <div class="row text-center" >
-                        <div class="col-12">
-                            <img src="{% static 'images/brain.png' %}" width="60" class="img-fluid">
-                            <p class="mt-0 pt-0 mb-0">Código fuente libre bajo licencia <a href="https://github.com/aleducode/help-abejorral/blob/master/LICENSE" target="_blank">MIT License</a></p>
-                            <p class="mt-0 pt-0 mb-0">Desarrollado por: <a href="https://github.com/aleducode" target="_blank">Alejandro Duque</a></p>
-                            <p class="mt-0 pt-0 mb-0"> Revisá el código <a href="https://github.com/aleducode/neural" target="_blank">acá</a></p>
-                            <p class="mt-0 pt-0 mb-0">© 2024. Creado en medallo con  <i class="mdi mdi-heart text-info"></i> mi fai.</p>
-
+                            </h4>
                         </div>
                     </div>
                 </div>
-            </footer>
-
-            {% block modal %}
-
-            {% endblock modal %}
-
-
-        <!-- end main content-->
-
+            </div>
+        </main>
     </div>
-
-
-    <script src="{% static 'backoffice/assets/libs/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'backoffice/assets/libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-        <!-- Sweet Alerts js -->
-        <script src="{% static 'backoffice/assets/libs/sweetalert2/sweetalert2.min.js' %}"></script>
-
-        <!-- Sweet alert init js-->
-        <script src="{% static 'backoffice/assets/js/pages/sweet-alerts.init.js' %}"></script>
-
-        {% block js %}
-
-        {% endblock js %}
 
 </body>
 
