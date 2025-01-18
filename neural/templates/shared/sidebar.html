@@ -29,7 +29,12 @@
         <a href="{% url 'users:logout' %}" class="nav-link">
           <div class="col-auto">
             <div class="avatar avatar-30 coverimg rounded d-block align-top"><img
-                src="{% static 'assets/img/modern-ai-image/user-6.jpg' %}" alt=""></div>
+              {% if user.photo %}
+              src="{{user.photo.url}}"
+              {% else %}
+              src="{% static 'assets/img/fitness/image-6.jpg' %}"
+              {% endif %}
+                alt=""></div>
           </div>
           <div class="col px-2 menu-name text-start not-iconic">
             <p class="mb-0 fs-14 lh-20">Cerrar sesión<br><small class="opacity-50">{{request.user.first_name|title}}</small>

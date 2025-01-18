@@ -136,20 +136,6 @@ class ProfileView(LoginRequiredMixin, FormView):
         kwargs["user"] = self.request.user
         return kwargs
 
-    def get_initial(self):
-        initial = super().get_initial()
-        user = self.request.user
-        profile = user.profile if hasattr(user, "profile") else None
-        if profile:
-            initial["plan"] = profile.plan
-            initial["birthdate"] = profile.birthdate
-            initial["address"] = profile.address
-            initial["emergency_contact"] = profile.emergency_contact
-            initial["emergency_contact_phone"] = profile.emergency_contact_phone
-            initial["profession"] = profile.profession
-            initial["instagram"] = profile.instagram
-        return initial
-
     def form_valid(self, form):
         form.save()
         return super().form_valid(form)

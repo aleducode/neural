@@ -14,7 +14,12 @@
       <div class="row gx-3 align-items-center">
         <div class="col-auto mb-4">
           <figure class="avatar avatar-60 rounded-circle coverimg align-middle"><img
-              src="{% static 'assets/img/fitness/image-6.jpg' %}" alt=""></figure>
+            {% if user.photo %}
+            src="{{user.photo.url}}"
+            {% else %}
+            src="{% static 'assets/img/fitness/image-6.jpg' %}"
+            {% endif %}
+              alt=""></figure>
         </div>
         <div class="col-9 col-sm-8 col-md-9 col-xl mb-4">
           <h1 class="fw-bold text-theme-accent-1 mb-0">Oe, <span>{{request.user.first_name|title}}</span></h1>
@@ -270,9 +275,15 @@
       <li class="nav-item"><a class="nav-link" href="{% url 'training:my_schedule' %}"><span><i
               class="nav-icon bi bi-calendar"></i> <span class="nav-text">Calendario</span></span></a></li>
       <li class="nav-item">
-        <a class="nav-link" href="fitness-profile.html"><span>
+
+        <a class="nav-link" href="{% url 'users:profile' %}"><span>
             <figure class="avatar avatar-20 rounded-circle coverimg align-middle mb-2"><img
-                src="{% static 'assets/img/fitness/image-6.jpg' %}" alt=""></figure><br><span class="nav-text">Profile</span>
+              {% if user.photo %}
+              src="{{user.photo.url}}"
+              {% else %}
+              src="{% static 'assets/img/fitness/image-6.jpg' %}"
+              {% endif %}
+                alt=""></figure><br><span class="nav-text">Profile</span>
           </span></a></li>
     </ul>
   </div>

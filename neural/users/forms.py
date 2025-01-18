@@ -8,7 +8,7 @@ from django.contrib.auth import forms as admin_forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from neural.users.models import Plan, User, Profile
+from neural.users.models import User
 
 
 class UserChangeForm(admin_forms.UserChangeForm):
@@ -201,46 +201,50 @@ class SignUpForms(forms.Form):
 class ProfileForm(forms.Form):
     """Profile form."""
 
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop("user", None)
+    def __init__(self, user, *args, **kwargs):
+        """User must be passed as a parameter."""
+        self.user = user
         super().__init__(*args, **kwargs)
 
-    plan = forms.ModelChoiceField(
-        queryset=Plan.objects.all(),
-        widget=forms.Select(attrs={"class": "form-control"}),
+    photo = forms.ImageField(
+        label="",
+        required=False,
+        widget=forms.FileInput(attrs={"class": "form-control"}),
     )
-    birthdate = forms.DateField(
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "type": "date", "value": "2000-01-01"}
+    first_name = forms.CharField(
+        min_length=2,
+        max_length=50,
+        label="",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    last_name = forms.CharField(
+        min_length=2,
+        max_length=50,
+        label="",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    email = forms.EmailField(
+        label="",
+        widget=forms.EmailInput(attrs={"class": "form-control"}),
+    )
+
+    def clean_email(self):
+        """Email must be unique."""
+        email = self.cleaned_data["email"]
+        email_taken = (
+            User.objects.filter(email=email)
+            .exclude(username=self.user.username)
+            .exists()
         )
-    )
-    address = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control"}))
-    emergency_contact = forms.CharField(
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Nombre de contacto de emergencia",
-            }
-        )
-    )
-    emergency_contact_phone = forms.CharField(
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Número de contacto de emergencia",
-            }
-        )
-    )
-    profession = forms.CharField(
-        widget=forms.TextInput(attrs={"class": "form-control"})
-    )
-    instagram = forms.CharField(
-        required=False, widget=forms.TextInput(attrs={"class": "form-control"})
-    )
+        if email_taken:
+            raise forms.ValidationError("Email ya registrado.")
+        return email
 
     def save(self):
         """Update user's profile data."""
-        profle, _ = Profile.objects.update_or_create(
-            user=self.user, defaults=self.cleaned_data
-        )
-        return profle
+        fields = ["photo", "first_name", "last_name", "email"]
+        data = {field: self.cleaned_data[field] for field in fields}
+        for field, value in data.items():
+            setattr(self.user, field, value)
+        self.user.save()
+        return self.user

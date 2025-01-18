@@ -33,6 +33,13 @@ class User(NeuralBaseModel, AbstractUser):
         validators=[phone_regex], max_length=17, unique=True
     )
 
+    photo = models.ImageField(
+        "profile picture",
+        upload_to="users/photos/",
+        blank=True,
+        null=True,
+    )
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "first_name", "last_name"]
 
