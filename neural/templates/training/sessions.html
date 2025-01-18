@@ -46,12 +46,14 @@
         <div class="card adminuiux-card border-0 bg-gradient-6">
           <div class="card-body">
             <div class="row">
-              <div class="col">
+              {% if already_scheduled %}
+              <div class="col mb-2 mt-2">
                 <p>
-                  <span class="badge badge-sm badge-light text-bg-theme-1 theme-cyan"><i class="bi bi-patch-check-fill"></i> Pro
-                    Trainer</span>
+                  <span class="badge badge-sm badge-success text-bg-theme-1"><i class="bi bi-patch-check-fill"></i> Ya reservaste esta clase
+                  </span>
                 </p>
               </div>
+              {% endif %}
               <div class="col-8">
                 <h6 class="text-truncated">
                   {{session.class_trainging.training_type.name}}

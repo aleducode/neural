@@ -14,7 +14,6 @@ router.register(r"training", api_views.TrainingViewSet, basename="api-training")
 
 urlpatterns = [
     path("api/", include(router.urls)),
-    path(route="schedule", view=training_views.ScheduleView.as_view(), name="schedule"),
     path(
         route="schedule/v1",
         view=training_views.ScheduleV1View.as_view(),
@@ -39,21 +38,5 @@ urlpatterns = [
         route="my-schedule",
         view=training_views.MyScheduleView.as_view(),
         name="my_schedule",
-    ),
-    path(route="info", view=training_views.InfoView.as_view(), name="info"),
-    path(
-        route="resumen-2024",
-        view=training_views.ResumeYear.as_view(),
-        name="resume_year",
-    ),
-    path(
-        route="class-calendar/",
-        view=training_views.ClassCalendarView.as_view(),
-        name="calendar",
-    ),
-    path(
-        route="class-calendar/<str:day>/",
-        view=training_views.ClassCalendarDetailView.as_view(),
-        name="detail-calendar",
     ),
 ]

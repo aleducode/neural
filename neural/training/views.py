@@ -1,35 +1,20 @@
 """Training views."""
 
-import calendar
-
 # Django
 from django.contrib import messages
-from django.db.models import Count
 from datetime import timedelta
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 
-from django.views.generic import TemplateView, FormView, DetailView
+from django.views.generic import TemplateView, DetailView
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 
 # Models
-from neural.training.models import Slot, UserTraining, Classes, TrainingType
-from neural.users.models import Ranking
+from neural.training.models import Slot, UserTraining
 from datetime import datetime
-from neural.training.forms import ClassesForm
-
-
-class ScheduleView(LoginRequiredMixin, TemplateView):
-    template_name = "training/schedule.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        now = timezone.localtime()
-        context["date"] = now
-        return context
 
 
 class ScheduleV1View(LoginRequiredMixin, TemplateView):
@@ -108,6 +93,7 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
                 f'Ya reservaste para este día si quieres modificarlo cancela tu clase activa <a href="{link}">aquí</a>',
                 extra_tags="safe",
             )
+            context["already_scheduled"] = True
         if self.date == now_date:
             filter_dict["class_trainging__hour_init__gte"] = now
         base_filter = Slot.objects.filter(**filter_dict)
@@ -189,129 +175,4 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
                 "slot__class_trainging__training_type",
             )[:7]
         )
-        return context
-
-
-class InfoView(LoginRequiredMixin, TemplateView):
-    template_name = "training/info.html"
-
-
-class ResumeYear(LoginRequiredMixin, TemplateView):
-    template_name = "training/resume.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        years_in_the_app = timezone.localdate() - self.request.user.created.date()
-        context["years_in_the_app"] = years_in_the_app.days // 365
-        ranking = self.request.user.rankings.last()
-        top_10 = Ranking.objects.all().order_by("position").select_related("user")[:10]
-        total_ranking = Ranking.objects.count()
-        context["total_ranking"] = total_ranking
-        context["top_10"] = top_10
-        context["ranking"] = ranking
-        now = timezone.localtime()
-        trainings = UserTraining.objects.filter(
-            user=self.request.user,
-            slot__date__year=now.year,
-            status=UserTraining.Status.CONFIRMED,
-        ).distinct()
-        cancelled_trainings = UserTraining.objects.filter(
-            user=self.request.user,
-            slot__date__year=now.year,
-            status=UserTraining.Status.CANCELLED,
-        ).distinct()
-        if trainings.count() == 0:
-            return context
-        context["trainings"] = trainings.count()
-        context["reaction"] = "🤩" if trainings.count() >= 20 else "🤟"
-
-        # Day selected
-        best_day = (
-            trainings.values("slot__date__week_day")
-            .annotate(total=Count("slot__date__week_day"))
-            .order_by("-total")
-            .first()
-        )
-        context["best_day_name"] = (
-            _(calendar.day_name[best_day["slot__date__week_day"] - 1])
-            if best_day
-            else None
-        )
-
-        # Best training
-        best_train = (
-            trainings.values("slot__class_trainging__training_type")
-            .annotate(total=Count("slot__class_trainging__training_type"))
-            .order_by("-total")
-            .first()
-        )
-        if best_train:
-            context["best_train"] = TrainingType.objects.get(
-                pk=best_train["slot__class_trainging__training_type"]
-            ).name
-        # Best train hours
-        best_train_hour = (
-            trainings.values("slot__class_trainging__hour_init")
-            .annotate(total=Count("slot__class_trainging__hour_init"))
-            .exclude(slot__class_trainging__hour_init="05:00")
-            .order_by("-total")
-            .first()
-        )
-        context["best_train_hour"] = (
-            best_train_hour["slot__class_trainging__hour_init"]
-            if best_train_hour
-            else None
-        )
-
-        array_per_month = (
-            trainings.values("created__month")
-            .annotate(total=Count("created__month"))
-            .order_by("created__month")
-            .distinct()
-        )
-        final_array = []
-        for date in range(1, 13):
-            if not array_per_month.filter(created__month=date).exists():
-                final_array.append(0)
-            else:
-                final_array.append(array_per_month.get(created__month=date)["total"])
-        context["array_per_month"] = final_array
-        context["best_month"] = max(final_array)
-        month = final_array.index(context["best_month"]) + 1
-        context["best_month_name"] = _(calendar.month_name[month])
-
-        # Worst month
-        context["worst_month"] = min(final_array)
-        month = final_array.index(context["worst_month"]) + 1
-        context["worst_month_name"] = _(calendar.month_name[month])
-        context["cancelled_trainings"] = cancelled_trainings.count()
-        return context
-
-
-class ClassCalendarView(TemplateView):
-    template_name = "users/class_calendar.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["days_choices"] = Classes.DaysChoices.choices
-        return context
-
-
-class ClassCalendarDetailView(FormView):
-    template_name = "users/class_calendar_detail.html"
-    form_class = ClassesForm
-
-    def dispatch(self, request, *args, **kwargs):
-        self.day_name = self.kwargs.get("day")
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_queryset(self):
-        classes = Classes.objects.filter(day=self.day_name).order_by("hour_init")
-        return classes
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["day_classes"] = self.get_queryset()
-        context["day_name"] = self.day_name
-        context["training_types"] = TrainingType.objects.all()
         return context

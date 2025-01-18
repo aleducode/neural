@@ -102,13 +102,14 @@
           dataType: "json",
         })
           .done(function (response) {
-            var elem = document.getElementById('event_' + pk_session);
-            elem.parentNode.removeChild(elem);
             Swal.fire({
               title: "Eliminado!",
               text: "Tu sessión de entrenamiento ha sido cancelada.",
-              type: "success"
-            })
+              type: "success",
+              timeout: 2000,
+            }).then((result) => {
+              location.reload();
+            });
           })
 
       }

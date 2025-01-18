@@ -1,45 +1,73 @@
-{% extends 'base.html' %}
-{% load i18n static %}
+{% extends 'users/base.html' %}
+{% load static i18n static %}
+{% block title %}Calendario{% endblock %}
 
-{% block content %}
-<div class="page-content">
-    <div class="container-fluid">
-        <div class="row justify-content-center mt-lg-5">
-            <div class="col-xl-5 col-sm-8">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="text-center">
-                            <div class="row justify-content-center">
-                                <div class="col-lg-10">
-                                    <h4 class="mt-4 font-weight-semibold">Entrenamiento Agendado!!</h4>
-                                    <p class="text-info mt-3">
-                                        {% with init_am_pm=init_hour|date:"A" end_am_pm=end_hour|date:"A" %}
-                                        Ey {{ request.user.first_name|title }}, ya te agendamos el entreno para el día {{ date }} de {{ init_hour }} {{ init_am_pm }} hasta las {{ end_hour }} {{ end_am_pm }}, vamos con toda!! 💪🏼
-                                        {% endwith %}
-                                    </p>
-                                    </div>
-                                        <a href="/index" class="btn btn-success mt-2">
-                                            Entendido.
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+{% block css %}
+<link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
+<style>
+  .clickeable {
+    cursor: pointer;
+  }
+</style>
+{% endblock css %}
+{% block custom_header %}
+<button class="btn btn-square btn-link" onclick="goBack()"><i class="bi bi-arrow-left"></i></button>
+<p class="h6 my-1 px-3 text-center"><span class="title">Inicio</span></p>
+{% endblock custom_header %}
+{% block container %}
 
-                            <div class="row justify-content-center mt-5 mb-2">
-                                <div class="col-sm-6 col-8">
-                                    <div>
+<div class="adminuiux-wrap">
+  {% include 'shared/sidebar.html' %}
+  <main class="adminuiux-content has-sidebar" onclick="contentClick()">
+    <div class="container mt-3" id="main-content">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-5">
+          <div class="card adminuiux-card overflow-hidden mb-3">
+            <div class="card-body">
+              <div class="card adminuiux-card text-center overflow-hidden mb-3">
+                <div class="card-body coverimg position-relative" style="height: 40vh;">
 
-                                        <img src="{% static 'backoffice/assets/images/verification-img.png' %}" alt="" class="img-fluid">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div>
+                  <img  src="{% static 'assets/img/fitness/image-5.jpg' %}" alt="" style="display: none;">
+                  <i class="h1 bi bi-check2-circle avatar avatar-50 text-white position-absolute end-0 top-0 m-3 p-2 bg-theme-1 theme-green rounded-circle"></i>
                 </div>
+              </div>
+              <div class="text-center mb-3">
+                <h5>Ya te agendamos el entreno 🎉</h5>
+              </div>
+              <div class="row gx-3">
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                  <div class="row gx-3">
+                    <div class="col-auto"><span
+                        class="avatar avatar-40 rounded bg-theme-1-subtle text-theme-1 h5">
+                        <i class="bi bi-clock"></i>
+                      </span></div>
+                    <div class="col">
+                      <p class="text-dark">{{date}}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                  <div class="row gx-3">
+                    <div class="col-auto"><span
+                        class="avatar avatar-40 rounded bg-theme-1-subtle text-theme-1 h5">
+                      <i class="bi bi-clock"></i>
+                      </span></div>
+                    <div class="col">
+                      <p class="text-dark">{{ init_hour }} {{ init_am_pm }} hasta las {{ end_hour }} {{ end_am_pm }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="text-center"><a href="/" class="btn btn-theme">Listo <i
+                    class="bi bi-arrow-right"></i></a></div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </main>
 </div>
-{% endblock content %}
+{% endblock %}
+{% block js %}
+{% endblock js %}

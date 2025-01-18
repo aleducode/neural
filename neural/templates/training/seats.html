@@ -1,64 +1,139 @@
-{% extends 'base.html' %}
-{% load i18n static %}
-{% block content %}
-{% language 'es' %}
-<div class="page-content">
-  <div class="container-fluid">
-    {% language 'es' %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-          aria-hidden="true">&times;</span>
-      </button>{% if 'safe' in message.tags %}
-      {{ message|safe }}
-  {% else %}
-      {{ message }}
-  {% endif %}
+{% extends 'users/base.html' %}
+{% load static i18n static %}
+{% block title %}Calendario{% endblock %}
 
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endlanguage %}
-    <div class="col-xl-6 offset-lg-3">
-      <a href="{% url 'training:training-types' slot.date|date:'Y-m-d' %}">Regresar</a>
-      <div class="card mt-2 ml-0 mr-0 pl-0 pr-0">
-        <div class="card-body ml-0 mr-0 pl-0 pr-0 text-center">
-          <h3 class="text-center">Confirmar Entreno:</h3>
-          <h4 class="text-center mt-0 mb-4"><small>{{slot.class_trainging.training_type.name}} |
-              {{slot.date|date:"l d"}}</small></h4>
+{% block css %}
+<link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
+<style>
+  .clickeable {
+    cursor: pointer;
+  }
 
-          <div class="product-color">
-            <div class="text-center mb-5">
-              <h1 class="display-2 font-weight-medium">{{slot.available_places}}</h1>
-              <h4 class="text-uppercase">Cupos</h4>
+  a {
+    text-decoration: unset;
+  }
+</style>
+{% endblock css %}
+{% block custom_header %}
+<button class="btn btn-square btn-link" onclick="goBack()"><i class="bi bi-arrow-left"></i></button>
+<p class="h6 my-1 px-3 text-center"><span class="title">Calendario</span></p>
+{% endblock custom_header %}
+{% block container %}
 
-              {% if slot.available_places < slot.max_places %} <p>Vas a entrenar con:</p>
+<div class="adminuiux-wrap">
+  {% include 'shared/sidebar.html' %}
+  <main class="adminuiux-content has-sidebar" onclick="contentClick()">
 
-                {% for user_train in slot.users %}
-                <small>💪{{user_train.user.first_name}}</small>
-                <br>
-                {% endfor %}
-                {% endif %}
-                <form method="post">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-success waves-effect waves-light mt-5">
-                    <i class="bx bx-check-double font-size-16 align-middle mr-2"></i> Confirmar entreno
-                  </button>
-                </form>
+    <div class="container mt-3" id="main-content">
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+        {% if 'safe' in message.tags %}
+        {{ message|safe }}
+        {% else %}
+        {{ message }}
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% endif %}
+      <div class="row gx-3 align-items-center">
+        <div class="col-12 col-md-10 col-lg-8">
+          <h1 class="text-theme-accent-1 mb-0">Confirmar Entreno:</h1>
+          <h2 class="fw-normal mb-3 text-theme-1">{{slot.class_trainging.training_type.name}} |
+            {{slot.date|date:"l d"}}</h2>
+        </div>
+        <div class="col-12 py-1"></div>
+        <!-- <div class="col-12 col-md-8 col-lg-6 col-xxl-5 mb-3">
+          <p class="mb-0">Invitá a un amigo a que caiga.</p>
+          <p class="small text-secondary">Copia y pegá la invitación</p>
+          <div class="input-group"><input class="form-control border-theme-1" placeholder="Referral Code"
+              aria-describedby="button-addon2" value="https://adminuiux.com/adminuiux50off" disabled="disabled"> <button
+              class="btn btn-outline-theme" type="button" id="button-addon2" data-bs-toggle="tooltip" aria-label="Copy"
+              data-bs-original-title="Copy"><i class="bi bi-copy"></i></button></div>
+        </div> -->
+        <div class="col-12 py-1"></div>
+        <div class="col-12 col-sm-6 col-lg-3 mb-3">
+          <div class="card adminuiux-card">
+            <div class="card-body">
+              <h2 class="mb-1">{{slot.available_places}}</h2>
+              <p class="text-secondary small">Cupos</p>
+            </div>
+          </div>
+        </div>
+        <form action="" method="post" id="main-form">
+          {% csrf_token %}
+          <div class="col-12 col-sm-6 col-lg-3 mb-3 clickeable" onclick="document.getElementById('main-form').submit()">
+            <div class="card adminuiux-card position-relative overflow-hidden bg-theme-1 shadow-sm h-100">
+              <div class="position-absolute top-0 start-0 h-100 w-100 z-index-0 coverimg opacity-50"></div>
+              <div class="card-body z-index-1">
+                <div class="row gx-3 align-items-center">
+                  <div class="col-auto">
+                    <span class="avatar avatar-60 bg-white-opacity rounded"><i
+                        class="bi bi-lightning-charge h4"></i></span>
+                  </div>
+                  <div class="col">
+                    <h2 class="mb-1">Confirmar</h2>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="row gx-3 align-items-center mb-2">
+        <div class="col">
+          <hr class="">
+        </div>
+        <div class="col-auto">
+          <p class="small text-secondary">Usuarios confirmados</p>
+        </div>
+        <div class="col">
+          <hr class="">
+        </div>
+      </div>
+      <div class="row align-items-center jsutify-content-center">
+        <div class="col-12 mb-3">
+          <div class="card adminuiux-card mb-4">
+            <div class="card-header">
+              <div class="row align-items-center">
+                <div class="col">
+                  <p class="h6">Listado</p>
+                </div>
+                <div class="col-auto"><button type="button" class="btn btn-outline-theme btn-square"
+                    data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="false"><i
+                      class="bi bi-person-bounding-box"></i></button></div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive mb-4">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Nombre</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user_train in slot.users %}
+                    <tr>
+                      <th scope="row">{{forloop.counter}}</th>
+                      <td>{{user_train.user.get_full_name|title}}</td>
+                    </tr>
 
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
           </div>
 
-          </form>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </div>
-{% endlanguage %}
-{% endblock content %}
-
+{% endblock %}
 {% block js %}
+
 {% endblock js %}
