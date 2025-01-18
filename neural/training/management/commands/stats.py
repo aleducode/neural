@@ -5,6 +5,7 @@ from django.utils import timezone
 from neural.users.models import User, UserStrike
 from datetime import timedelta
 
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         """Handle command usage."""

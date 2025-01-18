@@ -54,6 +54,10 @@ if env.get_value("USE_DJANGO_DEBUG_TOOLBAR", default="no") == "yes":
         "DISABLE_PANELS": ["debug_toolbar.panels.redirects.RedirectsPanel"],
         "SHOW_TEMPLATE_CONTEXT": True,
     }
+# WhiteNoise
+# ------------------------------------------------------------------------------
+# http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
+INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS  # noqa F405
 
 # EMAIL
 # ------------------------------------------------------------------------------
