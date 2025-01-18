@@ -77,6 +77,13 @@ class IndexView(LoginRequiredMixin, TemplateView):
                 "hour": hour,
                 "message": f"Recuerda:  Tu proximo entrenamiento es {training_name} {day_name} a las {hour}",
             }
+        # Strike logic
+        week_number = now_date.isocalendar()[1]
+        year = now_date.year
+        strike = user.strikes.filter(is_current=True).first()
+        context["strike"] = strike
+        stats = user.stats.filter(year=year, week=week_number).first()
+        context["stats"] = stats
         return context
 
 

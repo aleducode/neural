@@ -25,7 +25,7 @@
         Regresar
       </a>
       <div class="col-12 text-center">
-        <p class="h4 mb-3">{{name_day}} {{date}}</p>
+        <p class="h4 mb-3">{{name_day|title}} {{date}}</p>
       </div>
       {% if messages %}
       {% for message in messages %}
@@ -42,7 +42,7 @@
       {% for session in sessions %}
       <a
         href="{% if session.available_places > 0 and pemission_to_schedule %}{% url 'training:select_space' session.pk %}{% endif %}">
-        <div class="card adminuiux-card border-0 bg-gradient-6">
+        <div class="card adminuiux-card border-0 bg-gradient-6 mb-3">
           <div class="card-body">
             <div class="row">
               {% if already_scheduled %}

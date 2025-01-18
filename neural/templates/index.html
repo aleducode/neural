@@ -66,7 +66,7 @@
                   <div class="position-absolute bottom-0 start-0 w-100 px-3">
                     <div class="row align-items-center justify-content-center h-100">
                       <div class="col-12 lh-20">
-                        <h4 class="h4 mb-0">80</h4>
+                        <h4 class="h4 mb-0">{{strike.weeks|default:0}}</h4>
                         <p class="small opacity-75">Semana(s)</p>
                       </div>
                     </div>
@@ -92,7 +92,7 @@
                   <div class="position-absolute top-0 start-0 w-100 h-100">
                     <div class="row align-items-center justify-content-center h-100">
                       <div class="col-auto lh-20">
-                        <h4 class="h4 mb-0">365</h4>
+                        <h4 class="h4 mb-0">{{stats.calories|default:0}}</h4>
                         <p class="small opacity-75">kcal</p>
                       </div>
                     </div>
@@ -118,8 +118,8 @@
                   <div class="position-absolute top-0 start-0 w-100 h-100">
                     <div class="row align-items-center justify-content-center h-100">
                       <div class="col-auto lh-20">
-                        <h4 class="h4 mb-0">7532</h4>
-                        <p class="small opacity-75">Steps</p>
+                        <h4 class="h4 mb-0">{{stats.trainings|default:0}}</h4>
+                        <p class="small opacity-75">Veces</p>
                       </div>
                     </div>
                   </div>
@@ -141,9 +141,8 @@
               </div>
               <div class="card-body text-center pt-0">
                 <div class="avatar avatar-60 mx-auto position-relative mb-3">
-                  <div id="circleprogresspurple1"></div>
                 </div>
-                <h4 class="h4 mb-0">7.4 <span class="fw-normal fs-14 opacity-75">Hours</span></h4>
+                <h4 class="h4 mb-0">{{stats.hours|default:0}} <span class="fw-normal fs-14 opacity-75">Horas</span></h4>
               </div>
             </div>
           </div>

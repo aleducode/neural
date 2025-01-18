@@ -176,12 +176,10 @@ class UserStrike(NeuralBaseModel):
     user = models.ForeignKey(
         "users.User", on_delete=models.CASCADE, related_name="strikes"
     )
-    weeks = models.PositiveIntegerField(default=0)
+    weeks = models.PositiveIntegerField(default=0, db_index=True)
 
-    is_current = models.BooleanField(
-        "Current",
-        default=False,
-    )
+    is_current = models.BooleanField("Current", default=False, db_index=True)
+    last_week = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = "Strike"
@@ -205,13 +203,13 @@ class UserStats(NeuralBaseModel):
     """
 
     user = models.ForeignKey(
-        "users.User", on_delete=models.CASCADE, related_name="stats"
+        "users.User", on_delete=models.CASCADE, related_name="stats", db_index=True
     )
-    week = models.PositiveIntegerField(default=0)
+    year = models.PositiveIntegerField(default=timezone.now().year)
+    week = models.PositiveIntegerField(default=0, db_index=True)
     trainings = models.PositiveIntegerField(default=0)
     calories = models.PositiveIntegerField(default=0)
     hours = models.PositiveIntegerField(default=0)
-    trainings = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = "Stats"

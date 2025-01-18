@@ -176,7 +176,7 @@ class SignUpForms(forms.Form):
         email_taken = User.objects.filter(email=email).exists()
         if email_taken:
             raise forms.ValidationError("Email ya registrado.")
-        return email
+        return email.lower()
 
     def clean(self):
         """Veirify password confirmation match."""
