@@ -111,7 +111,7 @@ TEMPLATES[0]["OPTIONS"]["loaders"] = [  # noqa F405
 EMAIL_BACKEND = env(
     "DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
 )
-
+EMAIL_USE_TLS = True
 # ADMIN
 # ------------------------------------------------------------------------------
 # Django Admin URL regex.
