@@ -1,13 +1,12 @@
-# PRECAUTION: avoid production dependencies that aren't in development
-
 -r base.txt
 
+# Datadog
 gunicorn==20.1.0  # https://github.com/benoitc/gunicorn
-psycopg2==2.9.9  # https://github.com/psycopg/psycopg2
+psycopg2==2.9.6  # https://github.com/psycopg/psycopg2
 Collectfasta==3.2.0  # https://github.com/jasongi/collectfasta
-sentry-sdk==1.12.1  # https://github.com/getsentry/sentry-python
+sentry-sdk==2.9.0  # https://github.com/getsentry/sentry-python
 
 # Django
 # ------------------------------------------------------------------------------
-django-storages[boto3]==1.13.1  # https://github.com/jschneier/django-storages
-django-anymail[amazon_ses]  # https://github.com/anymail/django-anymail
+django-storages[boto3]==1.14.2  # https://github.com/jschneier/django-storages
+django-anymail[amazon_ses]==9.1  # https://github.com/anymail/django-anymail
