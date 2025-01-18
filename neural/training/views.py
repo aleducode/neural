@@ -113,6 +113,8 @@ class TrainingSlotView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         slot = self.get_object()
         context["slot"] = slot
+        slot_date = slot.date.strftime("%Y-%m-%d")
+        context["date"] = slot_date
         return context
 
     def post(self, request, *args, **kwargs):

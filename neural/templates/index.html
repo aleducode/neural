@@ -235,7 +235,7 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="fitness-workout.html">
+        <a class="nav-link" href="{% url 'training:schedule-v1' %}">
           <span>
             <svg xmlns="http://www.w3.org/2000/svg"
               class="nav-icon" viewBox="0 0 20 10">
@@ -267,8 +267,8 @@
                 </g>
               </g>
             </svg> <span class="nav-text">Agendar</span></span></a></li>
-      <li class="nav-item"><a class="nav-link" href="fitness-report.html"><span><i
-              class="nav-icon bi bi-graph-up-arrow"></i> <span class="nav-text">Report</span></span></a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'training:my_schedule' %}"><span><i
+              class="nav-icon bi bi-calendar"></i> <span class="nav-text">Calendario</span></span></a></li>
       <li class="nav-item">
         <a class="nav-link" href="fitness-profile.html"><span>
             <figure class="avatar avatar-20 rounded-circle coverimg align-middle mb-2"><img
@@ -276,11 +276,6 @@
           </span></a></li>
     </ul>
   </div>
-</footer>
-
-<footer class="adminuiux-footer mt-auto">
-  <div class="container-fluid text-center"><span class="small">Copyright @2025, <a
-target="_blank">Neural consciente</a>💙</span></div>
 </footer>
 
 {% endblock %}

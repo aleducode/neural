@@ -10,16 +10,15 @@
   }
 </style>
 {% endblock css %}
-{% block custom_header %}
-<button class="btn btn-square btn-link" onclick="goBack()"><i class="bi bi-arrow-left"></i></button>
-<p class="h6 my-1 px-3 text-center"><span class="title">Inicio</span></p>
-{% endblock custom_header %}
 {% block container %}
-
 <div class="adminuiux-wrap">
   {% include 'shared/sidebar.html' %}
 <main class="adminuiux-content has-sidebar" onclick="contentClick()">
   <div class="container mt-3" id="main-content">
+    <a type="button" class="btn btn-outline-theme mb-3 btn-xs" href="{% url 'users:index' %}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left-circle"><circle cx="12" cy="12" r="10"/><polyline points="12 8 8 12 12 16"/><line x1="16" y1="12" x2="8" y2="12"/></svg>
+      Regresar
+    </a>
     <p class="h6 mb-3">Mi calendario</p>
     <div class="card adminuiux-card mb-2">
       <div class="card-body px-2 pt-1">
