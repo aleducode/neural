@@ -4,6 +4,11 @@
 
 {% block css %}
 <link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
+<style>
+  .clickeable {
+    cursor: pointer;
+  }
+</style>
 {% endblock css %}
 {% block custom_header %}
 <button class="btn btn-square btn-link" onclick="goBack()"><i class="bi bi-arrow-left"></i></button>
@@ -53,6 +58,20 @@
     </div>
     {% endfor %}
     {% else %}
+    <div class="col-6 col-md-4 col-lg-3 clickeable" onclick="window.location.href=`{% url 'training:schedule-v1' %}`">
+      <div class="card adminuiux-card border-0 height-150 bg-theme-accent-1 mb-3 hover-action">
+        <div class="card-body position-relative">
+          <div class="hover-action-visible position-absolute top-0 end-0 m-3" data-bs-toggle="modal"
+            data-bs-target="#addreminder" title="Add Reminder"><button
+              class="btn btn-sm btn-square btn-theme theme-blue rounded-circle"><i class="bi bi-plus"></i></button></div>
+          <p class="opacity-75 mb-4">Aún no tienes entrenos</p>
+          <p class="text-truncated small mb-0">Agenda acá</p>
+          <div
+            class="avatar avatar-20 position-absolute bottom-0 end-0 rounded-circle bg-white-opacity text-white text-center m-2"
+            ><span class="fs-12">+1</span></div>
+        </div>
+      </div>
+    </div>
     {% endif %}
 
   </div>

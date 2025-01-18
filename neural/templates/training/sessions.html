@@ -1,83 +1,94 @@
-{% extends 'base.html' %}
-{% load i18n %}
-{% load training_tags %}
+{% extends 'users/base.html' %}
+{% load static i18n static %}
+{% block title %}Calendario{% endblock %}
 
-
-{% block styles %}
+{% block css %}
+<link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
 <style>
-    .disabled-item {
-         color:brown !important
-    }
+  .clickeable {
+    cursor: pointer;
+  }
+
+  a {
+    text-decoration: unset;
+  }
 </style>
-{% endblock styles %}
+{% endblock css %}
+{% block custom_header %}
+<button class="btn btn-square btn-link" onclick="goBack()"><i class="bi bi-arrow-left"></i></button>
+<p class="h6 my-1 px-3 text-center"><span class="title">Calendario</span></p>
+{% endblock custom_header %}
+{% block container %}
 
-{% block content %}
-{% language 'es' %}
+<div class="adminuiux-wrap">
+  {% include 'shared/sidebar.html' %}
+  <main class="adminuiux-content has-sidebar" onclick="contentClick()">
 
-<div class="page-content">
-    <div class="container-fluid">
-        <div class="col-xl-6 offset-lg-3">
-            <a href="{% url 'training:schedule-v1' %}?{{request.GET.urlencode}}">Regresar</a>
-            <h3 class="text-center mb-0">{{name_day}}</h3>
-            <h4 class="text-center mt-0 mb-4"><small>{{date}}</small></h4>
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                        aria-hidden="true">&times;</span>
-                </button>{% if 'safe' in message.tags %}
-                {{ message|safe }}
-            {% else %}
-                {{ message }}
-            {% endif %}
-
+    <div class="container mt-3" id="main-content">
+      <div class="col-12 text-center">
+        <p class="h4 mb-3">{{name_day}} {{date}}</p>
+      </div>
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+        {% if 'safe' in message.tags %}
+        {{ message|safe }}
+        {% else %}
+        {{ message }}
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% if sessions %}
+      {% for session in sessions %}
+      <a
+        href="{% if session.available_places > 0 and pemission_to_schedule %}{% url 'training:select_space' session.pk %}{% endif %}">
+        <div class="card adminuiux-card border-0 bg-gradient-6">
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <p>
+                  <span class="badge badge-sm badge-light text-bg-theme-1 theme-cyan"><i class="bi bi-patch-check-fill"></i> Pro
+                    Trainer</span>
+                </p>
+              </div>
+              <div class="col-8">
+                <h6 class="text-truncated">
+                  {{session.class_trainging.training_type.name}}
+                </h6>
+                <p class="text-secondary fs-14 mb-2">
+                  <span class="me-1"><i class="bi bi-clock me-1"></i> {{session.class_trainging.hour_init|date:"f"}} a
+                    {{session.class_trainging.hour_end|date:"f A"}}</span>
+                  <span class="me-1">
+                    <i class="bi bi-fire me-1">
+                    </i> 400 kcal</span>
+                </p>
+                <button class="btn btn-sm btn-link bg-white-opacity"><i class="bi bi-universal-access me-1"></i>
+                  Cupos:
+                  {{session.available_places}}
+                </button>
+              </div>
+              <div class="col-4">
+                <figure class="height-90 w-100 rounded coverimg mb-0">
+                  <img src="{% static 'assets/img/fitness/image-5.jpg' %}" alt="" style="display: none;">
+                </figure>
+              </div>
             </div>
-            {% endfor %}
-            {% endif %}
-            <div class="mt-2 row">
-                {% if sessions %}
-                {% for session in sessions %}
-                <a href="{% if session.available_places > 0 and pemission_to_schedule %}{% url 'training:select_space' session.pk %}{% endif %}"
-                    style="display:block; width:100%">
-                    <div class="col-sm-12">
-                        <div class="card mini-stats-wid">
-                            <div class="card-body">
-                                <div class="media">
-                                    <div class="mr-3 align-self-center">
-                                        <i class="{{session.class_trainging.training_type|get_icon}} h2 mb-0"></i>
-                                    </div>
-                                    <div class="media-body">
-                                        <p class="text-muted mb-0 d-inline">
-                                            {{session.class_trainging.hour_init|date:"f"}} a
-                                            {{session.class_trainging.hour_end|date:"f A"}}
-                                        </p>
-                                        {% if session.available_places < 1 or not pemission_to_schedule %}
-                                        <span class="badge badge-pill badge-danger d-inline">Acceso Denegado</span>
-                                        {% endif %}
-                                        <h5 class="mb-0">{{session.class_trainging.training_type.name}} <span
-                                                class="font-size-12" style="color:#0ca2df">| Cupos:
-                                                {{session.available_places}}</span></h5>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-                {% endfor %}
-                {% else %}
-                <div class="text-center">
-                    <h3 class="text-center">No hay clases disponibles para este día</h3>
-                </div>
-
-                {% endif %}
-
-            </div>
+          </div>
         </div>
-    </div>
-</div>
-{% endlanguage %}
-{% endblock content %}
+      </a>
+      {% endfor %}
+      {% else %}
+      <div class="text-center mb-3">
+        <h1 class="fw-bold text-theme-accent-1 mb-0">Ojo</h1>
+        <h4 class="text-theme-1">No hay clases disponibles para este día</h4>
+      </div>
+      {% endif %}
 
+    </div>
+  </main>
+</div>
+{% endblock %}
 {% block js %}
+
 {% endblock js %}

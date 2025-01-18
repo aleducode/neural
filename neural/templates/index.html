@@ -20,6 +20,7 @@
           <h1 class="fw-bold text-theme-accent-1 mb-0">Oe, <span>{{request.user.first_name|title}}</span></h1>
           <h4 class="text-theme-1">Bienvenidx a neural app</h4>
         </div>
+        {% if last_training %}
         <div class="col-12 col-lg-4 col-xl-3">
           <div class="card adminuiux-card border-0 bg-theme-r-gradient mb-3">
             <div class="card-body">
@@ -39,6 +40,8 @@
             </div>
           </div>
         </div>
+        {% endif %}
+
       </div>
       <div class="swiper swipernav mb-3">
         <div class="swiper-wrapper">

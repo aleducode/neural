@@ -1,53 +1,142 @@
-{% extends 'base.html' %}
-{% load i18n %}
-{% block content %}
-{% language 'es' %}
-<div class="page-content">
-    <div class="container-fluid">
-        <div class="col-xl-6 offset-lg-3">
-            <a href="{% url 'users:index' %}?{{request.GET.urlencode}}">Regresar</a>
-            <div class="card mt-2">
-                <div class="card-body">
-                    <h3 class="mb-4 text-center">Seleccionar Día</h3>
-                    <form method="POST">
+{% extends 'users/base.html' %}
+{% load static i18n static %}
+{% block title %}Calendario{% endblock %}
 
-                        <div class="card-body border-top">
-                            <div class="text-center">
-                                <div class="row">
+{% block css %}
+<link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
+<style>
+  .clickeable {
+    cursor: pointer;
+  }
+  a {
+    text-decoration:unset;
+  }
+  .rounded-pill {
+    border-radius: 50px;
+    border: 1px solid #e9ecef;
+    padding-right: 18px;
+  }
 
-                                    {% for day in days %}
+</style>
+{% endblock css %}
+{% block custom_header %}
+<button class="btn btn-square btn-link" onclick="goBack()"><i class="bi bi-arrow-left"></i></button>
+<p class="h6 my-1 px-3 text-center"><span class="title">Inicio</span></p>
+{% endblock custom_header %}
+{% block container %}
 
-                                    <a href="{% url 'training:training-types' day.date %}?{{request.GET.urlencode}}">
-                                        <div class="col-sm-4">
-                                            <div>
-                                                <div class="font-size-24 text-primary mb-2">
-                                                    <i class="bx bx-calendar-check "></i>
-                                                </div>
-
-                                                <p class="text-muted mb-2">{{day.date}}</p>
-                                                <h5>{{day.day}}</h5>
-
-                                                <div class="mt-3 mb-2">
-                                                    <a href="{% url 'training:training-types' day.date %}?{{request.GET.urlencode}}" class="btn btn-primary btn-sm w-md">Ver Clases</a>
-                                                </div>
-                                                <hr>
-                                            </div>
-                                        </div>
-                                    </a>
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-        </div>
+<div class="adminuiux-wrap">
+  {% include 'shared/sidebar.html' %}
+<main class="adminuiux-content has-sidebar" onclick="contentClick()">
+  <div class="container mt-3" id="main-content">
+    <p class="h6 mb-3">Mi calendario</p>
+    <div class="row gx-3 align-items-center mb-2">
+      <div class="col">
+        <hr class="">
+      </div>
+      <div class="col-auto">
+        <p class="small text-secondary">Mis entrenos</p>
+      </div>
+      <div class="col">
+        <hr class="">
+      </div>
     </div>
-</div>
-{% endlanguage %}
-{% endblock content %}
+    {% if days %}
+    <div class="row gx-3">
+    {% for day in days %}
+      <div class="col-6 col-md-6">
+        <a href="{% url 'training:training-types' day.date %}?{{request.GET.urlencode}}">
+        <div class="row gx-3">
+          <div class="col-12 col-md-12">
+            <div class="card adminuiux-card mb-3">
+              <div class="card-body">
+                <div class="row gx-2 align-items-center mb-2">
+                  <div class="col">
+                    <p class="small">{{day.date}}</p>
+                  </div>
+                  <div class="col-auto">
+                    <p><span class="badge badge-sm text-bg-theme-1"></span></p>
+                  </div>
+                </div>
+                <h6 class="text-theme-1 text-truncated mb-1">{{day.day}}</h6>
+                <button class="btn btn-sm btn-link bg-white-opacity rounded-pill mt-4"><i class="bi bi-play me-1"></i> Ver clases</button>
+              </div>
+            </div>
+          </div>
 
+        </div>
+      </a>
+      </div>
+
+
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="col-6 col-md-4 col-lg-3 clickeable" onclick="window.location.href=`{% url 'training:schedule-v1' %}`">
+      <div class="card adminuiux-card border-0 height-150 bg-theme-accent-1 mb-3 hover-action">
+        <div class="card-body position-relative">
+          <div class="hover-action-visible position-absolute top-0 end-0 m-3" data-bs-toggle="modal"
+            data-bs-target="#addreminder" title="Add Reminder"><button
+              class="btn btn-sm btn-square btn-theme theme-blue rounded-circle"><i class="bi bi-plus"></i></button></div>
+          <p class="opacity-75 mb-4">Aún no tienes entrenos</p>
+          <p class="text-truncated small mb-0">Agenda acá</p>
+          <div
+            class="avatar avatar-20 position-absolute bottom-0 end-0 rounded-circle bg-white-opacity text-white text-center m-2"
+            ><span class="fs-12">+1</span></div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</main>
+</div>
+{% endblock %}
 {% block js %}
+<script>
+
+  function cancelSession(pk_session) {
+    Swal.fire({
+      title: "Estas seguro de cancelar el entrenamiento?",
+      text: "Es posible que pierdas el puesto!",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Si, seguro!",
+      cancelButtonText: "Noooo!",
+    }).then((result) => {
+      if (result.value) {
+        $.ajax({
+          type: 'POST',
+          url: "{% url 'training:api-training-cancel-session' %}",
+          data: {
+            "user_training": pk_session,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+          },
+          timeout: 5000,
+          dataType: "json",
+        })
+          .done(function (response) {
+            var elem = document.getElementById('event_' + pk_session);
+            elem.parentNode.removeChild(elem);
+            Swal.fire({
+              title: "Eliminado!",
+              text: "Tu sessión de entrenamiento ha sido cancelada.",
+              type: "success"
+            })
+          })
+
+      }
+      else {
+        Swal.fire({
+          title: "Ojo pueeees",
+          text: "No hemos eliminado tu entreno, nos vemos en Neural :)",
+          imageUrl: "{% static 'images/brain.png' %}",
+          imageWidth: 150,
+          imageHeight: 150,
+        })
+      }
+    })
+  }
+
+</script>
 {% endblock js %}

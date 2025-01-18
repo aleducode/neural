@@ -103,7 +103,7 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
         ).exists():
             pemission_to_schedule = False
             link = reverse_lazy("training:my_schedule")
-            messages.error(
+            messages.warning(
                 self.request,
                 f'Ya reservaste para este día si quieres modificarlo cancela tu clase activa <a href="{link}">aquí</a>',
                 extra_tags="safe",
