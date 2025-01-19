@@ -127,9 +127,36 @@ class TrainingSlotView(LoginRequiredMixin, DetailView):
         context["date"] = slot_date
         return context
 
+    def _update_stats(self, user, slot):
+        year = timezone.now().year
+        slot_week_number = slot.date.isocalendar()[1]
+        stats, _ = user.stats.update_or_create(
+            year=year,
+            week=slot_week_number,
+        )
+        stats.trainings += 1
+        stats.calories += 400
+        stats.hours += 1
+        stats.save()
+
     def post(self, request, *args, **kwargs):
         # Create User training session
+        user = self.request.user
         slot = self.get_object()
+        self._update_stats(user, slot)
+        # Get week day of the slot
+        slot_week_day = slot.date.isocalendar()[1]
+        # Check streak
+        streak = user.strikes.filter(is_current=True).first()
+        if streak:
+            # Different to this week day
+            if streak.last_week != int(slot_week_day):
+                # Add a strike
+                streak.weeks += 1
+                streak.save()
+        else:
+            # Create a new strike
+            user.strikes.create(weeks=1, last_week=int(slot_week_day), is_current=True)
         # Check again spaces
         if not slot.available_places:
             messages.error(
