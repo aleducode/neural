@@ -71,7 +71,17 @@
               </div>
               <div class="col-4">
                 <figure class="height-90 w-100 rounded coverimg mb-0">
-                  <img src="{% static 'assets/img/fitness/image-5.jpg' %}" alt="" style="display: none;">
+                  {% if session.class_trainging.training_type.id == 8 %}
+                  <img src="{% static 'images/8.jpg' %}" alt="" style="display: none;">
+                  {% elif session.class_trainging.training_type.id == 4 %}
+                  <img src="{% static 'images/4.jpg' %}" alt="" style="display: none;">
+                  {% elif session.class_trainging.training_type.id == 5 %}
+                  <img src="{% static 'images/5.jpg' %}" alt="" style="display: none;">
+                  {% elif session.class_trainging.training_type.id == 6 %}
+                  <img src="{% static 'images/8.jpg' %}" alt="" style="display: none;">
+                  {% else %}
+                  <img src="{% static 'images/1.jpg' %}" alt="" style="display: none;">
+                  {% endif %}
                 </figure>
               </div>
             </div>

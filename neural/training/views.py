@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
+from django.utils.translation import activate
 
 from django.views.generic import TemplateView, DetailView
 from django.urls import reverse_lazy
@@ -24,6 +25,8 @@ class ScheduleV1View(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         days = []
         now = timezone.localdate()
+        # Activate language translation
+        activate("es")
         custom_filters = {}
         if self.request.GET.get("is_group"):
             custom_filters["class_trainging__training_type__is_group"] = True
@@ -96,8 +99,15 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
             context["already_scheduled"] = True
         if self.date == now_date:
             filter_dict["class_trainging__hour_init__gte"] = now
-        base_filter = Slot.objects.filter(**filter_dict)
-        context["sessions"] = base_filter.order_by("class_trainging__hour_init")
+        context["sessions"] = (
+            Slot.objects.filter(**filter_dict)
+            .select_related(
+                "class_trainging",
+                "class_trainging__training_type",
+            )
+            .order_by("class_trainging__hour_init")
+        )
+        activate("es")
         context["name_day"] = _(self.date_obj.strftime("%A"))
         context["date"] = self.date
         context["pemission_to_schedule"] = pemission_to_schedule

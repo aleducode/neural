@@ -97,37 +97,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // progressCirclesgreen2.text.style.fontSize = '20px';
     progressCirclesgreen2.animate(0.70);  // Number from 0.0 to 1.0
 
-    // /* purple circular progress */
-    var progressCirclespurple1 = new ProgressBar.Circle(circleprogresspurple1, {
-        color: 'rgba(71, 28, 168, 1)',
-        // This has to be the same size as the maximum width to
-        // prevent clipping
-        strokeWidth: 10,
-        trailWidth: 10,
-        easing: 'easeInOut',
-        trailColor: 'rgba(71, 28, 168, 0.15)',
-        duration: 1400,
-        text: {
-            autoStyleContainer: false
-        },
-        from: { color: 'rgba(71, 28, 168, 1)', width: 10 },
-        to: { color: 'rgba(71, 28, 168, 1)', width: 10 },
-        // Set default step function for all animate calls
-        step: function (state, circle) {
-            circle.path.setAttribute('stroke', state.color);
-            circle.path.setAttribute('stroke-width', state.width);
-
-            var value = Math.round(circle.value() * 100);
-            if (value === 0) {
-                circle.setText('');
-            } else {
-                circle.setText(value + "<small>%<small>");
-            }
-        }
-    });
-    progressCirclespurple1.text.style.fontSize = '16px';
-    progressCirclespurple1.animate(0.50);  // Number from 0.0 to 1.0
-
 
     /* orange progress */
     var progressCirclesorange1 = new ProgressBar.Circle(circleprogressorange1, {
