@@ -4,10 +4,17 @@ from django.contrib.auth import admin as auth_admin
 from django.utils.translation import gettext_lazy as _
 
 # Models
-from neural.users.models import User, Ranking, Profile, Plan, UserMembership
+from neural.users.models import User, Ranking, Profile, Plan, UserMembership, UserStrike
 
 # Forms
 from neural.users.forms import UserChangeForm
+
+
+@admin.register(UserStrike)
+class UserStrikeAdmin(admin.ModelAdmin):
+    list_display = ["user", "weeks", "is_current", "last_week"]
+    search_fields = ["user__email", "user__first_name", "user__last_name"]
+    ordering = ["user"]
 
 
 @admin.register(Plan)

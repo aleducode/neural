@@ -153,6 +153,7 @@ class TrainingSlotView(LoginRequiredMixin, DetailView):
             if streak.last_week != int(slot_week_day):
                 # Add a strike
                 streak.weeks += 1
+                streak.last_week = int(slot_week_day)
                 streak.save()
         else:
             # Create a new strike

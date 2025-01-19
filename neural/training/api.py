@@ -1,5 +1,7 @@
 """Api training."""
 
+import logging
+
 # Django
 from django.utils import timezone
 from datetime import timedelta
@@ -15,6 +17,8 @@ from neural.training.models import Slot, UserTraining
 
 # Serializers
 from neural.training.serializers import SlotModelSerializer, SeatModelSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class TrainingViewSet(viewsets.GenericViewSet):
@@ -60,6 +64,44 @@ class TrainingViewSet(viewsets.GenericViewSet):
             data = "No data"
         return Response({"result": data}, status=status.HTTP_200_OK)
 
+    def _update_stats(self, user, slot):
+        try:
+            year = timezone.now().year
+            slot_week_number = slot.date.isocalendar()[1]
+            stats = user.stats.filter(
+                year=year,
+                week=slot_week_number,
+            ).last()
+            if stats:
+                if stats.trainings > 0:
+                    stats.trainings -= 1
+                if stats.calories > 0:
+                    stats.calories -= 400
+                if stats.hours > 0:
+                    stats.hours -= 1
+                stats.save()
+
+            # Check streak to decrease it, if not have another training in the week
+            streak = user.strikes.filter(
+                is_current=True, last_week=slot_week_number
+            ).first()
+            if streak:
+                # Check other training in the week
+                trainings_in_week = UserTraining.objects.filter(
+                    user=user,
+                    slot__date__week=slot_week_number,
+                    slot__date__year=year,
+                    status=UserTraining.Status.CONFIRMED,
+                ).exists()
+                if not trainings_in_week:
+                    if streak.weeks > 0:
+                        streak.weeks -= 1
+                    if streak.last_week > 0:
+                        streak.last_week -= 1
+                    streak.save()
+        except Exception as e:
+            logger.error(f"Error updating stats: {e}")
+
     @action(detail=False, methods=["post"])
     def cancel_session(self, request):
         user_training = request.data.get("user_training")
@@ -67,4 +109,5 @@ class TrainingViewSet(viewsets.GenericViewSet):
         training.status = UserTraining.Status.CANCELLED
         training.space = None
         training.save()
+        self._update_stats(training.user, training.slot)
         return Response({"result": "OK"}, status=status.HTTP_200_OK)
