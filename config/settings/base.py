@@ -59,7 +59,7 @@ DJANGO_APPS = [
     # "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "django.contrib.humanize", # Handy template tags
+    "django.contrib.humanize",
     "django.contrib.admin",
     "django.forms",
 ]
@@ -173,6 +173,7 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
                 "neural.utils.context_processors.settings_context",
+                "neural.utils.context_processors.user_membership",
             ],
         },
     }
@@ -288,3 +289,7 @@ MESSAGE_TAGS = {
 
 NEURAL_PHONE = env("NEURAL_PHONE")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# BOLD
+BOLD_KEY = env("BOLD_KEY", default="mA6B-yZMWWEjM5Y5UJxiUz5vMx4MIBkORAh3_zk0o_k")
+BOLD_SECRET = env("BOLD_SECRET", default="B24ZRXiazgcgsr2T_30fKQ")

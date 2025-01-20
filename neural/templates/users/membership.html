@@ -1,0 +1,135 @@
+{% extends 'users/base.html' %}
+{% load static i18n static  humanize %}
+{% block title %}Calendario{% endblock %}
+
+{% block css %}
+<link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
+<style>
+  .clickeable {
+    cursor: pointer;
+  }
+
+  a {
+    text-decoration: unset;
+    color: black;
+  }
+</style>
+{% endblock css %}
+{% block container %}
+<div class="adminuiux-wrap">
+  {% include 'shared/sidebar.html' %}
+  <main class="adminuiux-content has-sidebar" onclick="contentClick()">
+    <div class="container mt-3" id="main-content">
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+        {% if 'safe' in message.tags %}
+        {{ message|safe }}
+        {% else %}
+        {{ message }}
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% endif %}
+      <div class="card adminuiux-card border-0 overflow-hidden theme-green mb-3">
+        <figure class="h-100 w-100 coverimg blur-overlay position-absolute start-0 top-0 z-index-0 opacity-50">
+          <img
+            src="{% static 'assets/img/background-image/backgorund-image-3.jpg' %}" alt="" style="display: none;"></figure>
+        <div class="card-body text-center z-index-1">
+          <figure class="avatar avatar-100 bg-theme-1-subtle rounded-circle mb-3"><i
+              class="bi bi-person-workspace text-theme-1 display-2"></i></figure>
+          <h5>{{membership.get_membership_type_display|default:'Sin membresía'}}</h5>
+          <p class="mb-2">
+            {% if membership.is_active %}
+            <span class="badge badge-light text-bg-theme-1 theme-green">
+              Activa
+            </span>
+            {% else %}
+            <span class="badge badge-light text-danger">
+              Inactiva
+            </span>
+            {% endif %}
+        </p>
+        </div>
+      </div>
+      {% if membership %}
+      <div class="card adminuiux-card bg-theme-1-subtle mb-3">
+        <div class="card-body">
+          <h6>Tu membresía vence: {{membership.expiration_date}}</h6>
+          <p class="small text-secondary">Tienes {{membership.days_left}} días para renovarla</p>
+        </div>
+      </div>
+      <div class="row gx-3 align-items-center mb-3">
+        <div class="col">
+          <p class="text-secondary">Próximo vencimiento</p>
+        </div>
+        <div class="col-auto">
+          <p>{{membership.expiration_date}}</p>
+        </div>
+      </div>
+      <div class="row gx-3 align-items-center mb-3">
+        <div class="col">
+          <p class="text-secondary">Tipo de membresía</p>
+        </div>
+        <div class="col-auto">
+          <p>{{membership.get_membership_type_display}}</p>
+        </div>
+      </div>
+      <div class="row gx-3 align-items-center mb-4">
+        <div class="col">
+          <p class="text-secondary">Valor</p>
+        </div>
+        <div class="col-auto">
+          <p>{{membership.plan.price|intcomma }} $</p>
+        </div>
+      </div>
+      <div class="row gx-3 align-items-center mb-3">
+        <div class="col">
+          <label for="">Renueva tu suscripción aquí</label>
+          <script
+            data-bold-button="dark-S"
+            data-order-id="{{random_transaction_id}}"
+            data-currency="COP"
+            data-amount="{{membership.plan.raw_price}}"
+            data-api-key="{{BOLD_KEY}}"
+            data-integrity-signature="{{hash_hex}}"
+            data-redirection-url="{{membership_link}}"
+            data-description="Plan {{membership.plan.name}} de Neural"
+            data-tax="consumption"
+            data-render-mode="embedded"
+            extra-data-1="{{request.user.pk}}"
+          ></script>
+        </div>
+        <div class="col-auto">
+        </div>
+      </div>
+      {% else %}
+      <div class="row gx-3 align-items-center mb-3">
+        <div class="col">
+          <label for="">Adquiere tu suscripción aquí</label>
+          <script
+            data-bold-button="dark-S"
+            data-order-id="{{random_transaction_id}}"
+            data-currency="COP"
+            data-amount="{{plan.raw_price}}"
+            data-api-key="{{BOLD_KEY}}"
+            data-integrity-signature="{{hash_hex}}"
+            data-redirection-url="{{membership_link}}"
+            data-description="Plan {{plan.name}} de Neural"
+            data-tax="consumption"
+            data-render-mode="embedded"
+            extra-data-1="{{request.user.pk}}"
+          ></script>
+        </div>
+        <div class="col-auto">
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+{% endblock %}
+{% block js %}
+<script src="https://checkout.bold.co/library/boldPaymentButton.js"></script>
+{% endblock js %}

@@ -6,6 +6,12 @@ urlpatterns = [
     path(route="", view=user_views.IndexView.as_view(), name="index"),
     path(route="pending", view=user_views.PendingView.as_view(), name="pending"),
     path(route="signup", view=user_views.SignUpView.as_view(), name="signup"),
+    path(
+        route="my-profile", view=user_views.MyProfileView.as_view(), name="my_profile"
+    ),
+    path(
+        route="membership", view=user_views.MembershipView.as_view(), name="membership"
+    ),
     path(route="profile", view=user_views.ProfileView.as_view(), name="profile"),
     path(route="login/", view=user_views.LoginView.as_view(), name="login"),
     path(route="logout/", view=user_views.LogoutView.as_view(), name="logout"),

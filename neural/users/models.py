@@ -1,11 +1,15 @@
 """User model."""
 
+from slugify import slugify
+
 # Django
+from django.core.cache import cache
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db.models import Q
 from django.utils import timezone
+from datetime import timedelta
 
 # Utils
 from neural.utils.models import NeuralBaseModel
@@ -60,6 +64,27 @@ class User(NeuralBaseModel, AbstractUser):
         return self.email
 
 
+class NeuralPlan(NeuralBaseModel):
+    """Neural plan model."""
+
+    name = models.CharField(max_length=100)
+    slug_name = models.SlugField(max_length=100, unique=True)
+    description = models.CharField(max_length=500)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration = models.PositiveIntegerField(default=30)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug_name = slugify(self.name, separator="_")
+        super().save(*args, **kwargs)
+
+    @property
+    def raw_price(self):
+        return int(self.price)
+
+
 class UserMembership(NeuralBaseModel):
     """User membership model."""
 
@@ -73,6 +98,13 @@ class UserMembership(NeuralBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="memberships")
     membership_type = models.CharField(
         max_length=10, choices=MembershipType.choices, default=MembershipType.MENSUAL
+    )
+    plan = models.ForeignKey(
+        "users.NeuralPlan",
+        on_delete=models.SET_NULL,
+        related_name="memberships",
+        blank=True,
+        null=True,
     )
     is_active = models.BooleanField(
         "Active",
@@ -88,17 +120,26 @@ class UserMembership(NeuralBaseModel):
         blank=True,
         null=True,
     )
-    days_duration = models.IntegerField(default=30)
+
+    @property
+    def days_left(self):
+        date_now = timezone.localdate()
+        return (self.expiration_date - date_now).days + 1
 
     def save(self, *args, **kwargs):
-        date_now = timezone.now().date()
-        if self.membership_type == self.MembershipType.MENSUAL:
-            self.expiration_date = self.init_date + timezone.timedelta(days=30)
-        elif self.membership_type == self.MembershipType.QUARTER:
-            self.expiration_date = self.init_date + timezone.timedelta(days=90)
-        elif self.membership_type == self.MembershipType.SEMESTER:
-            self.expiration_date = self.init_date + timezone.timedelta(days=183)
-        self.days_duration = (self.expiration_date - date_now).days
+        # Reset cache membership
+        now = timezone.localtime()
+        cache_key = f"user_membership_{self.user.id}_{now.date()}"
+        # Reset cache membership
+        cache.delete(cache_key)
+        dict_plans = {
+            "MENSUAL": "Mensualidad",
+            "QUARTER": "Trimestre",
+            "SEMESTER": "Semestre",
+        }
+        self.plan = NeuralPlan.objects.filter(
+            name=dict_plans.get(self.membership_type)
+        ).last()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -220,3 +261,47 @@ class UserStats(NeuralBaseModel):
 
     def __str__(self):
         return f"{self.user} - {self.week} - {self.trainings} trainings"
+
+
+class UserPaymentReference(NeuralBaseModel):
+    """User payment reference model.
+
+    A payment reference is a reference that a user get for a specific
+    payment. It is used to determine the user payment in a
+    week.
+    """
+
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="payments"
+    )
+    reference = models.CharField(max_length=100, unique=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    is_paid = models.BooleanField(default=False)
+    plan = models.ForeignKey(
+        "users.NeuralPlan",
+        on_delete=models.SET_NULL,
+        related_name="payments",
+        blank=True,
+        null=True,
+    )
+    data = models.JSONField(blank=True, null=True)
+
+    def apply_membership(self):
+        self.is_paid = True
+        self.save()
+        self.user.memberships.update_or_create(
+            plan=self.plan,
+            defaults={
+                "init_date": timezone.localdate(),
+                "is_active": True,
+                "expiration_date": timezone.localdate()
+                + timedelta(days=self.plan.duration),
+            },
+        )
+
+    class Meta:
+        verbose_name = "Payment reference"
+        verbose_name_plural = "Payment references"
+
+    def __str__(self):
+        return f"{self.user} - {self.reference} - {self.amount}"

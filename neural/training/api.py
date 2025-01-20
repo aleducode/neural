@@ -14,6 +14,7 @@ from rest_framework.response import Response
 
 # Models
 from neural.training.models import Slot, UserTraining
+from neural.users.models import UserPaymentReference
 
 # Serializers
 from neural.training.serializers import SlotModelSerializer, SeatModelSerializer
@@ -110,4 +111,16 @@ class TrainingViewSet(viewsets.GenericViewSet):
         training.space = None
         training.save()
         self._update_stats(training.user, training.slot)
+        return Response({"result": "OK"}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post", "get"], url_path="hook")
+    def hook(self, request):
+        reference = request.data.get("data", {}).get("metadata", {}).get("reference")
+        payment = UserPaymentReference.objects.filter(reference=reference).last()
+        if payment:
+            logger.info(f"Payment received: {payment}")
+            payment.data = request.data
+            payment.save()
+            if not payment.is_paid:
+                payment.apply_membership()
         return Response({"result": "OK"}, status=status.HTTP_200_OK)

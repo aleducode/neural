@@ -1,5 +1,9 @@
 """Users views."""
 
+import hashlib
+import random
+import string
+
 from datetime import timedelta
 
 # Django
@@ -20,7 +24,7 @@ from neural.users.forms import CustomAuthenticationForm, ProfileForm
 
 # Models
 from neural.training.models import UserTraining
-from neural.users.models import User
+from neural.users.models import User, NeuralPlan
 
 
 class LoginView(auth_views.LoginView):
@@ -45,9 +49,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         now_date = timezone.localdate()
         user = self.request.user
-        user_membership = user.memberships.filter(is_active=True)
-        if user_membership:
-            context["days_duration"] = user_membership.first().days_duration
         last_training = (
             UserTraining.objects.filter(
                 user=self.request.user,
@@ -150,3 +151,67 @@ class ProfileView(LoginRequiredMixin, FormView):
     def get_success_url(self):
         messages.success(self.request, "Perfil actualizado correctamente")
         return reverse_lazy("users:profile")
+
+
+class MyProfileView(LoginRequiredMixin, TemplateView):
+    template_name = "users/my-profile.html"
+
+
+class MembershipView(LoginRequiredMixin, TemplateView):
+    template_name = "users/membership.html"
+
+    def get(self, request, *args, **kwargs):
+        order_id = request.GET.get("bold-order-id")
+        payment_status = request.GET.get("bold-tx-status")
+        if order_id and payment_status:
+            if payment_status == "approved":
+                active_payment = request.user.payments.filter(
+                    reference=order_id,
+                    is_paid=False,
+                ).last()
+                if active_payment:
+                    active_payment.apply_membership()
+                messages.success(request, "Pago exitoso y membresía activada")
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        active_membership = user.memberships.filter(is_active=True).first()
+        if not active_membership:
+            last_membership = user.memberships.last()
+            membership = last_membership
+        else:
+            membership = active_membership
+        context["membership"] = membership
+
+        # Price logic
+        random_transaction_id = "".join(
+            random.choices(string.ascii_letters + string.digits, k=7)
+        )
+        if not membership:
+            plan = NeuralPlan.objects.filter(name="Mensualidad").first()
+        else:
+            plan = membership.plan
+        context["plan"] = plan
+        user.payments.create(
+            reference=random_transaction_id,
+            amount=plan.raw_price,
+            plan=plan,
+        )
+        context["random_transaction_id"] = random_transaction_id
+        secret_key = settings.BOLD_SECRET
+        cadena_concatenada = f"{random_transaction_id}{plan.raw_price}COP{secret_key}"
+
+        # Crear un objeto hash SHA-256
+        m = hashlib.sha256()
+        m.update(cadena_concatenada.encode())
+        hash_hex = m.hexdigest()
+        context["hash_hex"] = hash_hex
+        if not settings.DEBUG:
+            context["membership_link"] = reverse_lazy("users:membership")
+        else:
+            context["membership_link"] = "https://app.neural.com.co" + reverse_lazy(
+                "users:membership"
+            )
+        return context

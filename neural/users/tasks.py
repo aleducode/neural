@@ -1,6 +1,7 @@
 # Celery
 from config import celery_app
 from celery.schedules import crontab
+from django.utils import timezone
 
 # Models
 from neural.users.models import UserMembership
@@ -18,11 +19,9 @@ def setup_periodic_tasks(sender, **kwargs):
 @celery_app.task
 def check_user_memberships():
     """Check user memberships"""
-    user_memberships = UserMembership.objects.filter(is_active=True)
+    user_memberships = UserMembership.objects.filter(
+        is_active=True, expiration_date=timezone.localdate()
+    )
     for membership in user_memberships:
-        if membership.days_duration == 0:
-            membership.is_active = False
-            membership.save()
-        else:
-            membership.days_duration -= 1
-            membership.save()
+        membership.is_active = False
+        membership.save()

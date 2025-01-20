@@ -13,6 +13,7 @@
     <div class="container mt-3" id="main-content">
       <div class="row gx-3 align-items-center">
         <div class="col-auto mb-4">
+          <a href="{% url 'users:my_profile' %}">
           <figure class="avatar avatar-60 rounded-circle coverimg align-middle"><img
             {% if user.photo %}
             src="{{user.photo.url}}"
@@ -20,6 +21,7 @@
             src="{% static 'assets/img/fitness/image-6.jpg' %}"
             {% endif %}
               alt=""></figure>
+            </a>
         </div>
         <div class="col-9 col-sm-8 col-md-9 col-xl mb-4">
           <h1 class="fw-bold text-theme-accent-1 mb-0">Oe, <span>{{request.user.first_name|title}}</span></h1>
@@ -47,6 +49,13 @@
         </div>
         {% endif %}
 
+      </div>
+      <div class="col-auto m-3">
+        <a href="{% url 'users:membership' %}">
+        <span class="badge badge-light text-bg-theme-1 theme-orange">
+          <span class="bi bi-award text-theme-1"></span> {{membership.days_left|default:0}} Días de membresía
+        </span>
+      </a>
       </div>
       <div class="swiper swipernav mb-3">
         <div class="swiper-wrapper">
@@ -155,6 +164,7 @@
           <h6>Menú</h6>
         </div>
       </div>
+      {% if membership.days_left > 0 %}
       <div class="row">
         <div class="col-12 col-md-6 col-lg-4">
           <div class="card adminuiux-card mb-3">
@@ -224,6 +234,30 @@
           </div>
         </div>
       </div>
+      {% else %}
+      <div class="col-12 col-md-6 col-xl-4 col-xxl-3">
+        <div class="card adminuiux-card bg-theme-1 overflow-hidden position-relative mb-3">
+            <div class="position-absolute start-0 top-0 h-100 w-100 rounded overflow-hidden coverimg z-index-0" >
+
+                <img src="{% static 'assets/img/fitness/bg-overlay-1.png' %}" alt="" style="display: none;"></div>
+            <div class="card-body height-dynamic position-relative" style="--h-dynamic:315px"><span class="opacity-50 position-absolute end-0 top-0 m-1 mx-2 fs-12">Activa tu membresía</span>
+                <div class="row align-items-center justify-content-center h-100">
+                    <div class="col-11">
+                        <h3 class="fw-normal mb-0">No tienes membresía activa</h3>
+                        <p class="opacity-75"></p>
+                        <h1 class="mb-0">Activala ahora</h1><br>
+                        <div class="row align-items-center">
+
+                            <div class="col"><a class="btn btn-outline-light" href="{% url 'users:membership' %}">Actívala ya</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+      {% endif %}
     </div>
   </main>
 </div>
@@ -275,7 +309,7 @@
               class="nav-icon bi bi-calendar"></i> <span class="nav-text">Calendario</span></span></a></li>
       <li class="nav-item">
 
-        <a class="nav-link" href="{% url 'users:profile' %}"><span>
+        <a class="nav-link" href="{% url 'users:my_profile' %}"><span>
             <figure class="avatar avatar-20 rounded-circle coverimg align-middle mb-2"><img
               {% if user.photo %}
               src="{{user.photo.url}}"

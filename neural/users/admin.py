@@ -4,10 +4,36 @@ from django.contrib.auth import admin as auth_admin
 from django.utils.translation import gettext_lazy as _
 
 # Models
-from neural.users.models import User, Ranking, Profile, Plan, UserMembership, UserStrike
+from neural.users.models import (
+    User,
+    Ranking,
+    Profile,
+    Plan,
+    UserMembership,
+    UserStrike,
+    NeuralPlan,
+    UserPaymentReference,
+)
 
 # Forms
 from neural.users.forms import UserChangeForm
+
+
+@admin.register(UserPaymentReference)
+class UserPaymentReferenceAdmin(admin.ModelAdmin):
+    list_display = ["user", "reference", "is_paid"]
+    search_fields = ["user__email", "user__first_name", "user__last_name"]
+    list_filter = ["is_paid"]
+    ordering = ["user"]
+
+
+@admin.register(NeuralPlan)
+class NeuralPlanAdmin(admin.ModelAdmin):
+    list_display = ["name", "price", "duration"]
+    list_editable = ["price", "duration"]
+    search_fields = ["name", "description"]
+    list_filter = ["name", "price", "duration"]
+    readonly_fields = ["slug_name"]
 
 
 @admin.register(UserStrike)
@@ -34,7 +60,6 @@ class MembershipInline(admin.StackedInline):
     model = UserMembership
     ordering = ["-is_active"]
     search_fields = ["user", "membership_type"]
-    readonly_fields = ["expiration_date"]
     extra = 0
 
 

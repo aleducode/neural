@@ -1,0 +1,113 @@
+{% extends 'users/base.html' %}
+{% load static i18n static %}
+{% block title %}Calendario{% endblock %}
+
+{% block css %}
+<link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
+<style>
+  .clickeable {
+    cursor: pointer;
+  }
+  a {
+    text-decoration:unset;
+    color: black;
+  }
+</style>
+{% endblock css %}
+{% block container %}
+<div class="adminuiux-wrap">
+  {% include 'shared/sidebar.html' %}
+  <main class="adminuiux-content has-sidebar" onclick="contentClick()">
+    <div class="container mt-3" id="main-content">
+      <a type="button" class="btn btn-outline-theme mb-3 btn-xs" href="{% url 'users:index' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left-circle"><circle cx="12" cy="12" r="10"/><polyline points="12 8 8 12 12 16"/><line x1="16" y1="12" x2="8" y2="12"/></svg>
+        Regresar
+      </a>
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
+        {% if 'safe' in message.tags %}
+        {{ message|safe }}
+        {% else %}
+        {{ message }}
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <div class="card adminuiux-card overflow-hidden mb-3 pt-4">
+        <figure class="coverimg start-0 top-0 w-100 h-100 z-index-0 position-absolute blur-overlay opacity-50">
+          <img {% if user.photo %} src="{{user.photo.url}}" {% else %}
+            src="{% static 'assets/img/fitness/image-6.jpg' %}" {% endif %} class="mw-100" alt=""
+            style="display: none;">
+        </figure>
+
+        <a href="{% url 'users:profile' %}">
+        <div class="card-body text-center z-index-1">
+          <div class="d-inline-block text-center position-relative my-3">
+            <div class="avatar avatar-110 border rounded-circle mx-auto border-theme-1">
+              <figure class="avatar avatar-100 coverimg rounded-circle">
+                <img {% if user.photo %} src="{{user.photo.url}}" {% else %}
+                  src="{% static 'assets/img/fitness/image-6.jpg' %}" {% endif %} alt="" style="display: none;">
+              </figure>
+            </div>
+          </div>
+          <h5 class="mb-0">{{request.user.get_full_name|title}}</h5>
+          <p class="small opacity-75 mb-3">{{request.user.email}}</p>
+        </div>
+      </a>
+      </div>
+      <div class="list-group adminuiux-list-group"><a class="list-group-item list-group-item-action"
+          href="/">
+          <div class="row gx-0">
+            <div class="col align-self-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" class="feather feather-layout avatar avatar-18 me-1">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="9" y1="21" x2="9" y2="9"></line>
+              </svg> Inicio</div>
+
+          </div>
+        </a>
+        <a class="list-group-item list-group-item-action" href="fitness-subscription.html">
+          <div class="row">
+            <div class="col"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-gift avatar avatar-18 me-1">
+                <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                <rect x="2" y="7" width="20" height="5"></rect>
+                <line x1="12" y1="22" x2="12" y2="7"></line>
+                <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+              </svg> Membresía</div>
+            <div class="col-auto">
+              <p class="small text-success"></p>
+            </div>
+            <div class="col-auto"><span class="arrow bi bi-chevron-right"></span></div>
+          </div>
+        </a>
+
+        <a class="list-group-item list-group-item-action" href="{% url 'users:profile' %}"><svg
+            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="feather feather-settings avatar avatar-18 me-1">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg> Configuración de la cuenta </a>
+
+          <a class="list-group-item list-group-item-action theme-red"
+          href="{% url 'users:logout' %}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="feather feather-power avatar avatar-18 me-1">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+            <line x1="12" y1="2" x2="12" y2="12"></line>
+          </svg> Cerrar sesión</a></div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+{% block js %}
+{% endblock js %}
