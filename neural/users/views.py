@@ -208,10 +208,7 @@ class MembershipView(LoginRequiredMixin, TemplateView):
         m.update(cadena_concatenada.encode())
         hash_hex = m.hexdigest()
         context["hash_hex"] = hash_hex
-        if not settings.DEBUG:
-            context["membership_link"] = reverse_lazy("users:membership")
-        else:
-            context["membership_link"] = "https://app.neural.com.co" + reverse_lazy(
-                "users:membership"
-            )
+        context["membership_link"] = "https://app.neural.com.co" + reverse_lazy(
+            "users:membership"
+        )
         return context
