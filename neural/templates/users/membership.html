@@ -1,6 +1,6 @@
 {% extends 'users/base.html' %}
 {% load static i18n static  humanize %}
-{% block title %}Calendario{% endblock %}
+{% block title %}Mensualidad{% endblock %}
 
 {% block css %}
 <link href="{% static 'assets/css/index.css' %}" rel="stylesheet">
@@ -13,6 +13,11 @@
     text-decoration: unset;
     color: black;
   }
+  div.card-footer:nth-child(4) > bold-payment-button:nth-child(2) {
+    display: block ruby;
+  }
+
+
 </style>
 {% endblock css %}
 {% block container %}
@@ -83,22 +88,55 @@
           <p>{{membership.plan.price|intcomma }} $</p>
         </div>
       </div>
+      <h4 for="">Renueva tu suscripción aquí</h4>
+
+        <div class="row mt-3">
+          <div class="col-12 col-sm-6 col-lg-6">
+            <div class="card adminuiux-card overflow-hidden theme-green mb-3">
+              <div class="card-body text-center z-index-1">
+                <figure class="avatar avatar-80 bg-theme-1-subtle rounded-circle mb-3"><i
+                    class="bi bi bi-star text-theme-1 h1"></i></figure>
+                <h1 class="mb-0">{{membership.plan.price|intcomma }} $</h1>
+                <h5 class="fw-normal text-secondary">Renovación automática</h5>
+              </div>
+              <div class="card-body pb-0">
+                <h6>Incluye:</h6>
+                <ul class="list-group adminuiux-list-group small mb-0">
+                  <li class="list-group-item text-secondary"><i class="bi bi-check-circle vm me-1"></i> Acceso a las clases</li>
+                </ul>
+                <ul class="list-group adminuiux-list-group small mb-0">
+                  <li class="list-group-item text-secondary"><i class="bi bi-check-circle vm me-1"></i> Entrenamiento muy melo </li>
+                </ul>
+                <ul class="list-group adminuiux-list-group small mb-0">
+                  <li class="list-group-item text-secondary"><i class="bi bi-check-circle vm me-1"></i> Ser feliz</li>
+                </ul>
+              </div>
+
+              <div class="card-footer text-center mb-0 pb-0">
+                <a href="fitness-subscription-pay.html" class="btn btn-theme w-100">Pago automático</a>
+                <small> ó paga con débito </small>
+              </div>
+              <div class="card-footer text-center mt-0 pt-0">
+                <script
+                data-bold-button="dark-S"
+                data-order-id="{{random_transaction_id}}"
+                data-currency="COP"
+                data-amount="{{membership.plan.raw_price}}"
+                data-api-key="{{BOLD_KEY}}"
+                data-integrity-signature="{{hash_hex}}"
+                data-redirection-url="{{membership_link}}"
+                data-description="Plan {{membership.plan.name}} de Neural"
+                data-tax="consumption"
+                data-render-mode="embedded"
+                extra-data-1="{{request.user.pk}}"
+              ></script>
+              </div>
+            </div>
+          </div>
+        </div>
       <div class="row gx-3 align-items-center mb-3">
         <div class="col">
-          <label for="">Renueva tu suscripción aquí</label>
-          <script
-            data-bold-button="dark-S"
-            data-order-id="{{random_transaction_id}}"
-            data-currency="COP"
-            data-amount="{{membership.plan.raw_price}}"
-            data-api-key="{{BOLD_KEY}}"
-            data-integrity-signature="{{hash_hex}}"
-            data-redirection-url="{{membership_link}}"
-            data-description="Plan {{membership.plan.name}} de Neural"
-            data-tax="consumption"
-            data-render-mode="embedded"
-            extra-data-1="{{request.user.pk}}"
-          ></script>
+
         </div>
         <div class="col-auto">
         </div>

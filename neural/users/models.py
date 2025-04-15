@@ -124,7 +124,10 @@ class UserMembership(NeuralBaseModel):
     @property
     def days_left(self):
         date_now = timezone.localdate()
-        return (self.expiration_date - date_now).days + 1
+        value = (self.expiration_date - date_now).days + 1
+        if value < 0:
+            return 0
+        return value
 
     def save(self, *args, **kwargs):
         # Reset cache membership
