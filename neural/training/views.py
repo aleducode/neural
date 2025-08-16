@@ -28,10 +28,8 @@ class ScheduleV1View(LoginRequiredMixin, TemplateView):
         # Activate language translation
         activate("es")
         custom_filters = {}
-        if self.request.GET.get("is_group"):
-            custom_filters["class_trainging__training_type__is_group"] = True
         if self.request.GET.get("type"):
-            custom_filters["class_trainging__training_type__slug_name"] = (
+            custom_filters["class_training__training_type__slug_name"] = (
                 self.request.GET.get("type")
             )
         if custom_filters:
@@ -75,12 +73,9 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         filter_dict = {
             "date": self.date_obj,
-            "class_trainging__training_type__is_group": self.request.GET.get(
-                "is_group", False
-            ),
         }
         if self.request.GET.get("type"):
-            filter_dict["class_trainging__training_type__slug_name"] = (
+            filter_dict["class_training__training_type__slug_name"] = (
                 self.request.GET.get("type")
             )
         # Permissions
@@ -98,14 +93,14 @@ class TrainingByDateView(LoginRequiredMixin, TemplateView):
             )
             context["already_scheduled"] = True
         if self.date == now_date:
-            filter_dict["class_trainging__hour_init__gte"] = now
+            filter_dict["class_training__hour_init__gte"] = now
         context["sessions"] = (
             Slot.objects.filter(**filter_dict)
             .select_related(
-                "class_trainging",
-                "class_trainging__training_type",
+                "class_training",
+                "class_training__training_type",
             )
-            .order_by("class_trainging__hour_init")
+            .order_by("class_training__hour_init")
         )
         activate("es")
         context["name_day"] = _(self.date_obj.strftime("%A"))
@@ -187,8 +182,8 @@ class ScheduleDoneView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         training_session = self.get_object()
         date = training_session.slot.date
-        init_hour = training_session.slot.class_trainging.hour_init
-        end_hour = training_session.slot.class_trainging.hour_end
+        init_hour = training_session.slot.class_training.hour_init
+        end_hour = training_session.slot.class_training.hour_end
         context["date"] = date
         context["init_hour"] = init_hour
         context["end_hour"] = end_hour
@@ -211,8 +206,8 @@ class MyScheduleView(LoginRequiredMixin, TemplateView):
             .select_related(
                 "user",
                 "slot",
-                "slot__class_trainging",
-                "slot__class_trainging__training_type",
+                "slot__class_training",
+                "slot__class_training__training_type",
             )[:7]
         )
         return context

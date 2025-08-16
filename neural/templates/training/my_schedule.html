@@ -40,15 +40,15 @@
     {% for event in user_slots %}
     <div class="card adminuiux-card style-none mb-3">
       <div class="card-body">
-        <p class="mb-3 small fw-medium text-secondary">{{event.slot.date}} | {{event.slot.class_trainging.hour_init}} -
-          {{event.slot.class_trainging.hour_end}}<span class="text-success bi bi-calendar"></span></p>
+        <p class="mb-3 small fw-medium text-secondary">{{event.slot.date}} | {{event.slot.class_training.hour_init}} -
+          {{event.slot.class_training.hour_end}}<span class="text-success bi bi-calendar"></span></p>
         <div class="row align-items-center gx-2 mb-0">
 
           <div class="col-auto"><img src="{% static 'assets/img/fitness/image-5.jpg' %}"
               class="avatar avatar-40 rounded" alt=""></div>
           <div class="col">
-            <h6 class="mb-0">{{event.slot.class_trainging.training_type}}</h6>
-            <p class="text-secondary small text-truncated">{{event.slot.class_trainging.get_day_display}}.</p>
+            <h6 class="mb-0">{{event.slot.class_training.training_type}}</h6>
+            <p class="text-secondary small text-truncated">{{event.slot.class_training.get_day_display}}.</p>
             <a onclick="cancelSession('{{event.pk}}')" class="btn btn-sm btn-link bg-white-opacity">Cancelar <i
                 class="bi bi-arrow-right"></i></a>
           </div>
