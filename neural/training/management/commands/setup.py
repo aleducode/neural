@@ -20,7 +20,7 @@ class Command(BaseCommand):
             print(f"Training type {name} created")
             # For today into each day until 3 months
             Slot.objects.filter(
-                class_trainging__training_type=training_type,
+                class_training__training_type=training_type,
                 # ONLY WEEKENDS
                 date__week_day__in=[6, 7],
             ).delete()
@@ -57,6 +57,6 @@ class Command(BaseCommand):
                         )
                         Slot.objects.update_or_create(
                             date=date,
-                            class_trainging=session,
+                            class_training=session,
                             defaults={"max_places": 8},
                         )

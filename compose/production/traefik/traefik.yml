@@ -13,53 +13,17 @@ entryPoints:
   flower:
     address: ":5555"
 
-certificatesResolvers:
-  letsencrypt:
-    # https://docs.traefik.io/master/https/acme/#lets-encrypt
-    acme:
-      email: "ducode@outlook.com"
-      storage: /etc/traefik/acme/acme.json
-      # https://docs.traefik.io/master/https/acme/#httpchallenge
-      httpChallenge:
-        entryPoint: web
-
 http:
   routers:
     web-router:
-      rule: "Host(`neural.com.co`) || Host(`www.neural.com.co`) || Host(`app.neural.com.co`)"
+      rule: "Host(`app.neural.com.co`)"
       entryPoints:
         - web
       middlewares:
-        - redirect
         - csrf
       service: django
-
-    web-secure-router:
-      rule: "Host(`neural.com.co`) || Host(`www.neural.com.co`)  || Host(`app.neural.com.co`)"
-      entryPoints:
-        - web-secure
-      middlewares:
-        - csrf
-      service: django
-      tls:
-        # https://docs.traefik.io/master/routing/routers/#certresolver
-        certResolver: letsencrypt
-
-    flower-secure-router:
-      rule: "Host(`neural.com.co`) || Host(`www.neural.com.co`)  || Host(`app.neural.com.co`)"
-      entryPoints:
-        - flower
-      service: flower
-      tls:
-        # https://docs.traefik.io/master/routing/routers/#certresolver
-        certResolver: letsencrypt
 
   middlewares:
-    redirect:
-      # https://docs.traefik.io/master/middlewares/redirectscheme/
-      redirectScheme:
-        scheme: https
-        permanent: true
     csrf:
       # https://docs.traefik.io/master/middlewares/headers/#hostsproxyheaders
       # https://docs.djangoproject.com/en/dev/ref/csrf/#ajax

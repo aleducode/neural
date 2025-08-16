@@ -22,8 +22,9 @@ class UserTrainingInline(admin.TabularInline):
 @admin.register(Slot)
 class SlotAdmin(admin.ModelAdmin):
     date_hierarchy = "date"
-    search_fields = ["class_trainging__training_type__name"]
-    list_filter = ["date", "class_trainging__training_type"]
+    search_fields = ["class_training__training_type__name"]
+    list_filter = ["date", "class_training__training_type"]
+    autocomplete_fields = ["class_training"]
     list_display = [
         "date",
         "class_training_name",
@@ -47,18 +48,18 @@ class SlotAdmin(admin.ModelAdmin):
         return obj.reserved_spaces
 
     def class_training_hour_init(self, obj):
-        if obj.class_trainging:
-            return obj.class_trainging.hour_init
+        if obj.class_training:
+            return obj.class_training.hour_init
         return None
 
     def class_training_hour_end(self, obj):
-        if obj.class_trainging:
-            return obj.class_trainging.hour_end
+        if obj.class_training:
+            return obj.class_training.hour_end
         return None
 
     def class_training_name(self, obj):
-        if obj.class_trainging.training_type:
-            return obj.class_trainging.training_type.name
+        if obj.class_training.training_type:
+            return obj.class_training.training_type.name
         return None
 
 
@@ -72,6 +73,7 @@ class TrainingTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Classes)
 class ClassesAdmin(admin.ModelAdmin):
+    search_fields = ["training_type__name", "day"]
     list_filter = ["day"]
     list_display = ["day", "training_type", "hour_init", "hour_end"]
 
@@ -104,13 +106,13 @@ class UserTrainingAdmin(admin.ModelAdmin):
         return (
             super()
             .get_queryset(request)
-            .select_related("user", "slot", "slot__class_trainging")
+            .select_related("user", "slot", "slot__class_training")
         )
 
     def slot_info(self, obj):
         slot = obj.slot
         if slot:
-            slot_info_str = f"{slot.date} {slot.class_trainging.hour_init} - {slot.class_trainging.hour_end}"
+            slot_info_str = f"{slot.date} {slot.class_training.hour_init} - {slot.class_training.hour_end}"
         else:
             slot_info_str = "N/A"
         return slot_info_str

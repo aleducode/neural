@@ -89,7 +89,7 @@ class Classes(NeuralBaseModel):
 class Slot(NeuralBaseModel):
     date = models.DateField()
     max_places = models.IntegerField()
-    class_trainging = models.ForeignKey(
+    class_training = models.ForeignKey(
         Classes, on_delete=models.CASCADE, related_name="slots", blank=True, null=True
     )
 
@@ -97,7 +97,7 @@ class Slot(NeuralBaseModel):
         ordering = ["-date"]
 
     def __str__(self):
-        return f"Clase {self.date} - {self.class_trainging.hour_init} - {self.class_trainging.hour_end}"
+        return f"Clase {self.date} - {self.class_training.hour_init} - {self.class_training.hour_end}"
 
     @property
     def users_scheduled(self):

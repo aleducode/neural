@@ -35,6 +35,6 @@ def create_schedule_day():
     classes = Classes.objects.filter(day=day_name)
     for session in classes:
         Slot.objects.update_or_create(
-            date=delta_day, class_trainging=session, defaults={"max_places": 20}
+            date=delta_day, class_training=session, defaults={"max_places": 20}
         )
     print("Finish")

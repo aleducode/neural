@@ -55,7 +55,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
                 slot__date__gte=now_date,
                 status=UserTraining.Status.CONFIRMED,
             )
-            .select_related("slot__class_trainging__training_type")
+            .select_related("slot__class_training__training_type")
             .last()
         )
         profile = user.profile if hasattr(user, "profile") else None
@@ -71,8 +71,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
             else:
                 translate_day = _(day.strftime("%A"))
                 day_name = f"El {translate_day}"
-            hour = last_training.slot.class_trainging.hour_init.strftime("%I:%M %p")
-            training_name = last_training.slot.class_trainging.training_type.name
+            hour = last_training.slot.class_training.hour_init.strftime("%I:%M %p")
+            training_name = last_training.slot.class_training.training_type.name
             context["last_training"] = {
                 "day": day_name,
                 "hour": hour,

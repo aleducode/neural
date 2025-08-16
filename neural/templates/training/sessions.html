@@ -55,11 +55,11 @@
               {% endif %}
               <div class="col-8">
                 <h6 class="text-truncated">
-                  {{session.class_trainging.training_type.name}}
+                  {{session.class_training.training_type.name}}
                 </h6>
                 <p class="text-secondary fs-14 mb-2">
-                  <span class="me-1"><i class="bi bi-clock me-1"></i> {{session.class_trainging.hour_init|date:"f"}} a
-                    {{session.class_trainging.hour_end|date:"f A"}}</span>
+                  <span class="me-1"><i class="bi bi-clock me-1"></i> {{session.class_training.hour_init|date:"f"}} a
+                    {{session.class_training.hour_end|date:"f A"}}</span>
                   <span class="me-1">
                     <i class="bi bi-fire me-1">
                     </i> 400 kcal</span>
@@ -71,13 +71,13 @@
               </div>
               <div class="col-4">
                 <figure class="height-90 w-100 rounded coverimg mb-0">
-                  {% if session.class_trainging.training_type.id == 8 %}
+                  {% if session.class_training.training_type.id == 8 %}
                   <img src="{% static 'images/8.jpg' %}" alt="" style="display: none;">
-                  {% elif session.class_trainging.training_type.id == 4 %}
+                  {% elif session.class_training.training_type.id == 4 %}
                   <img src="{% static 'images/4.jpg' %}" alt="" style="display: none;">
-                  {% elif session.class_trainging.training_type.id == 5 %}
+                  {% elif session.class_training.training_type.id == 5 %}
                   <img src="{% static 'images/5.jpg' %}" alt="" style="display: none;">
-                  {% elif session.class_trainging.training_type.id == 6 %}
+                  {% elif session.class_training.training_type.id == 6 %}
                   <img src="{% static 'images/6.jpg' %}" alt="" style="display: none;">
                   {% else %}
                   <img src="{% static 'images/1.jpg' %}" alt="" style="display: none;">
