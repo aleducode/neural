@@ -20,4 +20,14 @@ urlpatterns = [
         view=user_views.SwitchUserView.as_view(),
         name="switch_user",
     ),
+    path(
+        route="year-in-review/",
+        view=user_views.YearInReviewView.as_view(),
+        name="year_in_review",
+    ),
+    path(
+        route="year-in-review/<int:year>/",
+        view=user_views.YearInReviewView.as_view(),
+        name="year_in_review_year",
+    ),
 ]

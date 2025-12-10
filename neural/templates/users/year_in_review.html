@@ -1,0 +1,413 @@
+{% extends 'users/base.html' %}
+{% load static i18n %}
+{% block title %}Tu Resumen del Año {{ year }}{% endblock %}
+
+{% block css %}
+<link href="{% static 'assets/css/year_review.css' %}" rel="stylesheet">
+{% endblock css %}
+
+{% block container %}
+<div class="year-review-container">
+  <!-- Floating particles background -->
+  <div class="particles-container" id="particles"></div>
+
+  <!-- Progress indicator -->
+  <div class="progress-indicator">
+    <div class="progress-dots">
+      <span class="dot active" data-slide="0"></span>
+      <span class="dot" data-slide="1"></span>
+      <span class="dot" data-slide="2"></span>
+      <span class="dot" data-slide="3"></span>
+      <span class="dot" data-slide="4"></span>
+      <span class="dot" data-slide="5"></span>
+      <span class="dot" data-slide="6"></span>
+      <span class="dot" data-slide="7"></span>
+      <span class="dot" data-slide="8"></span>
+    </div>
+  </div>
+
+  <!-- Navigation arrows -->
+  <button class="nav-arrow nav-prev" id="prevBtn" style="display: none;">
+    <i class="bi bi-chevron-up"></i>
+  </button>
+  <button class="nav-arrow nav-next" id="nextBtn">
+    <i class="bi bi-chevron-down"></i>
+  </button>
+
+  <!-- Slides container -->
+  <div class="slides-wrapper" id="slidesWrapper">
+
+    <!-- Slide 0: Welcome -->
+    <section class="review-slide slide-welcome active" data-theme="gradient-purple">
+      <div class="slide-content">
+        <div class="welcome-animation">
+          <div class="year-text">
+            <span class="year-digit" style="--delay: 0">{{ year }}</span>
+          </div>
+          <div class="user-greeting fade-up" style="--delay: 0.5s">
+            <h1>{{ request.user.first_name|title }}</h1>
+            <p class="subtitle">Tu viaje fitness fue increible</p>
+          </div>
+          <div class="scroll-hint fade-up" style="--delay: 1s">
+            <span>Desliza para ver tu resumen</span>
+            <i class="bi bi-chevron-double-down bounce"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 1: Total Trainings -->
+    <section class="review-slide slide-trainings" data-theme="gradient-orange">
+      <div class="slide-content">
+        <div class="stat-reveal">
+          <p class="stat-intro fade-up">Este año entrenaste</p>
+          <div class="big-number-container">
+            <span class="big-number counter" data-target="{{ total_trainings }}">0</span>
+            <span class="big-number-label fade-up" style="--delay: 0.3s">veces</span>
+          </div>
+          <div class="stat-context fade-up" style="--delay: 0.6s">
+            <div class="context-card">
+              <i class="bi bi-calendar-check"></i>
+              <span>{{ active_weeks }} semanas activas</span>
+            </div>
+            <div class="context-card">
+              <i class="bi bi-graph-up-arrow"></i>
+              <span>{{ avg_trainings_per_week }} entrenos/semana</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 2: Calories & Energy -->
+    <section class="review-slide slide-calories" data-theme="gradient-red">
+      <div class="slide-content">
+        <div class="stat-reveal">
+          <p class="stat-intro fade-up">Quemaste la increible cantidad de</p>
+          <div class="big-number-container">
+            <span class="big-number counter" data-target="{{ total_calories }}">0</span>
+            <span class="big-number-label fade-up" style="--delay: 0.3s">calorias</span>
+          </div>
+          <div class="fun-equivalents fade-up" style="--delay: 0.6s">
+            <div class="equivalent-item">
+              <span class="equiv-emoji">🍕</span>
+              <span class="equiv-number">{{ pizzas_burned }}</span>
+              <span class="equiv-label">pizzas quemadas</span>
+            </div>
+            <div class="equivalent-item">
+              <span class="equiv-emoji">🏃</span>
+              <span class="equiv-number">{{ marathons_equivalent }}</span>
+              <span class="equiv-label">maratones de energia</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 3: Hours Dedicated -->
+    <section class="review-slide slide-hours" data-theme="gradient-cyan">
+      <div class="slide-content">
+        <div class="stat-reveal">
+          <p class="stat-intro fade-up">Dedicaste</p>
+          <div class="big-number-container">
+            <span class="big-number counter" data-target="{{ total_hours }}">0</span>
+            <span class="big-number-label fade-up" style="--delay: 0.3s">horas a tu salud</span>
+          </div>
+          <div class="time-visualization fade-up" style="--delay: 0.6s">
+            <div class="time-blocks">
+              {% for i in "123456789012"|make_list %}
+              <div class="time-block" style="--block-delay: {{ forloop.counter0 }}"></div>
+              {% endfor %}
+            </div>
+            <p class="time-message">Cada hora invertida es un paso hacia una mejor version de ti</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4: Favorite Training -->
+    <section class="review-slide slide-favorite" data-theme="gradient-green">
+      <div class="slide-content">
+        <div class="stat-reveal">
+          <p class="stat-intro fade-up">Tu entrenamiento favorito fue</p>
+          <div class="favorite-reveal">
+            <div class="favorite-icon pulse-glow">
+              <i class="bi bi-trophy-fill"></i>
+            </div>
+            <h2 class="favorite-name fade-up" style="--delay: 0.4s">
+              {% if favorite_training_type %}{{ favorite_training_type }}{% else %}--{% endif %}
+            </h2>
+            <p class="favorite-count fade-up" style="--delay: 0.6s">
+              {% if favorite_training_count %}{{ favorite_training_count }} sesiones{% endif %}
+            </p>
+          </div>
+          <div class="favorite-details fade-up" style="--delay: 0.8s">
+            {% if favorite_day %}
+            <div class="detail-chip">
+              <i class="bi bi-calendar-heart"></i>
+              <span>Tu dia preferido: <strong>{{ favorite_day }}</strong></span>
+            </div>
+            {% endif %}
+            {% if favorite_time %}
+            <div class="detail-chip">
+              <span class="time-emoji">{{ favorite_time_emoji }}</span>
+              <span>Entrenas mejor en la <strong>{{ favorite_time }}</strong></span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5: Streaks -->
+    <section class="review-slide slide-streak" data-theme="gradient-yellow">
+      <div class="slide-content">
+        <div class="stat-reveal">
+          <p class="stat-intro fade-up">Tu mejor racha fue de</p>
+          <div class="streak-display">
+            <div class="streak-flames">
+              <span class="flame flame-1">🔥</span>
+              <span class="flame flame-2">🔥</span>
+              <span class="flame flame-3">🔥</span>
+            </div>
+            <span class="big-number counter" data-target="{{ best_streak }}">0</span>
+            <span class="big-number-label fade-up" style="--delay: 0.3s">semanas seguidas</span>
+          </div>
+          {% if current_streak > 0 %}
+          <div class="current-streak fade-up" style="--delay: 0.6s">
+            <p>Racha actual: <strong>{{ current_streak }} semanas</strong> 🔥</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6: Monthly Chart -->
+    <section class="review-slide slide-chart" data-theme="gradient-purple-dark">
+      <div class="slide-content">
+        <div class="chart-section">
+          <h2 class="chart-title fade-up">Tu actividad mes a mes</h2>
+          {% if best_month %}
+          <p class="best-month-badge fade-up" style="--delay: 0.2s">
+            <i class="bi bi-star-fill"></i> Mejor mes: <strong>{{ best_month }}</strong> ({{ best_month_trainings }} entrenos)
+          </p>
+          {% endif %}
+          <div class="chart-container fade-up" style="--delay: 0.4s">
+            <canvas id="monthlyChart"></canvas>
+          </div>
+          <div class="weekday-chart fade-up" style="--delay: 0.6s">
+            <h3>Distribucion semanal</h3>
+            <div class="weekday-bars">
+              {% for day in weekday_labels %}
+              <div class="weekday-bar-item">
+                <div class="bar-fill" style="--bar-height: 0%" data-height="{{ weekday_data|default_if_none:0 }}"></div>
+                <span class="bar-label">{{ day }}</span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7: Ranking & Summary -->
+    <section class="review-slide slide-summary" data-theme="gradient-gold">
+      <div class="slide-content">
+        <div class="summary-section">
+          {% if ranking_position %}
+          <div class="ranking-reveal fade-up">
+            <p class="ranking-intro">En el ranking Neural eres el</p>
+            <div class="ranking-badge">
+              <span class="ranking-hash">#</span>
+              <span class="ranking-number counter" data-target="{{ ranking_position }}">0</span>
+            </div>
+            <p class="ranking-total">de {{ ranking_total }} atletas</p>
+          </div>
+          {% endif %}
+
+          <div class="final-stats fade-up" style="--delay: 0.5s">
+            <h2>Resumen {{ year }}</h2>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <i class="bi bi-lightning-charge-fill"></i>
+                <span class="stat-value">{{ total_trainings }}</span>
+                <span class="stat-label">Entrenos</span>
+              </div>
+              <div class="stat-item">
+                <i class="bi bi-fire"></i>
+                <span class="stat-value">{{ total_calories }}</span>
+                <span class="stat-label">Calorias</span>
+              </div>
+              <div class="stat-item">
+                <i class="bi bi-clock-fill"></i>
+                <span class="stat-value">{{ total_hours }}h</span>
+                <span class="stat-label">Horas</span>
+              </div>
+              <div class="stat-item">
+                <i class="bi bi-trophy-fill"></i>
+                <span class="stat-value">{{ best_streak }}</span>
+                <span class="stat-label">Mejor racha</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="share-section fade-up" style="--delay: 0.8s">
+            <p class="share-message">Desliza para compartir tu resumen</p>
+            <i class="bi bi-chevron-double-down bounce" style="font-size: 24px; opacity: 0.7;"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8: Share Card -->
+    <section class="review-slide slide-share" data-theme="gradient-share">
+      <div class="slide-content share-slide-content">
+        <h2 class="share-title fade-up">Comparte tu logro</h2>
+        <p class="share-subtitle fade-up" style="--delay: 0.2s">Descarga tu tarjeta y compartela en redes</p>
+
+        <!-- Shareable Card -->
+        <div class="share-card-wrapper fade-up" style="--delay: 0.4s">
+          <div class="share-card" id="shareCard">
+            <!-- Card Background Pattern -->
+            <div class="card-bg-pattern"></div>
+
+            <!-- Card Header -->
+            <div class="card-header-section">
+              <div class="card-logo">
+                <img src="{% static 'images/brain.png' %}" alt="Neural" class="logo-img">
+                <span class="logo-text">Neural</span>
+              </div>
+              <div class="card-year-badge">{{ year }}</div>
+            </div>
+
+            <!-- User Info -->
+            <div class="card-user-section">
+              <div class="card-avatar">
+                {% if request.user.photo %}
+                <img src="{{ request.user.photo.url }}" alt="{{ request.user.first_name }}">
+                {% else %}
+                <div class="avatar-placeholder">{{ request.user.first_name|slice:":1"|upper }}</div>
+                {% endif %}
+              </div>
+              <h3 class="card-username">{{ request.user.first_name|title }} {{ request.user.last_name|title }}</h3>
+              <p class="card-tagline">Mi año en Neural</p>
+            </div>
+
+            <!-- Main Stats -->
+            <div class="card-stats-section">
+              <div class="card-stat-main">
+                <span class="card-stat-number">{{ total_trainings }}</span>
+                <span class="card-stat-label">Entrenamientos</span>
+              </div>
+            </div>
+
+            <!-- Secondary Stats Grid -->
+            <div class="card-stats-grid">
+              <div class="card-stat-item">
+                <i class="bi bi-fire"></i>
+                <span class="card-stat-value">{{ total_calories|floatformat:0 }}</span>
+                <span class="card-stat-name">Calorias</span>
+              </div>
+              <div class="card-stat-item">
+                <i class="bi bi-clock-fill"></i>
+                <span class="card-stat-value">{{ total_hours }}h</span>
+                <span class="card-stat-name">Horas</span>
+              </div>
+              <div class="card-stat-item">
+                <i class="bi bi-lightning-charge-fill"></i>
+                <span class="card-stat-value">{{ best_streak }}</span>
+                <span class="card-stat-name">Mejor racha</span>
+              </div>
+              {% if ranking_position %}
+              <div class="card-stat-item">
+                <i class="bi bi-trophy-fill"></i>
+                <span class="card-stat-value">#{{ ranking_position }}</span>
+                <span class="card-stat-name">Ranking</span>
+              </div>
+              {% else %}
+              <div class="card-stat-item">
+                <i class="bi bi-calendar-check"></i>
+                <span class="card-stat-value">{{ active_weeks }}</span>
+                <span class="card-stat-name">Semanas</span>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Favorite Training -->
+            {% if favorite_training_type %}
+            <div class="card-favorite-section">
+              <span class="favorite-label">Entrenamiento favorito</span>
+              <span class="favorite-value">{{ favorite_training_type }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Card Footer -->
+            <div class="card-footer-section">
+              <span class="card-hashtag">#NeuralWrapped{{ year }}</span>
+              <span class="card-url">neural.com.co</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share Actions -->
+        <div class="share-actions fade-up" style="--delay: 0.6s">
+          <button class="btn-share btn-download" id="downloadCard">
+            <i class="bi bi-download"></i>
+            <span>Descargar imagen</span>
+          </button>
+
+          <div class="social-share-buttons">
+            <button class="btn-social btn-instagram" id="shareInstagram" title="Compartir en Instagram Stories">
+              <i class="bi bi-instagram"></i>
+            </button>
+            <button class="btn-social btn-whatsapp" id="shareWhatsapp" title="Compartir en WhatsApp">
+              <i class="bi bi-whatsapp"></i>
+            </button>
+            <button class="btn-social btn-twitter" id="shareTwitter" title="Compartir en X/Twitter">
+              <i class="bi bi-twitter-x"></i>
+            </button>
+            <button class="btn-social btn-facebook" id="shareFacebook" title="Compartir en Facebook">
+              <i class="bi bi-facebook"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Back Home -->
+        <div class="home-link fade-up" style="--delay: 0.8s">
+          <a href="{% url 'users:index' %}" class="btn-back-home">
+            <i class="bi bi-house-fill"></i> Volver al inicio
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- Data for charts -->
+<script>
+  window.yearReviewData = {
+    monthlyLabels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+    monthlyData: [{% for m in monthly_data %}{{ m }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+    weekdayLabels: ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"],
+    weekdayData: [{% for w in weekday_data %}{{ w }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+  };
+</script>
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="{% static 'assets/js/year_review.js' %}"></script>
+<script>
+  // Share data for social sharing
+  window.shareData = {
+    userName: "{{ request.user.first_name|title }}",
+    year: {{ year }},
+    trainings: {{ total_trainings }},
+    calories: {{ total_calories }},
+    hours: {{ total_hours }},
+    hashtag: "#NeuralWrapped{{ year }}"
+  };
+</script>
+{% endblock js %}

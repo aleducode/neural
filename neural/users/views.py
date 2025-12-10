@@ -5,12 +5,15 @@ import random
 import string
 
 from datetime import timedelta
+from collections import Counter
 
 # Django
 from django.contrib.auth import login
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.db.models import Sum, Count, Max
+from django.db.models.functions import ExtractMonth, ExtractWeekDay, ExtractHour
+from django.http import HttpResponseRedirect, JsonResponse
 from django.utils import timezone
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -24,7 +27,7 @@ from neural.users.forms import CustomAuthenticationForm, ProfileForm
 
 # Models
 from neural.training.models import UserTraining
-from neural.users.models import User, NeuralPlan
+from neural.users.models import User, NeuralPlan, UserStats
 
 
 class LoginView(auth_views.LoginView):
@@ -85,6 +88,9 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context["strike"] = strike
         stats = user.stats.filter(year=year, week=week_number).first()
         context["stats"] = stats
+        # Membership
+        membership = user.memberships.filter(is_active=True).first()
+        context["membership"] = membership
         return context
 
 
@@ -211,4 +217,186 @@ class MembershipView(LoginRequiredMixin, TemplateView):
         context["membership_link"] = "https://app.neural.com.co" + reverse_lazy(
             "users:membership"
         )
+        return context
+
+
+class YearInReviewView(LoginRequiredMixin, TemplateView):
+    """Year in Review - Spotify Wrapped style stats."""
+
+    template_name = "users/year_in_review.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        year = self.kwargs.get("year", timezone.localdate().year)
+
+        # Basic aggregated stats from UserStats
+        yearly_stats = user.stats.filter(year=year).aggregate(
+            total_trainings=Sum("trainings"),
+            total_calories=Sum("calories"),
+            total_hours=Sum("hours"),
+            active_weeks=Count("id"),
+        )
+
+        context["year"] = year
+        context["total_trainings"] = yearly_stats["total_trainings"] or 0
+        context["total_calories"] = yearly_stats["total_calories"] or 0
+        context["total_hours"] = yearly_stats["total_hours"] or 0
+        context["active_weeks"] = yearly_stats["active_weeks"] or 0
+
+        # Get all confirmed trainings for the year
+        user_trainings = UserTraining.objects.filter(
+            user=user,
+            slot__date__year=year,
+            status__in=[UserTraining.Status.CONFIRMED, UserTraining.Status.DONE],
+        ).select_related("slot__class_training__training_type")
+
+        # Monthly breakdown for chart
+        monthly_data = (
+            user_trainings.annotate(month=ExtractMonth("slot__date"))
+            .values("month")
+            .annotate(count=Count("id"))
+            .order_by("month")
+        )
+        months_dict = {m["month"]: m["count"] for m in monthly_data}
+        month_names = [
+            "Ene",
+            "Feb",
+            "Mar",
+            "Abr",
+            "May",
+            "Jun",
+            "Jul",
+            "Ago",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dic",
+        ]
+        context["monthly_labels"] = month_names
+        context["monthly_data"] = [months_dict.get(i, 0) for i in range(1, 13)]
+
+        # Best month
+        if months_dict:
+            best_month_num = max(months_dict, key=months_dict.get)
+            context["best_month"] = month_names[best_month_num - 1]
+            context["best_month_trainings"] = months_dict[best_month_num]
+        else:
+            context["best_month"] = None
+            context["best_month_trainings"] = 0
+
+        # Favorite training type
+        training_types = (
+            user_trainings.values("slot__class_training__training_type__name")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        if training_types:
+            context["favorite_training_type"] = training_types[0][
+                "slot__class_training__training_type__name"
+            ]
+            context["favorite_training_count"] = training_types[0]["count"]
+        else:
+            context["favorite_training_type"] = None
+            context["favorite_training_count"] = 0
+
+        # Favorite day of week
+        day_names = {
+            1: "Domingo",
+            2: "Lunes",
+            3: "Martes",
+            4: "Miércoles",
+            5: "Jueves",
+            6: "Viernes",
+            7: "Sábado",
+        }
+        weekday_data = (
+            user_trainings.annotate(weekday=ExtractWeekDay("slot__date"))
+            .values("weekday")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        if weekday_data:
+            favorite_day_num = weekday_data[0]["weekday"]
+            context["favorite_day"] = day_names.get(favorite_day_num, "")
+            context["favorite_day_count"] = weekday_data[0]["count"]
+        else:
+            context["favorite_day"] = None
+            context["favorite_day_count"] = 0
+
+        # Weekday distribution for chart
+        weekday_labels = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
+        weekday_dict = {w["weekday"]: w["count"] for w in weekday_data}
+        context["weekday_labels"] = weekday_labels
+        context["weekday_data"] = [weekday_dict.get(i, 0) for i in range(1, 8)]
+
+        # Favorite time slot
+        time_data = (
+            user_trainings.annotate(hour=ExtractHour("slot__class_training__hour_init"))
+            .values("hour")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        if time_data:
+            favorite_hour = time_data[0]["hour"]
+            if favorite_hour < 12:
+                context["favorite_time"] = "Mañana"
+                context["favorite_time_emoji"] = "🌅"
+            elif favorite_hour < 18:
+                context["favorite_time"] = "Tarde"
+                context["favorite_time_emoji"] = "☀️"
+            else:
+                context["favorite_time"] = "Noche"
+                context["favorite_time_emoji"] = "🌙"
+            context["favorite_time_count"] = time_data[0]["count"]
+        else:
+            context["favorite_time"] = None
+            context["favorite_time_emoji"] = ""
+            context["favorite_time_count"] = 0
+
+        # Best streak
+        best_strike = user.strikes.aggregate(max_weeks=Max("weeks"))
+        context["best_streak"] = best_strike["max_weeks"] or 0
+
+        # Current streak
+        current_strike = user.strikes.filter(is_current=True).first()
+        context["current_streak"] = current_strike.weeks if current_strike else 0
+
+        # Ranking
+        ranking = user.rankings.first()
+        context["ranking_position"] = ranking.position if ranking else None
+        context["ranking_total"] = (
+            User.objects.filter(is_verified=True, is_client=True).count()
+        )
+
+        # Fun metrics
+        # Average trainings per week
+        if context["active_weeks"] > 0:
+            context["avg_trainings_per_week"] = round(
+                context["total_trainings"] / context["active_weeks"], 1
+            )
+        else:
+            context["avg_trainings_per_week"] = 0
+
+        # Equivalent metrics for fun
+        # Assuming 400 calories per training
+        context["pizzas_burned"] = round(context["total_calories"] / 2000, 1)
+        context["marathons_equivalent"] = round(
+            context["total_calories"] / 2600, 1
+        )  # ~2600 cal per marathon
+
+        # Days since first training
+        first_training = user_trainings.order_by("slot__date").first()
+        if first_training:
+            days_as_member = (timezone.localdate() - first_training.slot.date).days
+            context["days_as_member"] = days_as_member
+        else:
+            context["days_as_member"] = 0
+
+        # Percentage of year trained
+        days_in_year = 366 if year % 4 == 0 else 365
+        context["percentage_of_year"] = round(
+            (context["total_trainings"] / days_in_year) * 100, 1
+        )
+
         return context
