@@ -166,13 +166,13 @@ class Command(BaseCommand):
         )
 
         # 6. Create UserTraining records for detailed analysis
-        UserTraining.objects.filter(
-            user=user, slot__date__year=year
-        ).delete()
+        UserTraining.objects.filter(user=user, slot__date__year=year).delete()
 
         all_classes = list(Classes.objects.all())
         if not all_classes:
-            self.stdout.write(self.style.WARNING("No classes found, skipping UserTraining"))
+            self.stdout.write(
+                self.style.WARNING("No classes found, skipping UserTraining")
+            )
         else:
             trainings_created = 0
             start_date = date(year, 1, 1)
@@ -272,8 +272,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Demo data created successfully!"))
         self.stdout.write(self.style.SUCCESS("=" * 50))
         self.stdout.write(f"Email: {email}")
-        self.stdout.write(f"Password: demo123456")
+        self.stdout.write("Password: demo123456")
         self.stdout.write(f"Year: {year}")
         self.stdout.write(f"Total trainings: {total_trainings}")
-        self.stdout.write(f"URL: /year-in-review/")
+        self.stdout.write("URL: /year-in-review/")
         self.stdout.write(self.style.SUCCESS("=" * 50))

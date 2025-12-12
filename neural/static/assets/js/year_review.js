@@ -370,15 +370,33 @@ document.addEventListener('DOMContentLoaded', function() {
       // Wait for fonts and images to load
       await document.fonts.ready;
 
+      // Store original transform and temporarily remove it for capture
+      const originalTransform = card.style.transform;
+      card.style.transform = 'none';
+
+      // Get the actual dimensions of the card
+      const rect = card.getBoundingClientRect();
+
       const canvas = await html2canvas(card, {
-        scale: 2, // Higher resolution
+        scale: 3, // Higher resolution for better quality
         backgroundColor: null,
         useCORS: true,
         allowTaint: true,
         logging: false,
-        width: card.offsetWidth,
-        height: card.offsetHeight,
+        width: rect.width,
+        height: rect.height,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
+        x: 0,
+        y: 0,
+        foreignObjectRendering: false,
+        removeContainer: true,
       });
+
+      // Restore original transform
+      card.style.transform = originalTransform;
 
       // Convert to blob and download
       canvas.toBlob((blob) => {

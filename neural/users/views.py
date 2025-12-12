@@ -5,7 +5,6 @@ import random
 import string
 
 from datetime import timedelta
-from collections import Counter
 
 # Django
 from django.contrib.auth import login
@@ -13,7 +12,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.db.models import Sum, Count, Max
 from django.db.models.functions import ExtractMonth, ExtractWeekDay, ExtractHour
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -27,7 +26,7 @@ from neural.users.forms import CustomAuthenticationForm, ProfileForm
 
 # Models
 from neural.training.models import UserTraining
-from neural.users.models import User, NeuralPlan, UserStats
+from neural.users.models import User, NeuralPlan
 
 
 class LoginView(auth_views.LoginView):
@@ -365,9 +364,9 @@ class YearInReviewView(LoginRequiredMixin, TemplateView):
         # Ranking
         ranking = user.rankings.first()
         context["ranking_position"] = ranking.position if ranking else None
-        context["ranking_total"] = (
-            User.objects.filter(is_verified=True, is_client=True).count()
-        )
+        context["ranking_total"] = User.objects.filter(
+            is_verified=True, is_client=True
+        ).count()
 
         # Fun metrics
         # Average trainings per week
