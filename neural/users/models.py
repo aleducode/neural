@@ -305,3 +305,26 @@ class UserPaymentReference(NeuralBaseModel):
 
     def __str__(self):
         return f"{self.user} - {self.reference} - {self.amount}"
+
+
+class Device(NeuralBaseModel):
+    """Device model for push notifications."""
+
+    class Platform(models.TextChoices):
+        IOS = "ios", "iOS"
+        ANDROID = "android", "Android"
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="devices"
+    )
+    token = models.CharField(max_length=500)
+    platform = models.CharField(max_length=10, choices=Platform.choices)
+    device_id = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Dispositivo"
+        verbose_name_plural = "Dispositivos"
+
+    def __str__(self):
+        return f"{self.user} - {self.platform} - {self.device_id[:20]}"

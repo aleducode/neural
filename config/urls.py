@@ -11,6 +11,8 @@ from neural.users.authentication import (
 
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
+    # API v1 for mobile app
+    path("api/v1/", include("neural.api.urls", namespace="api")),
     path("", include("neural.users.urls", namespace="users")),
     path("", include("neural.training.urls", namespace="training")),
     path("password_reset/", PasswordResetCustomView.as_view(), name="password_reset"),
