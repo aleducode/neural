@@ -35,25 +35,27 @@ class YearReviewView(APIView):
             user=user,
             status=UserTraining.Status.CONFIRMED,
             slot__date__year=year,
-        ).select_related("slot", "slot__class_training", "slot__class_training__training_type")
+        ).select_related(
+            "slot", "slot__class_training", "slot__class_training__training_type"
+        )
 
         total_trainings = trainings.count()
 
         if total_trainings == 0:
-            return Response({
-                "year": year,
-                "total_trainings": 0,
-                "message": "No tienes entrenamientos registrados para este año",
-            })
+            return Response(
+                {
+                    "year": year,
+                    "total_trainings": 0,
+                    "message": "No tienes entrenamientos registrados para este año",
+                }
+            )
 
         # Basic stats
         total_calories = total_trainings * 400
         total_hours = total_trainings
 
         # Active weeks
-        weekly_stats = UserStats.objects.filter(
-            user=user, year=year, trainings__gt=0
-        )
+        weekly_stats = UserStats.objects.filter(user=user, year=year, trainings__gt=0)
         active_weeks = weekly_stats.count()
         avg_trainings_per_week = (
             total_trainings / active_weeks if active_weeks > 0 else 0
@@ -72,8 +74,18 @@ class YearReviewView(APIView):
         # Best month
         best_month_idx = monthly_data.index(max(monthly_data))
         month_names = [
-            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+            "Enero",
+            "Febrero",
+            "Marzo",
+            "Abril",
+            "Mayo",
+            "Junio",
+            "Julio",
+            "Agosto",
+            "Septiembre",
+            "Octubre",
+            "Noviembre",
+            "Diciembre",
         ]
         best_month = {
             "name": month_names[best_month_idx],
@@ -106,7 +118,15 @@ class YearReviewView(APIView):
             idx = (item["weekday"] - 2) % 7
             weekday_data[idx] = item["count"]
 
-        day_names = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        day_names = [
+            "Lunes",
+            "Martes",
+            "Miércoles",
+            "Jueves",
+            "Viernes",
+            "Sábado",
+            "Domingo",
+        ]
         favorite_day_idx = weekday_data.index(max(weekday_data))
         favorite_day = {
             "name": day_names[favorite_day_idx],
@@ -140,14 +160,8 @@ class YearReviewView(APIView):
         }
 
         # Streaks
-        best_strike = (
-            UserStrike.objects.filter(user=user)
-            .order_by("-weeks")
-            .first()
-        )
-        current_strike = UserStrike.objects.filter(
-            user=user, is_current=True
-        ).first()
+        best_strike = UserStrike.objects.filter(user=user).order_by("-weeks").first()
+        current_strike = UserStrike.objects.filter(user=user, is_current=True).first()
 
         streaks = {
             "best": best_strike.weeks if best_strike else 0,
@@ -166,25 +180,29 @@ class YearReviewView(APIView):
 
         # Fun metrics
         pizzas_burned = round(total_calories / 2000, 1)  # ~2000 cal per pizza
-        marathons_equivalent = round(total_hours * 6 / 42.195, 1)  # Avg 6km/h, marathon is 42.195km
+        marathons_equivalent = round(
+            total_hours * 6 / 42.195, 1
+        )  # Avg 6km/h, marathon is 42.195km
 
-        return Response({
-            "year": year,
-            "total_trainings": total_trainings,
-            "total_calories": total_calories,
-            "total_hours": total_hours,
-            "active_weeks": active_weeks,
-            "avg_trainings_per_week": round(avg_trainings_per_week, 1),
-            "best_month": best_month,
-            "favorite_training": favorite_training,
-            "favorite_day": favorite_day,
-            "favorite_time": favorite_time,
-            "streaks": streaks,
-            "ranking": ranking_data,
-            "fun_metrics": {
-                "pizzas_burned": pizzas_burned,
-                "marathons_equivalent": marathons_equivalent,
-            },
-            "monthly_data": monthly_data,
-            "weekday_data": weekday_data,
-        })
+        return Response(
+            {
+                "year": year,
+                "total_trainings": total_trainings,
+                "total_calories": total_calories,
+                "total_hours": total_hours,
+                "active_weeks": active_weeks,
+                "avg_trainings_per_week": round(avg_trainings_per_week, 1),
+                "best_month": best_month,
+                "favorite_training": favorite_training,
+                "favorite_day": favorite_day,
+                "favorite_time": favorite_time,
+                "streaks": streaks,
+                "ranking": ranking_data,
+                "fun_metrics": {
+                    "pizzas_burned": pizzas_burned,
+                    "marathons_equivalent": marathons_equivalent,
+                },
+                "monthly_data": monthly_data,
+                "weekday_data": weekday_data,
+            }
+        )

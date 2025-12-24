@@ -47,11 +47,13 @@ class CalendarView(APIView):
             else:
                 day_name = day_names.get(date.weekday(), "")
 
-            days.append({
-                "date": date.isoformat(),
-                "day_name": day_name,
-                "has_slots": has_slots,
-            })
+            days.append(
+                {
+                    "date": date.isoformat(),
+                    "day_name": day_name,
+                    "has_slots": has_slots,
+                }
+            )
 
         return Response({"days": days})
 
@@ -73,6 +75,7 @@ class SlotsView(APIView):
 
         try:
             from datetime import datetime
+
             date = datetime.strptime(date_str, "%Y-%m-%d").date()
         except ValueError:
             return Response(
@@ -102,9 +105,7 @@ class SlotsView(APIView):
         now = timezone.localtime()
         if date == now.date():
             cutoff_time = (now + timedelta(minutes=20)).time()
-            slots = slots.filter(
-                class_training__hour_init__gte=cutoff_time
-            )
+            slots = slots.filter(class_training__hour_init__gte=cutoff_time)
 
         # Order by hour
         slots = slots.order_by("class_training__hour_init")
@@ -120,12 +121,69 @@ class SlotsView(APIView):
             6: "Domingo",
         }
 
-        return Response({
-            "date": date_str,
-            "day_name": day_names.get(date.weekday(), ""),
-            "already_scheduled": already_scheduled,
-            "slots": SlotSerializer(slots, many=True).data,
-        })
+        return Response(
+            {
+                "date": date_str,
+                "day_name": day_names.get(date.weekday(), ""),
+                "already_scheduled": already_scheduled,
+                "slots": SlotSerializer(slots, many=True).data,
+            }
+        )
+
+
+class SlotDetailView(APIView):
+    """Get details of a specific slot."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            slot = Slot.objects.select_related(
+                "class_training", "class_training__training_type"
+            ).get(id=pk)
+        except Slot.DoesNotExist:
+            return Response(
+                {"error": "Slot no encontrado"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Get confirmed users for this slot
+        confirmed_trainings = (
+            UserTraining.objects.filter(
+                slot=slot,
+                status=UserTraining.Status.CONFIRMED,
+            )
+            .select_related("user")
+            .order_by("id")
+        )
+
+        confirmed_users = [
+            {
+                "id": t.user.id,
+                "name": f"{t.user.first_name} {t.user.last_name}",
+            }
+            for t in confirmed_trainings
+        ]
+
+        # Check if current user already booked this slot
+        user_has_booked = confirmed_trainings.filter(user=request.user).exists()
+
+        # Check if user has any booking for this date
+        already_scheduled = UserTraining.objects.filter(
+            user=request.user,
+            slot__date=slot.date,
+            status=UserTraining.Status.CONFIRMED,
+        ).exists()
+
+        return Response(
+            {
+                "slot": SlotSerializer(slot).data,
+                "confirmed_users": confirmed_users,
+                "confirmed_count": len(confirmed_users),
+                "user_has_booked": user_has_booked,
+                "already_scheduled_today": already_scheduled,
+            }
+        )
 
 
 class BookView(APIView):
@@ -249,9 +307,11 @@ class MyTrainingsView(APIView):
             .order_by("slot__date", "slot__class_training__hour_init")[:7]
         )
 
-        return Response({
-            "trainings": UserTrainingSerializer(trainings, many=True).data,
-        })
+        return Response(
+            {
+                "trainings": UserTrainingSerializer(trainings, many=True).data,
+            }
+        )
 
 
 class CancelView(APIView):
@@ -269,9 +329,7 @@ class CancelView(APIView):
             )
 
         try:
-            training = UserTraining.objects.get(
-                id=training_id, user=request.user
-            )
+            training = UserTraining.objects.get(id=training_id, user=request.user)
         except UserTraining.DoesNotExist:
             return Response(
                 {"error": "Entrenamiento no encontrado"},
@@ -319,8 +377,10 @@ class TrainingTypesView(APIView):
         from neural.api.serializers.training import TrainingTypeSerializer
 
         training_types = TrainingType.objects.all()
-        return Response({
-            "training_types": TrainingTypeSerializer(
-                training_types, many=True
-            ).data,
-        })
+        return Response(
+            {
+                "training_types": TrainingTypeSerializer(
+                    training_types, many=True
+                ).data,
+            }
+        )

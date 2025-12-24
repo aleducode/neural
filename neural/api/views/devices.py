@@ -66,9 +66,7 @@ class UnregisterDeviceView(APIView):
             )
 
         try:
-            device = Device.objects.get(
-                device_id=device_id, user=request.user
-            )
+            device = Device.objects.get(device_id=device_id, user=request.user)
             device.is_active = False
             device.save()
 

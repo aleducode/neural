@@ -173,9 +173,20 @@ class Profile(NeuralBaseModel):
     user = models.OneToOneField(
         "users.User", on_delete=models.CASCADE, related_name="profile"
     )
-    plan = models.ForeignKey(
-        "users.Plan", on_delete=models.CASCADE, related_name="profiles"
+    photo = models.ImageField(
+        "profile picture",
+        upload_to="users/photos/",
+        blank=True,
+        null=True,
     )
+    plan = models.ForeignKey(
+        "users.Plan",
+        on_delete=models.CASCADE,
+        related_name="profiles",
+        blank=True,
+        null=True,
+    )
+    height = models.PositiveIntegerField(blank=True, null=True)
     birthdate = models.DateField(blank=True, null=True)
     address = models.CharField(max_length=500, blank=True, null=True)
     emergency_contact = models.CharField(max_length=500, blank=True, null=True)
@@ -185,6 +196,21 @@ class Profile(NeuralBaseModel):
 
     def __str__(self):
         return "Profile of {}".format(self.user)
+
+
+class UserWeight(NeuralBaseModel):
+    """User weight model.
+
+    A weight is a weight that a user has at a specific date.
+    """
+
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="weights"
+    )
+    weight = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user} - {self.weight}"
 
 
 class Ranking(NeuralBaseModel):
@@ -314,9 +340,7 @@ class Device(NeuralBaseModel):
         IOS = "ios", "iOS"
         ANDROID = "android", "Android"
 
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="devices"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="devices")
     token = models.CharField(max_length=500)
     platform = models.CharField(max_length=10, choices=Platform.choices)
     device_id = models.CharField(max_length=100, unique=True)
@@ -328,3 +352,103 @@ class Device(NeuralBaseModel):
 
     def __str__(self):
         return f"{self.user} - {self.platform} - {self.device_id[:20]}"
+
+
+class PushNotification(NeuralBaseModel):
+    """Push notification model.
+
+    Stores all notifications sent to users.
+    """
+
+    class NotificationType(models.TextChoices):
+        GENERAL = "general", "General"
+        TRAINING_REMINDER = "training_reminder", "Recordatorio de entrenamiento"
+        TRAINING_CANCELLED = "training_cancelled", "Entrenamiento cancelado"
+        MEMBERSHIP_EXPIRING = "membership_expiring", "Membresía por vencer"
+        MEMBERSHIP_EXPIRED = "membership_expired", "Membresía vencida"
+        ACHIEVEMENT = "achievement", "Logro desbloqueado"
+        PROMOTION = "promotion", "Promoción"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pendiente"
+        SENT = "sent", "Enviada"
+        DELIVERED = "delivered", "Entregada"
+        FAILED = "failed", "Fallida"
+        READ = "read", "Leída"
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="notifications"
+    )
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    data = models.JSONField(blank=True, null=True, help_text="Extra payload data")
+    notification_type = models.CharField(
+        max_length=30,
+        choices=NotificationType.choices,
+        default=NotificationType.GENERAL,
+    )
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING
+    )
+    sent_at = models.DateTimeField(blank=True, null=True)
+    read_at = models.DateTimeField(blank=True, null=True)
+
+    # For scheduled notifications
+    scheduled_for = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Notificación"
+        verbose_name_plural = "Notificaciones"
+        ordering = ["-created"]
+
+    def __str__(self):
+        return f"{self.user} - {self.title[:50]}"
+
+    def mark_as_read(self):
+        if self.status != self.Status.READ:
+            self.status = self.Status.READ
+            self.read_at = timezone.now()
+            self.save(update_fields=["status", "read_at", "modified"])
+
+
+class PushNotificationLog(NeuralBaseModel):
+    """Log for push notification requests/responses.
+
+    Stores all API calls to Expo Push service for auditing and debugging.
+    """
+
+    class Status(models.TextChoices):
+        SUCCESS = "success", "Éxito"
+        ERROR = "error", "Error"
+
+    notification = models.ForeignKey(
+        PushNotification, on_delete=models.CASCADE, related_name="logs"
+    )
+    device = models.ForeignKey(
+        Device,
+        on_delete=models.SET_NULL,
+        related_name="notification_logs",
+        blank=True,
+        null=True,
+    )
+    expo_push_token = models.CharField(max_length=500)
+
+    # Request info
+    request_payload = models.JSONField(help_text="Request sent to Expo")
+
+    # Response info
+    response_payload = models.JSONField(
+        blank=True, null=True, help_text="Response from Expo"
+    )
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.SUCCESS
+    )
+    expo_receipt_id = models.CharField(max_length=100, blank=True, null=True)
+    error_message = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Log de notificación"
+        verbose_name_plural = "Logs de notificaciones"
+
+    def __str__(self):
+        return f"{self.notification} - {self.status}"

@@ -23,9 +23,7 @@ class DashboardView(APIView):
         user_data = {
             "first_name": user.first_name,
             "photo": (
-                request.build_absolute_uri(user.photo.url)
-                if user.photo
-                else None
+                request.build_absolute_uri(user.photo.url) if user.photo else None
             ),
         }
 
@@ -37,7 +35,9 @@ class DashboardView(APIView):
                 status=UserTraining.Status.CONFIRMED,
                 slot__date__gte=today,
             )
-            .select_related("slot", "slot__class_training", "slot__class_training__training_type")
+            .select_related(
+                "slot", "slot__class_training", "slot__class_training__training_type"
+            )
             .order_by("slot__date", "slot__class_training__hour_init")
             .first()
         )
@@ -75,9 +75,7 @@ class DashboardView(APIView):
 
         # Current strike
         strike_data = {"weeks": 0, "is_current": False}
-        current_strike = UserStrike.objects.filter(
-            user=user, is_current=True
-        ).first()
+        current_strike = UserStrike.objects.filter(user=user, is_current=True).first()
         if current_strike:
             strike_data = {
                 "weeks": current_strike.weeks,
@@ -99,15 +97,21 @@ class DashboardView(APIView):
 
         # Active membership
         membership_data = None
-        active_membership = UserMembership.objects.filter(
-            user=user, is_active=True
-        ).select_related("plan").first()
+        active_membership = (
+            UserMembership.objects.filter(user=user, is_active=True)
+            .select_related("plan")
+            .first()
+        )
         if active_membership:
             membership_data = {
-                "plan_name": active_membership.plan.name if active_membership.plan else active_membership.membership_type,
+                "plan_name": active_membership.plan.name
+                if active_membership.plan
+                else active_membership.membership_type,
                 "days_left": active_membership.days_left,
                 "is_active": True,
-                "expiration_date": active_membership.expiration_date.isoformat() if active_membership.expiration_date else None,
+                "expiration_date": active_membership.expiration_date.isoformat()
+                if active_membership.expiration_date
+                else None,
             }
 
         # Has year review
@@ -118,11 +122,13 @@ class DashboardView(APIView):
             slot__date__year=year,
         ).exists()
 
-        return Response({
-            "user": user_data,
-            "next_training": next_training,
-            "strike": strike_data,
-            "stats": stats_data,
-            "membership": membership_data,
-            "has_year_review": has_year_review,
-        })
+        return Response(
+            {
+                "user": user_data,
+                "next_training": next_training,
+                "strike": strike_data,
+                "stats": stats_data,
+                "membership": membership_data,
+                "has_year_review": has_year_review,
+            }
+        )

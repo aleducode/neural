@@ -53,13 +53,9 @@ class LoginSerializer(serializers.Serializer):
                 password=password,
             )
             if not user:
-                raise serializers.ValidationError(
-                    {"detail": "Credenciales inválidas"}
-                )
+                raise serializers.ValidationError({"detail": "Credenciales inválidas"})
             if not user.is_active:
-                raise serializers.ValidationError(
-                    {"detail": "Usuario desactivado"}
-                )
+                raise serializers.ValidationError({"detail": "Usuario desactivado"})
         else:
             raise serializers.ValidationError(
                 {"detail": "Email y contraseña son requeridos"}

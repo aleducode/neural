@@ -27,19 +27,23 @@ class MembershipView(APIView):
 
         # Current membership
         current_membership = None
-        active = UserMembership.objects.filter(
-            user=user, is_active=True
-        ).select_related("plan").first()
+        active = (
+            UserMembership.objects.filter(user=user, is_active=True)
+            .select_related("plan")
+            .first()
+        )
         if active:
             current_membership = UserMembershipSerializer(active).data
 
         # Available plans
         plans = NeuralPlan.objects.all().order_by("duration")
 
-        return Response({
-            "current_membership": current_membership,
-            "available_plans": NeuralPlanSerializer(plans, many=True).data,
-        })
+        return Response(
+            {
+                "current_membership": current_membership,
+                "available_plans": NeuralPlanSerializer(plans, many=True).data,
+            }
+        )
 
 
 class CreatePaymentView(APIView):
@@ -65,9 +69,7 @@ class CreatePaymentView(APIView):
             )
 
         # Generate unique reference
-        reference = "".join(
-            random.choices(string.ascii_letters + string.digits, k=16)
-        )
+        reference = "".join(random.choices(string.ascii_letters + string.digits, k=16))
 
         # Create payment reference
         UserPaymentReference.objects.create(
@@ -83,14 +85,16 @@ class CreatePaymentView(APIView):
         data_to_hash = f"{reference}{amount}COP{secret_key}"
         integrity_signature = hashlib.sha256(data_to_hash.encode()).hexdigest()
 
-        return Response({
-            "reference": reference,
-            "amount": amount,
-            "currency": "COP",
-            "integrity_signature": integrity_signature,
-            "bold_public_key": settings.BOLD_KEY,
-            "plan": NeuralPlanSerializer(plan).data,
-        })
+        return Response(
+            {
+                "reference": reference,
+                "amount": amount,
+                "currency": "COP",
+                "integrity_signature": integrity_signature,
+                "bold_public_key": settings.BOLD_KEY,
+                "plan": NeuralPlanSerializer(plan).data,
+            }
+        )
 
 
 class VerifyPaymentView(APIView):
@@ -119,33 +123,45 @@ class VerifyPaymentView(APIView):
             )
 
         if payment_ref.is_paid:
-            return Response({
-                "success": True,
-                "message": "Este pago ya fue procesado",
-            })
+            return Response(
+                {
+                    "success": True,
+                    "message": "Este pago ya fue procesado",
+                }
+            )
 
         if tx_status == "approved":
             payment_ref.apply_membership()
 
             # Get updated membership
-            membership = UserMembership.objects.filter(
-                user=request.user, is_active=True
-            ).select_related("plan").first()
+            membership = (
+                UserMembership.objects.filter(user=request.user, is_active=True)
+                .select_related("plan")
+                .first()
+            )
 
-            return Response({
-                "success": True,
-                "message": "Membresía activada exitosamente",
-                "membership": {
-                    "plan_name": membership.plan.name if membership and membership.plan else None,
-                    "expiration_date": membership.expiration_date.isoformat() if membership else None,
-                    "days_left": membership.days_left if membership else 0,
-                },
-            })
+            return Response(
+                {
+                    "success": True,
+                    "message": "Membresía activada exitosamente",
+                    "membership": {
+                        "plan_name": membership.plan.name
+                        if membership and membership.plan
+                        else None,
+                        "expiration_date": membership.expiration_date.isoformat()
+                        if membership
+                        else None,
+                        "days_left": membership.days_left if membership else 0,
+                    },
+                }
+            )
         else:
-            return Response({
-                "success": False,
-                "message": "El pago no fue aprobado",
-            })
+            return Response(
+                {
+                    "success": False,
+                    "message": "El pago no fue aprobado",
+                }
+            )
 
 
 class PaymentWebhookView(APIView):

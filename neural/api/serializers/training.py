@@ -78,9 +78,7 @@ class UserTrainingSerializer(serializers.ModelSerializer):
 
     def get_training_type(self, obj):
         if obj.slot and obj.slot.class_training:
-            return TrainingTypeSerializer(
-                obj.slot.class_training.training_type
-            ).data
+            return TrainingTypeSerializer(obj.slot.class_training.training_type).data
         return None
 
     def get_is_today(self, obj):
