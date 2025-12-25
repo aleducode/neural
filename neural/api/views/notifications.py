@@ -30,7 +30,7 @@ class NotificationListView(APIView):
                 PushNotification.Status.SENT,
                 PushNotification.Status.DELIVERED,
                 PushNotification.Status.READ,
-            ]
+            ],
         ).order_by("-created")[:50]  # Last 50 notifications
 
         serializer = NotificationSerializer(notifications, many=True)
@@ -41,13 +41,15 @@ class NotificationListView(APIView):
             status__in=[
                 PushNotification.Status.SENT,
                 PushNotification.Status.DELIVERED,
-            ]
+            ],
         ).count()
 
-        return Response({
-            "notifications": serializer.data,
-            "unread_count": unread_count,
-        })
+        return Response(
+            {
+                "notifications": serializer.data,
+                "unread_count": unread_count,
+            }
+        )
 
 
 class NotificationDetailView(APIView):
@@ -117,12 +119,14 @@ class MarkNotificationReadView(APIView):
                 status__in=[
                     PushNotification.Status.SENT,
                     PushNotification.Status.DELIVERED,
-                ]
+                ],
             ).update(
                 status=PushNotification.Status.READ,
                 read_at=request.user,
             )
-            return Response({"message": "Todas las notificaciones marcadas como leídas"})
+            return Response(
+                {"message": "Todas las notificaciones marcadas como leídas"}
+            )
 
 
 class NotificationCountView(APIView):
@@ -138,7 +142,7 @@ class NotificationCountView(APIView):
                 PushNotification.Status.SENT,
                 PushNotification.Status.DELIVERED,
                 PushNotification.Status.READ,
-            ]
+            ],
         ).count()
 
         unread = PushNotification.objects.filter(
@@ -146,13 +150,15 @@ class NotificationCountView(APIView):
             status__in=[
                 PushNotification.Status.SENT,
                 PushNotification.Status.DELIVERED,
-            ]
+            ],
         ).count()
 
-        return Response({
-            "total": total,
-            "unread": unread,
-        })
+        return Response(
+            {
+                "total": total,
+                "unread": unread,
+            }
+        )
 
 
 class SendNotificationView(APIView):
@@ -176,10 +182,12 @@ class SendNotificationView(APIView):
         if data.get("send_to_all"):
             # Send to all users
             count = PushNotificationService.send_to_all_users(payload)
-            return Response({
-                "message": f"Notificación enviada a {count} usuarios",
-                "count": count,
-            })
+            return Response(
+                {
+                    "message": f"Notificación enviada a {count} usuarios",
+                    "count": count,
+                }
+            )
         elif data.get("user_id"):
             # Send to specific user
             try:
@@ -192,10 +200,12 @@ class SendNotificationView(APIView):
 
             notification = PushNotificationService.send_to_user(user, payload)
             if notification:
-                return Response({
-                    "message": "Notificación enviada",
-                    "notification_id": notification.id,
-                })
+                return Response(
+                    {
+                        "message": "Notificación enviada",
+                        "notification_id": notification.id,
+                    }
+                )
             else:
                 return Response(
                     {"error": "El usuario no tiene dispositivos activos"},

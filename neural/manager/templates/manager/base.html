@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Manager{% endblock %} | Neural</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+
+  <!-- Manager CSS -->
+  <link rel="stylesheet" href="{% static 'manager/css/manager.css' %}">
+
+  {% block css %}{% endblock %}
+</head>
+<body class="manager-body">
+  <!-- Hidden messages for toast -->
+  {% if messages %}
+    {% for message in messages %}
+      <div data-toast="{{ message.tags }}" style="display:none;">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="manager-layout">
+    <!-- Sidebar -->
+    <aside class="manager-sidebar">
+      <div class="sidebar-header">
+        <a href="{% url 'manager:dashboard' %}" class="sidebar-logo">
+          <div class="sidebar-logo-icon">N</div>
+          <span class="sidebar-logo-text">Neural Manager</span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Principal</div>
+          <a href="{% url 'manager:dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="ti ti-dashboard"></i>
+            Dashboard
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Gestión</div>
+          <a href="{% url 'manager:user_list' %}" class="nav-item {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="ti ti-users"></i>
+            Usuarios
+          </a>
+          <a href="{% url 'manager:notification_list' %}" class="nav-item {% if 'notification' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="ti ti-bell"></i>
+            Notificaciones
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar">
+            {{ request.user.first_name.0|upper }}{{ request.user.last_name.0|upper }}
+          </div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">{{ request.user.first_name }} {{ request.user.last_name }}</div>
+            <div class="sidebar-user-role">{% if request.user.is_superuser %}Superusuario{% else %}Staff{% endif %}</div>
+          </div>
+          <a href="{% url 'manager:logout' %}" class="btn-icon btn-outline" title="Cerrar sesión">
+            <i class="ti ti-logout"></i>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="manager-main">
+      <!-- Mobile menu toggle -->
+      <button id="menu-toggle" class="btn-outline btn-icon" style="display:none; margin-bottom:1rem;">
+        <i class="ti ti-menu-2"></i>
+      </button>
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- Manager JS -->
+  <script src="{% static 'manager/js/manager.js' %}"></script>
+  {% block js %}{% endblock %}
+</body>
+</html>

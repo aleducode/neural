@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Neural Manager</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+
+  <!-- Manager CSS -->
+  <link rel="stylesheet" href="{% static 'manager/css/manager.css' %}">
+</head>
+<body class="manager-body">
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">N</div>
+        <h1 class="login-title">Neural Manager</h1>
+        <p class="login-subtitle">Ingresa con tu cuenta de administrador</p>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-error">
+          <i class="ti ti-alert-circle"></i>
+          {{ form.non_field_errors.0 }}
+        </div>
+      {% endif %}
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            <i class="ti ti-{% if message.tags == 'success' %}check{% elif message.tags == 'error' %}x{% else %}info-circle{% endif %}"></i>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="id_email" class="form-label">Email</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="form-error">{{ form.email.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_password" class="form-label">Contraseña</label>
+          {{ form.password }}
+          {% if form.password.errors %}
+            <div class="form-error">{{ form.password.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn-primary" style="width:100%; justify-content:center; margin-top:0.5rem;">
+          <i class="ti ti-login"></i>
+          Iniciar sesión
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+{% extends "manager/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Resumen general del sistema Neural</p>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="stats-card">
+    <div class="stats-label">Total Usuarios</div>
+    <div class="stats-value">{{ total_users }}</div>
+    <div class="stats-description">Usuarios registrados</div>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-label">Membresías Activas</div>
+    <div class="stats-value">{{ active_memberships }}</div>
+    <div class="stats-description">Usuarios con membresía vigente</div>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-label">Dispositivos</div>
+    <div class="stats-value">{{ total_devices }}</div>
+    <div class="stats-description">Dispositivos registrados</div>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-label">Notificaciones Hoy</div>
+    <div class="stats-value">{{ notifications_today }}</div>
+    <div class="stats-description">Enviadas hoy</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap:1.5rem;">
+  <!-- Recent Users -->
+  <div class="main-card">
+    <div class="card-header-section">
+      <div>
+        <h2 class="card-title">Usuarios Recientes</h2>
+        <p class="card-description">Últimos usuarios registrados</p>
+      </div>
+      <a href="{% url 'manager:user_list' %}" class="btn-outline btn-sm">
+        Ver todos
+        <i class="ti ti-arrow-right"></i>
+      </a>
+    </div>
+
+    {% if recent_users %}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in recent_users %}
+            <tr>
+              <td>
+                <a href="{% url 'manager:user_detail' user.pk %}" style="text-decoration:none;">
+                  <div class="user-info">
+                    <div class="avatar avatar-sm success">
+                      {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+                    </div>
+                    <div class="user-info-content">
+                      <div class="user-info-name">{{ user.first_name }} {{ user.last_name }}</div>
+                      <div class="user-info-email">{{ user.email }}</div>
+                    </div>
+                  </div>
+                </a>
+              </td>
+              <td>
+                <span style="font-size:0.75rem; color:var(--text-secondary);">
+                  {{ user.date_joined|date:"d M Y" }}
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="ti ti-users"></i>
+        </div>
+        <h5>Sin usuarios</h5>
+        <p>No hay usuarios registrados aún.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Recent Notifications -->
+  <div class="main-card">
+    <div class="card-header-section">
+      <div>
+        <h2 class="card-title">Notificaciones Recientes</h2>
+        <p class="card-description">Últimas notificaciones enviadas</p>
+      </div>
+      <a href="{% url 'manager:notification_list' %}" class="btn-outline btn-sm">
+        Ver todas
+        <i class="ti ti-arrow-right"></i>
+      </a>
+    </div>
+
+    {% if recent_notifications %}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Notificación</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for notif in recent_notifications %}
+            <tr>
+              <td>
+                <div style="max-width:250px;">
+                  <div style="font-size:0.875rem; font-weight:500; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    {{ notif.title }}
+                  </div>
+                  <div style="font-size:0.75rem; color:var(--text-secondary);">
+                    {{ notif.user.first_name }} {{ notif.user.last_name }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge {% if notif.status == 'sent' or notif.status == 'delivered' %}success{% elif notif.status == 'failed' %}error{% elif notif.status == 'read' %}info{% else %}neutral{% endif %}">
+                  <span class="status-dot"></span>
+                  {{ notif.get_status_display }}
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="ti ti-bell"></i>
+        </div>
+        <h5>Sin notificaciones</h5>
+        <p>No hay notificaciones enviadas aún.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

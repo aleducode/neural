@@ -1,0 +1,159 @@
+{% extends "manager/base.html" %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Usuarios</h1>
+    <p>Gestión de usuarios del sistema</p>
+  </div>
+</div>
+
+<div class="main-card">
+  <div class="card-header-section">
+    <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+      <!-- Search -->
+      <form method="get" style="margin:0;">
+        <div class="search-input-wrapper">
+          <i class="ti ti-search search-icon"></i>
+          <input
+            type="text"
+            name="q"
+            id="search-input"
+            class="search-input"
+            placeholder="Buscar por nombre, email o teléfono..."
+            value="{{ search_query }}"
+          >
+          {% if membership_filter %}
+            <input type="hidden" name="membership" value="{{ membership_filter }}">
+          {% endif %}
+        </div>
+      </form>
+
+      <!-- Filters -->
+      <div class="filter-tabs">
+        <a href="?{% if search_query %}q={{ search_query }}{% endif %}" class="filter-tab {% if not membership_filter %}active{% endif %}">
+          Todos
+          <span class="count">{{ total_count }}</span>
+        </a>
+        <a href="?membership=active{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-tab {% if membership_filter == 'active' %}active{% endif %}">
+          Con Membresía
+          <span class="count">{{ active_count }}</span>
+        </a>
+        <a href="?membership=inactive{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-tab {% if membership_filter == 'inactive' %}active{% endif %}">
+          Sin Membresía
+          <span class="count">{{ inactive_count }}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% if users %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Teléfono</th>
+          <th>Membresía</th>
+          <th>Dispositivos</th>
+          <th>Registro</th>
+          <th style="text-align:right;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>
+              <div class="user-info">
+                <div class="avatar avatar-sm {% if user.active_memberships %}success{% else %}neutral{% endif %}">
+                  {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+                </div>
+                <div class="user-info-content">
+                  <div class="user-info-name">{{ user.first_name }} {{ user.last_name }}</div>
+                  <div class="user-info-email">{{ user.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span style="font-size:0.875rem;">{{ user.phone_number }}</span>
+            </td>
+            <td>
+              {% if user.active_memberships %}
+                {% with membership=user.active_memberships.0 %}
+                  <span class="status-badge success">
+                    <span class="status-dot"></span>
+                    Activa
+                  </span>
+                  <div style="font-size:0.6875rem; color:var(--text-secondary); margin-top:0.25rem;">
+                    Vence: {{ membership.expiration_date|date:"d M Y" }}
+                  </div>
+                {% endwith %}
+              {% else %}
+                <span class="status-badge neutral">
+                  <span class="status-dot"></span>
+                  Sin membresía
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if user.device_count > 0 %}
+                <span class="tag">
+                  <i class="ti ti-device-mobile"></i>
+                  {{ user.device_count }}
+                </span>
+              {% else %}
+                <span style="font-size:0.75rem; color:var(--text-muted);">—</span>
+              {% endif %}
+            </td>
+            <td>
+              <span style="font-size:0.75rem; color:var(--text-secondary);">
+                {{ user.date_joined|date:"d M Y" }}
+              </span>
+            </td>
+            <td style="text-align:right;">
+              <a href="{% url 'manager:user_detail' user.pk %}" class="btn-outline btn-sm">
+                Ver detalle
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if membership_filter %}&membership={{ membership_filter }}{% endif %}">
+            <i class="ti ti-chevron-left"></i>
+          </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <span class="current">{{ num }}</span>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if membership_filter %}&membership={{ membership_filter }}{% endif %}">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if membership_filter %}&membership={{ membership_filter }}{% endif %}">
+            <i class="ti ti-chevron-right"></i>
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <i class="ti ti-users"></i>
+      </div>
+      <h5>No se encontraron usuarios</h5>
+      <p>{% if search_query %}No hay resultados para "{{ search_query }}"{% else %}No hay usuarios registrados{% endif %}</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

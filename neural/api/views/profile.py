@@ -21,35 +21,37 @@ class ProfileView(APIView):
 
     def get(self, request):
         profile, created = Profile.objects.get_or_create(
-            user=request.user,
-            defaults={"plan": None}
+            user=request.user, defaults={"plan": None}
         )
 
         # Get latest weight
-        latest_weight = UserWeight.objects.filter(
-            user=request.user
-        ).order_by("-created").first()
+        latest_weight = (
+            UserWeight.objects.filter(user=request.user).order_by("-created").first()
+        )
 
-        return Response({
-            "profile": ProfileSerializer(profile).data,
-            "latest_weight": UserWeightSerializer(latest_weight).data if latest_weight else None,
-        })
+        return Response(
+            {
+                "profile": ProfileSerializer(profile).data,
+                "latest_weight": UserWeightSerializer(latest_weight).data
+                if latest_weight
+                else None,
+            }
+        )
 
     def patch(self, request):
         profile, created = Profile.objects.get_or_create(
-            user=request.user,
-            defaults={"plan": None}
+            user=request.user, defaults={"plan": None}
         )
 
-        serializer = ProfileUpdateSerializer(
-            profile, data=request.data, partial=True
-        )
+        serializer = ProfileUpdateSerializer(profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response({
-            "profile": ProfileSerializer(profile).data,
-        })
+        return Response(
+            {
+                "profile": ProfileSerializer(profile).data,
+            }
+        )
 
 
 class WeightListView(APIView):
@@ -58,9 +60,9 @@ class WeightListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        weights = UserWeight.objects.filter(
-            user=request.user
-        ).order_by("-created")[:30]  # Last 30 entries
+        weights = UserWeight.objects.filter(user=request.user).order_by("-created")[
+            :30
+        ]  # Last 30 entries
 
         # Calculate stats
         all_weights = list(weights)
@@ -78,10 +80,12 @@ class WeightListView(APIView):
         else:
             stats["change"] = 0
 
-        return Response({
-            "weights": UserWeightSerializer(weights, many=True).data,
-            "stats": stats,
-        })
+        return Response(
+            {
+                "weights": UserWeightSerializer(weights, many=True).data,
+                "stats": stats,
+            }
+        )
 
 
 class WeightCreateView(APIView):
@@ -98,7 +102,10 @@ class WeightCreateView(APIView):
             weight=serializer.validated_data["weight"],
         )
 
-        return Response({
-            "weight": UserWeightSerializer(weight).data,
-            "message": "Peso registrado exitosamente",
-        }, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "weight": UserWeightSerializer(weight).data,
+                "message": "Peso registrado exitosamente",
+            },
+            status=status.HTTP_201_CREATED,
+        )

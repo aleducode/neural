@@ -121,8 +121,14 @@ class RankingAdmin(admin.ModelAdmin):
 class DeviceAdmin(admin.ModelAdmin):
     list_display = ["user", "platform", "device_id_short", "is_active", "created"]
     list_filter = ["platform", "is_active", "created"]
-    search_fields = ["user__email", "user__first_name", "user__last_name", "device_id"]
-    readonly_fields = ["token", "device_id", "created", "modified"]
+    search_fields = [
+        "user__email",
+        "user__first_name",
+        "user__last_name",
+        "device_id",
+        "token",
+    ]
+    readonly_fields = ["created", "modified"]
     ordering = ["-created"]
 
     @admin.display(description="Device ID")
@@ -158,7 +164,13 @@ class PushNotificationAdmin(admin.ModelAdmin):
         "read_at",
     ]
     list_filter = ["notification_type", "status", "created", "sent_at"]
-    search_fields = ["user__email", "user__first_name", "user__last_name", "title", "body"]
+    search_fields = [
+        "user__email",
+        "user__first_name",
+        "user__last_name",
+        "title",
+        "body",
+    ]
     readonly_fields = ["sent_at", "read_at", "created", "modified"]
     ordering = ["-created"]
     inlines = [PushNotificationLogInline]

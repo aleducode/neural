@@ -23,6 +23,7 @@ EXPO_RECEIPTS_URL = "https://exp.host/--/api/v2/push/getReceipts"
 @dataclass
 class NotificationPayload:
     """Payload for a push notification."""
+
     title: str
     body: str
     data: Optional[Dict[str, Any]] = None
@@ -132,9 +133,7 @@ class PushNotificationService:
         Returns:
             Number of notifications sent
         """
-        users_with_devices = User.objects.filter(
-            devices__is_active=True
-        ).distinct()
+        users_with_devices = User.objects.filter(devices__is_active=True).distinct()
 
         if exclude_users:
             users_with_devices = users_with_devices.exclude(id__in=exclude_users)

@@ -1,0 +1,297 @@
+{% extends "manager/base.html" %}
+
+{% block title %}{{ user_obj.first_name }} {{ user_obj.last_name }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="breadcrumb-nav">
+  <a href="{% url 'manager:user_list' %}">Usuarios</a>
+  <span class="separator">/</span>
+  <span class="current">{{ user_obj.first_name }} {{ user_obj.last_name }}</span>
+</nav>
+
+<div class="page-header">
+  <div style="display:flex; align-items:center; gap:1rem;">
+    <div class="avatar avatar-lg {% if membership %}success{% else %}neutral{% endif %}">
+      {{ user_obj.first_name.0|upper }}{{ user_obj.last_name.0|upper }}
+    </div>
+    <div>
+      <h1 style="margin-bottom:0.125rem;">{{ user_obj.first_name }} {{ user_obj.last_name }}</h1>
+      <p style="margin:0;">{{ user_obj.email }}</p>
+    </div>
+  </div>
+  <a href="{% url 'manager:send_notification_user' user_obj.pk %}" class="btn-primary">
+    <i class="ti ti-bell"></i>
+    Enviar Notificación
+  </a>
+</div>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap:1.5rem;">
+  <!-- User Info -->
+  <div class="main-card">
+    <div class="card-header-section">
+      <h2 class="card-title">Información del Usuario</h2>
+    </div>
+    <div class="card-body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-item-label">Email</div>
+          <div class="detail-item-value">{{ user_obj.email }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item-label">Teléfono</div>
+          <div class="detail-item-value">{{ user_obj.phone_number }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item-label">Fecha de registro</div>
+          <div class="detail-item-value">{{ user_obj.date_joined|date:"d M Y, H:i" }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item-label">Estado</div>
+          <div class="detail-item-value">
+            {% if user_obj.is_active %}
+              <span class="status-badge success">
+                <span class="status-dot"></span>
+                Activo
+              </span>
+            {% else %}
+              <span class="status-badge error">
+                <span class="status-dot"></span>
+                Inactivo
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        {% if profile.birthdate %}
+          <div class="detail-item">
+            <div class="detail-item-label">Fecha de nacimiento</div>
+            <div class="detail-item-value">{{ profile.birthdate|date:"d M Y" }}</div>
+          </div>
+        {% endif %}
+        {% if profile.instagram %}
+          <div class="detail-item">
+            <div class="detail-item-label">Instagram</div>
+            <div class="detail-item-value">@{{ profile.instagram }}</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Membership -->
+  <div class="main-card">
+    <div class="card-header-section">
+      <h2 class="card-title">Membresía</h2>
+    </div>
+    <div class="card-body">
+      {% if membership %}
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+          <span class="status-badge success">
+            <span class="status-dot"></span>
+            Activa
+          </span>
+          <span style="font-size:0.875rem; color:var(--text-secondary);">
+            {{ membership.get_membership_type_display }}
+          </span>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-item-label">Fecha inicio</div>
+            <div class="detail-item-value">{{ membership.init_date|date:"d M Y" }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">Fecha vencimiento</div>
+            <div class="detail-item-value">{{ membership.expiration_date|date:"d M Y" }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">Días restantes</div>
+            <div class="detail-item-value">
+              {% if membership.days_left > 7 %}
+                <span style="color:var(--success-text);">{{ membership.days_left }} días</span>
+              {% elif membership.days_left > 0 %}
+                <span style="color:var(--warning-text);">{{ membership.days_left }} días</span>
+              {% else %}
+                <span style="color:var(--error-text);">Vencida</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty-state" style="padding:2rem;">
+          <div class="empty-state-icon" style="width:3rem; height:3rem; font-size:1.25rem;">
+            <i class="ti ti-credit-card-off"></i>
+          </div>
+          <h5>Sin membresía activa</h5>
+          <p style="margin-bottom:0;">Este usuario no tiene una membresía vigente.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:1.5rem; display:grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap:1.5rem;">
+  <!-- Devices -->
+  <div class="main-card">
+    <div class="card-header-section">
+      <h2 class="card-title">Dispositivos ({{ devices.count }})</h2>
+    </div>
+    {% if devices %}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Plataforma</th>
+            <th>Estado</th>
+            <th>Registrado</th>
+            <th style="text-align:right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for device in devices %}
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <i class="ti ti-{% if device.platform == 'ios' %}brand-apple{% else %}brand-android{% endif %}" style="font-size:1.25rem; color:var(--text-secondary);"></i>
+                  <span style="font-size:0.875rem;">{{ device.get_platform_display }}</span>
+                </div>
+              </td>
+              <td>
+                {% if device.is_active %}
+                  <span class="status-badge success">
+                    <span class="status-dot"></span>
+                    Activo
+                  </span>
+                {% else %}
+                  <span class="status-badge error">
+                    <span class="status-dot"></span>
+                    Inactivo
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                <span style="font-size:0.75rem; color:var(--text-secondary);">
+                  {{ device.created|date:"d M Y" }}
+                </span>
+              </td>
+              <td style="text-align:right;">
+                <a href="{% url 'manager:device_edit' device.pk %}" class="btn-outline btn-sm" title="Editar token">
+                  <i class="ti ti-pencil"></i>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state" style="padding:2rem;">
+        <div class="empty-state-icon" style="width:3rem; height:3rem; font-size:1.25rem;">
+          <i class="ti ti-device-mobile-off"></i>
+        </div>
+        <h5>Sin dispositivos</h5>
+        <p style="margin-bottom:0;">Este usuario no tiene dispositivos registrados.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Notifications History -->
+  <div class="main-card">
+    <div class="card-header-section">
+      <div>
+        <h2 class="card-title">Historial de Notificaciones</h2>
+        <p class="card-description">Últimas 20 notificaciones</p>
+      </div>
+    </div>
+    {% if notifications %}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Notificación</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for notif in notifications %}
+            <tr>
+              <td>
+                <div style="max-width:220px;">
+                  <div style="font-size:0.875rem; font-weight:500; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    {{ notif.title }}
+                  </div>
+                  <div style="font-size:0.6875rem; color:var(--text-muted);">
+                    {{ notif.created|date:"d M Y, H:i" }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge {% if notif.status == 'sent' or notif.status == 'delivered' %}success{% elif notif.status == 'failed' %}error{% elif notif.status == 'read' %}info{% else %}neutral{% endif %}">
+                  <span class="status-dot"></span>
+                  {{ notif.get_status_display }}
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state" style="padding:2rem;">
+        <div class="empty-state-icon" style="width:3rem; height:3rem; font-size:1.25rem;">
+          <i class="ti ti-bell-off"></i>
+        </div>
+        <h5>Sin notificaciones</h5>
+        <p style="margin-bottom:0;">No se han enviado notificaciones a este usuario.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if membership_history %}
+  <div style="margin-top:1.5rem;">
+    <div class="main-card">
+      <div class="card-header-section">
+        <h2 class="card-title">Historial de Membresías</h2>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Inicio</th>
+            <th>Vencimiento</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in membership_history %}
+            <tr>
+              <td>
+                <span style="font-size:0.875rem;">{{ m.get_membership_type_display }}</span>
+              </td>
+              <td>
+                <span style="font-size:0.75rem; color:var(--text-secondary);">
+                  {{ m.init_date|date:"d M Y" }}
+                </span>
+              </td>
+              <td>
+                <span style="font-size:0.75rem; color:var(--text-secondary);">
+                  {{ m.expiration_date|date:"d M Y" }}
+                </span>
+              </td>
+              <td>
+                {% if m.is_active %}
+                  <span class="status-badge success">
+                    <span class="status-dot"></span>
+                    Activa
+                  </span>
+                {% else %}
+                  <span class="status-badge neutral">
+                    <span class="status-dot"></span>
+                    Vencida
+                  </span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

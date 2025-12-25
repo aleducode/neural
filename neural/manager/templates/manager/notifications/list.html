@@ -1,0 +1,153 @@
+{% extends "manager/base.html" %}
+
+{% block title %}Notificaciones{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Notificaciones</h1>
+    <p>Historial de notificaciones push enviadas</p>
+  </div>
+  <a href="{% url 'manager:send_notification' %}" class="btn-primary">
+    <i class="ti ti-plus"></i>
+    Nueva Notificación
+  </a>
+</div>
+
+<div class="main-card">
+  <div class="card-header-section">
+    <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+      <!-- Search -->
+      <form method="get" style="margin:0;">
+        <div class="search-input-wrapper">
+          <i class="ti ti-search search-icon"></i>
+          <input
+            type="text"
+            name="q"
+            id="search-input"
+            class="search-input"
+            placeholder="Buscar por usuario o título..."
+            value="{{ search_query }}"
+          >
+          {% if type_filter %}
+            <input type="hidden" name="type" value="{{ type_filter }}">
+          {% endif %}
+          {% if status_filter %}
+            <input type="hidden" name="status" value="{{ status_filter }}">
+          {% endif %}
+        </div>
+      </form>
+
+      <!-- Type Filter -->
+      <select name="type" class="form-select" style="width:auto; height:2.25rem;" onchange="window.location.href='?type='+this.value+'{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}'">
+        <option value="">Todos los tipos</option>
+        {% for value, label in notification_types %}
+          <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Status Filter -->
+      <select name="status" class="form-select" style="width:auto; height:2.25rem;" onchange="window.location.href='?status='+this.value+'{% if search_query %}&q={{ search_query }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}'">
+        <option value="">Todos los estados</option>
+        {% for value, label in notification_statuses %}
+          <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  {% if notifications %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Notificación</th>
+          <th>Tipo</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for notif in notifications %}
+          <tr>
+            <td>
+              <a href="{% url 'manager:user_detail' notif.user.pk %}" style="text-decoration:none;">
+                <div class="user-info">
+                  <div class="avatar avatar-sm success">
+                    {{ notif.user.first_name.0|upper }}{{ notif.user.last_name.0|upper }}
+                  </div>
+                  <div class="user-info-content">
+                    <div class="user-info-name">{{ notif.user.first_name }} {{ notif.user.last_name }}</div>
+                  </div>
+                </div>
+              </a>
+            </td>
+            <td>
+              <div style="max-width:280px;">
+                <div style="font-size:0.875rem; font-weight:500; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  {{ notif.title }}
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  {{ notif.body|truncatechars:60 }}
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="tag">{{ notif.get_notification_type_display }}</span>
+            </td>
+            <td>
+              <span class="status-badge {% if notif.status == 'sent' or notif.status == 'delivered' %}success{% elif notif.status == 'failed' %}error{% elif notif.status == 'read' %}info{% else %}neutral{% endif %}">
+                <span class="status-dot"></span>
+                {{ notif.get_status_display }}
+              </span>
+            </td>
+            <td>
+              <span style="font-size:0.75rem; color:var(--text-secondary);">
+                {{ notif.created|date:"d M Y, H:i" }}
+              </span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+            <i class="ti ti-chevron-left"></i>
+          </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <span class="current">{{ num }}</span>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+            <i class="ti ti-chevron-right"></i>
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <i class="ti ti-bell"></i>
+      </div>
+      <h5>No se encontraron notificaciones</h5>
+      <p>{% if search_query %}No hay resultados para "{{ search_query }}"{% else %}No hay notificaciones enviadas{% endif %}</p>
+      <a href="{% url 'manager:send_notification' %}" class="btn-primary">
+        <i class="ti ti-plus"></i>
+        Enviar primera notificación
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

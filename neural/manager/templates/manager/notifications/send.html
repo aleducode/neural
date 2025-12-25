@@ -1,0 +1,239 @@
+{% extends "manager/base.html" %}
+
+{% block title %}Enviar Notificación{% endblock %}
+
+{% block css %}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+  /* Select2 Custom Styling */
+  .select2-container--default .select2-selection--single {
+    height: 38px;
+    padding: 4px 8px;
+    border: 1px solid var(--border-default);
+    border-radius: 0.375rem;
+    background: var(--bg-primary);
+  }
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 28px;
+    color: var(--text-primary);
+    padding-left: 0;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--text-muted);
+  }
+  .select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: var(--primary-bg);
+    box-shadow: 0 0 0 1px var(--primary-bg);
+    outline: none;
+  }
+  .select2-dropdown {
+    border: 1px solid var(--border-default);
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  }
+  .select2-container--default .select2-search--dropdown .select2-search__field {
+    border: 1px solid var(--border-default);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border-color: var(--primary-bg);
+    outline: none;
+  }
+  .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+  .select2-container--default .select2-results__option--selected {
+    background-color: var(--bg-tertiary);
+  }
+  .select2-results__option {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="breadcrumb-nav">
+  <a href="{% url 'manager:notification_list' %}">Notificaciones</a>
+  <span class="separator">/</span>
+  <span class="current">Enviar Notificación</span>
+</nav>
+
+<div class="page-header">
+  <div>
+    <h1>Enviar Notificación</h1>
+    <p>{% if target_user %}Enviar notificación a {{ target_user.first_name }} {{ target_user.last_name }}{% else %}Enviar una notificación push a un usuario{% endif %}</p>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem;">
+  <!-- Form -->
+  <div class="main-card">
+    <div class="card-header-section">
+      <h2 class="card-title">Detalles de la Notificación</h2>
+    </div>
+    <div class="card-body">
+      {% if form.non_field_errors %}
+        <div class="alert alert-error">
+          <i class="ti ti-alert-circle"></i>
+          {{ form.non_field_errors.0 }}
+        </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="id_user" class="form-label">Usuario *</label>
+          {% if target_user %}
+            <div style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:var(--bg-secondary); border-radius:0.375rem; border:1px solid var(--border-default);">
+              <div class="avatar avatar-sm success">
+                {{ target_user.first_name.0|upper }}{{ target_user.last_name.0|upper }}
+              </div>
+              <div>
+                <div style="font-size:0.875rem; font-weight:500;">{{ target_user.first_name }} {{ target_user.last_name }}</div>
+                <div style="font-size:0.75rem; color:var(--text-secondary);">{{ target_user.email }}</div>
+              </div>
+            </div>
+            <input type="hidden" name="user" value="{{ target_user.pk }}">
+          {% else %}
+            {{ form.user }}
+            {% if form.user.errors %}
+              <div class="form-error">{{ form.user.errors.0 }}</div>
+            {% endif %}
+            <div class="form-help">Solo usuarios con dispositivos registrados</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_title" class="form-label">Título *</label>
+          {{ form.title }}
+          {% if form.title.errors %}
+            <div class="form-error">{{ form.title.errors.0 }}</div>
+          {% endif %}
+          <div class="form-help">Máximo 200 caracteres</div>
+        </div>
+
+        <div class="form-group">
+          <label for="id_body" class="form-label">Mensaje *</label>
+          {{ form.body }}
+          {% if form.body.errors %}
+            <div class="form-error">{{ form.body.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_notification_type" class="form-label">Tipo de Notificación</label>
+          {{ form.notification_type }}
+          {% if form.notification_type.errors %}
+            <div class="form-error">{{ form.notification_type.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+          <button type="submit" class="btn-primary">
+            <i class="ti ti-send"></i>
+            Enviar Notificación
+          </button>
+          <a href="{% url 'manager:notification_list' %}" class="btn-outline">
+            Cancelar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="main-card" style="height:fit-content;">
+    <div class="card-header-section">
+      <h2 class="card-title">Vista Previa</h2>
+    </div>
+    <div class="card-body">
+      <div style="background:var(--bg-tertiary); border-radius:0.75rem; padding:1rem; border:1px solid var(--border-default);">
+        <!-- Phone mockup -->
+        <div style="background:var(--bg-primary); border-radius:0.5rem; padding:0.75rem; box-shadow:0 2px 8px rgb(0 0 0 / 0.1);">
+          <div style="display:flex; align-items:flex-start; gap:0.75rem;">
+            <div style="width:32px; height:32px; background:linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius:0.5rem; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:0.75rem; flex-shrink:0;">
+              N
+            </div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:0.6875rem; color:var(--text-muted); margin-bottom:0.125rem;">NEURAL</div>
+              <div id="preview-title" style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.25rem;">
+                Título de la notificación
+              </div>
+              <div id="preview-body" style="font-size:0.75rem; color:var(--text-secondary); line-height:1.4;">
+                El mensaje de la notificación aparecerá aquí...
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center; margin-top:0.75rem; font-size:0.6875rem; color:var(--text-muted);">
+          Ahora
+        </div>
+      </div>
+
+      <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border-default);">
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:0.5rem;">
+          <i class="ti ti-info-circle" style="margin-right:0.25rem;"></i>
+          Información
+        </div>
+        <ul style="font-size:0.75rem; color:var(--text-secondary); margin:0; padding-left:1rem;">
+          <li>La notificación se enviará inmediatamente</li>
+          <li>El usuario debe tener un dispositivo registrado</li>
+          <li>Se enviará a todos los dispositivos activos del usuario</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<!-- jQuery & Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Select2 for user select
+    $('.select2-user').select2({
+      placeholder: 'Buscar usuario...',
+      allowClear: false,
+      width: '100%',
+      language: {
+        noResults: function() {
+          return 'No se encontraron usuarios';
+        },
+        searching: function() {
+          return 'Buscando...';
+        }
+      }
+    });
+
+    // Live preview
+    const titleInput = document.getElementById('id_title');
+    const bodyInput = document.getElementById('id_body');
+    const previewTitle = document.getElementById('preview-title');
+    const previewBody = document.getElementById('preview-body');
+
+    function updatePreview() {
+      previewTitle.textContent = titleInput.value || 'Título de la notificación';
+      previewBody.textContent = bodyInput.value || 'El mensaje de la notificación aparecerá aquí...';
+    }
+
+    if (titleInput && bodyInput) {
+      titleInput.addEventListener('input', updatePreview);
+      bodyInput.addEventListener('input', updatePreview);
+      updatePreview();
+    }
+  });
+</script>
+{% endblock %}
