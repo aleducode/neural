@@ -35,6 +35,15 @@ from neural.api.views.notifications import (
     NotificationCountView,
     SendNotificationView,
 )
+from neural.api.views.community import (
+    FeedView,
+    PostListCreateView,
+    PostDetailView,
+    PostReactionView,
+    PostCommentsView,
+    CommentDetailView,
+    UserTrainingsForPostView,
+)
 
 app_name = "api"
 
@@ -104,5 +113,33 @@ urlpatterns = [
     ),
     path(
         "notifications/send/", SendNotificationView.as_view(), name="notification_send"
+    ),
+    # Community
+    path("community/feed/", FeedView.as_view(), name="community_feed"),
+    path("community/posts/", PostListCreateView.as_view(), name="community_posts"),
+    path(
+        "community/posts/<int:pk>/",
+        PostDetailView.as_view(),
+        name="community_post_detail",
+    ),
+    path(
+        "community/posts/<int:pk>/react/",
+        PostReactionView.as_view(),
+        name="community_post_react",
+    ),
+    path(
+        "community/posts/<int:pk>/comments/",
+        PostCommentsView.as_view(),
+        name="community_post_comments",
+    ),
+    path(
+        "community/comments/<int:pk>/",
+        CommentDetailView.as_view(),
+        name="community_comment_detail",
+    ),
+    path(
+        "community/trainings/",
+        UserTrainingsForPostView.as_view(),
+        name="community_trainings",
     ),
 ]

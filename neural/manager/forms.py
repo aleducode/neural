@@ -70,10 +70,9 @@ class SendNotificationForm(forms.Form):
     """Form to send push notifications."""
 
     user = forms.ModelChoiceField(
-        queryset=User.objects.filter(
-            is_client=True,
-            devices__is_active=True
-        ).distinct().order_by("first_name", "last_name"),
+        queryset=User.objects.filter(is_client=True, devices__is_active=True)
+        .distinct()
+        .order_by("first_name", "last_name"),
         label="Usuario",
         widget=forms.Select(
             attrs={

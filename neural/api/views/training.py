@@ -288,28 +288,105 @@ class BookView(APIView):
 
 
 class MyTrainingsView(APIView):
-    """Get user's upcoming trainings."""
+    """Get user's trainings (upcoming and optionally past)."""
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         today = timezone.localdate()
 
-        trainings = (
-            UserTraining.objects.filter(
-                user=request.user,
-                status=UserTraining.Status.CONFIRMED,
-                slot__date__gte=today,
-            )
-            .select_related(
-                "slot", "slot__class_training", "slot__class_training__training_type"
-            )
-            .order_by("slot__date", "slot__class_training__hour_init")[:7]
+        # Check if include_past parameter is provided
+        include_past = (
+            request.query_params.get("include_past", "false").lower() == "true"
         )
+
+        # Pagination parameters
+        try:
+            limit = int(request.query_params.get("limit", 50))
+            offset = int(request.query_params.get("offset", 0))
+            # Limit max page size to prevent abuse
+            limit = min(limit, 100)
+            offset = max(0, offset)
+        except (ValueError, TypeError):
+            limit = 50
+            offset = 0
+
+        # Build query filter
+        query_filter = {
+            "user": request.user,
+            "status": UserTraining.Status.CONFIRMED,
+        }
+
+        # Only filter by date if we don't want past trainings
+        if not include_past:
+            query_filter["slot__date__gte"] = today
+
+        trainings_query = UserTraining.objects.filter(**query_filter).select_related(
+            "slot", "slot__class_training", "slot__class_training__training_type"
+        )
+
+        # Get total count for pagination
+        total_count = trainings_query.count()
+
+        # Order by date
+        if include_past:
+            # When including past: show upcoming first (ascending), then past (descending)
+            # Get future and past separately for proper ordering
+            future_query = (
+                UserTraining.objects.filter(
+                    user=request.user,
+                    status=UserTraining.Status.CONFIRMED,
+                    slot__date__gte=today,
+                )
+                .select_related(
+                    "slot",
+                    "slot__class_training",
+                    "slot__class_training__training_type",
+                )
+                .order_by("slot__date", "slot__class_training__hour_init")
+            )
+
+            past_query = (
+                UserTraining.objects.filter(
+                    user=request.user,
+                    status=UserTraining.Status.CONFIRMED,
+                    slot__date__lt=today,
+                )
+                .select_related(
+                    "slot",
+                    "slot__class_training",
+                    "slot__class_training__training_type",
+                )
+                .order_by("-slot__date", "-slot__class_training__hour_init")
+            )
+
+            # Get counts
+            future_count = future_query.count()
+            past_query.count()
+
+            # Determine which set to return based on offset
+            if offset < future_count:
+                # Return from future trainings
+                trainings = list(future_query[offset : offset + limit])
+            else:
+                # Return from past trainings
+                past_offset = offset - future_count
+                trainings = list(past_query[past_offset : past_offset + limit])
+        else:
+            # Only upcoming, ordered ascending
+            trainings = list(
+                trainings_query.order_by(
+                    "slot__date", "slot__class_training__hour_init"
+                )[offset : offset + limit]
+            )
 
         return Response(
             {
                 "trainings": UserTrainingSerializer(trainings, many=True).data,
+                "count": total_count,
+                "limit": limit,
+                "offset": offset,
+                "has_more": (offset + len(trainings)) < total_count,
             }
         )
 

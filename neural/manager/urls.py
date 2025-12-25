@@ -28,7 +28,9 @@ urlpatterns = [
     path("devices/<int:pk>/edit/", DeviceEditView.as_view(), name="device_edit"),
     # Notifications
     path("notifications/", NotificationListView.as_view(), name="notification_list"),
-    path("notifications/send/", SendNotificationView.as_view(), name="send_notification"),
+    path(
+        "notifications/send/", SendNotificationView.as_view(), name="send_notification"
+    ),
     path(
         "notifications/send/<int:user_id>/",
         SendNotificationView.as_view(),

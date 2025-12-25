@@ -7,7 +7,13 @@ from django.db.models import Q, Count, Prefetch
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import TemplateView, FormView, DetailView, ListView, UpdateView
+from django.views.generic import (
+    TemplateView,
+    FormView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
 
 from neural.users.models import (
     User,
@@ -33,7 +39,9 @@ class SuperStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
-            messages.error(self.request, "No tienes permisos para acceder a esta sección.")
+            messages.error(
+                self.request, "No tienes permisos para acceder a esta sección."
+            )
             return redirect("manager:login")
         return super().handle_no_permission()
 
@@ -106,15 +114,19 @@ class UserListView(SuperStaffRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = User.objects.filter(is_client=True).annotate(
-            device_count=Count("devices", filter=Q(devices__is_active=True))
-        ).select_related("profile").prefetch_related(
-            Prefetch(
-                "memberships",
-                queryset=UserMembership.objects.filter(is_active=True),
-                to_attr="active_memberships",
+        queryset = (
+            User.objects.filter(is_client=True)
+            .annotate(device_count=Count("devices", filter=Q(devices__is_active=True)))
+            .select_related("profile")
+            .prefetch_related(
+                Prefetch(
+                    "memberships",
+                    queryset=UserMembership.objects.filter(is_active=True),
+                    to_attr="active_memberships",
+                )
             )
-        ).order_by("-date_joined")
+            .order_by("-date_joined")
+        )
 
         # Search
         search = self.request.GET.get("q", "").strip()
@@ -143,9 +155,9 @@ class UserListView(SuperStaffRequiredMixin, ListView):
         # Counts for filter tabs
         base_queryset = User.objects.filter(is_client=True)
         context["total_count"] = base_queryset.count()
-        context["active_count"] = base_queryset.filter(
-            memberships__is_active=True
-        ).distinct().count()
+        context["active_count"] = (
+            base_queryset.filter(memberships__is_active=True).distinct().count()
+        )
         context["inactive_count"] = context["total_count"] - context["active_count"]
 
         return context
@@ -181,9 +193,9 @@ class UserDetailView(SuperStaffRequiredMixin, DetailView):
         context["devices"] = Device.objects.filter(user=user).order_by("-created")
 
         # Notifications
-        context["notifications"] = PushNotification.objects.filter(
-            user=user
-        ).order_by("-created")[:20]
+        context["notifications"] = PushNotification.objects.filter(user=user).order_by(
+            "-created"
+        )[:20]
 
         return context
 
