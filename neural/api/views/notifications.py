@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.utils import timezone
 
 from neural.users.models import PushNotification, User
 from neural.api.serializers.notifications import (
@@ -24,9 +25,12 @@ class NotificationListView(APIView):
 
     def get(self, request):
         """Get all notifications for the current user."""
+        # Include PENDING, SENT, DELIVERED, and READ notifications
+        # Exclude FAILED notifications
         notifications = PushNotification.objects.filter(
             user=request.user,
             status__in=[
+                PushNotification.Status.PENDING,
                 PushNotification.Status.SENT,
                 PushNotification.Status.DELIVERED,
                 PushNotification.Status.READ,
@@ -35,10 +39,11 @@ class NotificationListView(APIView):
 
         serializer = NotificationSerializer(notifications, many=True)
 
-        # Get unread count
+        # Get unread count (PENDING, SENT, DELIVERED are considered unread)
         unread_count = PushNotification.objects.filter(
             user=request.user,
             status__in=[
+                PushNotification.Status.PENDING,
                 PushNotification.Status.SENT,
                 PushNotification.Status.DELIVERED,
             ],
@@ -117,12 +122,13 @@ class MarkNotificationReadView(APIView):
             PushNotification.objects.filter(
                 user=request.user,
                 status__in=[
+                    PushNotification.Status.PENDING,
                     PushNotification.Status.SENT,
                     PushNotification.Status.DELIVERED,
                 ],
             ).update(
                 status=PushNotification.Status.READ,
-                read_at=request.user,
+                read_at=timezone.now(),
             )
             return Response(
                 {"message": "Todas las notificaciones marcadas como leídas"}
@@ -139,6 +145,7 @@ class NotificationCountView(APIView):
         total = PushNotification.objects.filter(
             user=request.user,
             status__in=[
+                PushNotification.Status.PENDING,
                 PushNotification.Status.SENT,
                 PushNotification.Status.DELIVERED,
                 PushNotification.Status.READ,
@@ -148,6 +155,7 @@ class NotificationCountView(APIView):
         unread = PushNotification.objects.filter(
             user=request.user,
             status__in=[
+                PushNotification.Status.PENDING,
                 PushNotification.Status.SENT,
                 PushNotification.Status.DELIVERED,
             ],

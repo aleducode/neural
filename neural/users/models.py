@@ -368,6 +368,7 @@ class PushNotification(NeuralBaseModel):
         MEMBERSHIP_EXPIRED = "membership_expired", "Membresía vencida"
         ACHIEVEMENT = "achievement", "Logro desbloqueado"
         PROMOTION = "promotion", "Promoción"
+        COMMUNITY = "community", "Comunidad"
 
     class Status(models.TextChoices):
         PENDING = "pending", "Pendiente"

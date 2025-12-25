@@ -1,5 +1,7 @@
 """API views for community feature."""
 
+import logging
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -15,6 +17,19 @@ from neural.community.serializers import (
     CreateCommentSerializer,
     ReactionSerializer,
 )
+from neural.services.push_notifications import PushNotificationService, NotificationPayload
+from neural.users.models import PushNotification
+from neural.users.tasks import send_community_notification_to_all
+
+logger = logging.getLogger(__name__)
+
+# Emoji mapping for reactions
+REACTION_EMOJIS = {
+    "fire": "🔥",
+    "muscle": "💪",
+    "clap": "👏",
+    "heart": "❤️",
+}
 
 
 class FeedView(APIView):
@@ -66,6 +81,33 @@ class PostListCreateView(APIView):
         )
         if serializer.is_valid():
             post = serializer.save()
+
+            # Send push notification to all users (except the author) - async via Celery
+            try:
+                user_name = request.user.get_full_name() or request.user.email.split("@")[0]
+
+                # Determine notification body based on post type
+                if post.post_type == Post.PostType.TRAINING:
+                    body = f"{user_name} compartió un entrenamiento"
+                elif post.post_type == Post.PostType.PHOTO:
+                    body = f"{user_name} compartió una foto"
+                else:
+                    content_preview = post.content[:50] + "..." if len(post.content) > 50 else post.content
+                    body = f"{user_name}: {content_preview}"
+
+                # Send asynchronously via Celery task
+                send_community_notification_to_all.delay(
+                    title="📢 Nueva publicación",
+                    body=body,
+                    data={
+                        "type": "community_new_post",
+                        "post_id": post.id,
+                    },
+                    exclude_user_ids=[request.user.id],
+                )
+            except Exception as e:
+                logger.error(f"Error queuing new post notification: {e}")
+
             return Response(
                 PostSerializer(post, context={"request": request}).data,
                 status=status.HTTP_201_CREATED,
@@ -114,6 +156,26 @@ class PostReactionView(APIView):
                 user=request.user,
                 defaults={"reaction_type": reaction_type},
             )
+
+            # Send push notification to post author (only for new reactions, not self-reactions)
+            if created and post.author_id != request.user.id:
+                try:
+                    emoji = REACTION_EMOJIS.get(reaction_type, "👍")
+                    user_name = request.user.get_full_name() or request.user.email.split("@")[0]
+
+                    payload = NotificationPayload(
+                        title=f"{emoji} Nueva reacción",
+                        body=f"{user_name} reaccionó a tu publicación",
+                        notification_type=PushNotification.NotificationType.COMMUNITY,
+                        data={
+                            "type": "community_reaction",
+                            "post_id": post.id,
+                            "reaction_type": reaction_type,
+                        },
+                    )
+                    PushNotificationService.send_to_user(post.author, payload)
+                except Exception as e:
+                    logger.error(f"Error sending reaction notification: {e}")
 
             # Get updated summary
             from django.db.models import Count
@@ -191,6 +253,27 @@ class PostCommentsView(APIView):
                 author=request.user,
                 **serializer.validated_data,
             )
+
+            # Send push notification to post author (not for self-comments)
+            if post.author_id != request.user.id:
+                try:
+                    user_name = request.user.get_full_name() or request.user.email.split("@")[0]
+                    comment_preview = comment.content[:50] + "..." if len(comment.content) > 50 else comment.content
+
+                    payload = NotificationPayload(
+                        title="💬 Nuevo comentario",
+                        body=f"{user_name}: {comment_preview}",
+                        notification_type=PushNotification.NotificationType.COMMUNITY,
+                        data={
+                            "type": "community_comment",
+                            "post_id": post.id,
+                            "comment_id": comment.id,
+                        },
+                    )
+                    PushNotificationService.send_to_user(post.author, payload)
+                except Exception as e:
+                    logger.error(f"Error sending comment notification: {e}")
+
             return Response(
                 CommentSerializer(comment, context={"request": request}).data,
                 status=status.HTTP_201_CREATED,

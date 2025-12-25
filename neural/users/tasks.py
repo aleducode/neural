@@ -195,3 +195,35 @@ def send_push_notification_to_all(
     except Exception as e:
         logger.error(f"Error sending notification to all users: {e}")
         return 0
+
+
+@celery_app.task
+def send_community_notification_to_all(
+    title: str,
+    body: str,
+    data: dict = None,
+    exclude_user_ids: list = None,
+):
+    """
+    Task to send a community push notification to all users asynchronously.
+    Used for new post notifications.
+    """
+    from neural.users.models import PushNotification
+    from neural.services.push_notifications import NotificationPayload
+
+    try:
+        payload = NotificationPayload(
+            title=title,
+            body=body,
+            notification_type=PushNotification.NotificationType.COMMUNITY,
+            data=data,
+        )
+        count = PushNotificationService.send_to_all_users(
+            payload,
+            exclude_users=exclude_user_ids,
+        )
+        logger.info(f"Sent community notification to {count} users: {title}")
+        return count
+    except Exception as e:
+        logger.error(f"Error sending community notification to all users: {e}")
+        return 0
