@@ -282,7 +282,7 @@ class UserStats(NeuralBaseModel):
         verbose_name = "Stats"
         verbose_name_plural = "Stats"
         constraints = [
-            models.UniqueConstraint(fields=["user", "week"], name="unique_stats")
+            models.UniqueConstraint(fields=["user", "year", "week"], name="unique_stats_per_year")
         ]
 
     def __str__(self):

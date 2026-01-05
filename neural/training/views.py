@@ -3,6 +3,8 @@
 # Django
 from django.contrib import messages
 from datetime import timedelta
+from django.db import IntegrityError
+from django.db.models import F
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -125,14 +127,20 @@ class TrainingSlotView(LoginRequiredMixin, DetailView):
     def _update_stats(self, user, slot):
         year = timezone.now().year
         slot_week_number = slot.date.isocalendar()[1]
-        stats, _ = user.stats.update_or_create(
-            year=year,
-            week=slot_week_number,
+        try:
+            stats, created = user.stats.get_or_create(
+                year=year,
+                week=slot_week_number,
+            )
+        except IntegrityError:
+            # Race condition: another request created the record first
+            stats = user.stats.get(year=year, week=slot_week_number)
+        # Use F() expressions for atomic updates to avoid race conditions
+        user.stats.filter(pk=stats.pk).update(
+            trainings=F("trainings") + 1,
+            calories=F("calories") + 400,
+            hours=F("hours") + 1,
         )
-        stats.trainings += 1
-        stats.calories += 400
-        stats.hours += 1
-        stats.save()
 
     def post(self, request, *args, **kwargs):
         # Create User training session
