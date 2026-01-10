@@ -46,8 +46,7 @@ class CommentAdmin(admin.ModelAdmin):
     readonly_fields = ["created", "modified"]
     ordering = ["-created"]
 
+    @admin.display(description="Contenido")
     def content_preview(self, obj):
         """Return first 50 characters of content."""
         return obj.content[:50] + "..." if len(obj.content) > 50 else obj.content
-
-    content_preview.short_description = "Contenido"

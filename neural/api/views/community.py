@@ -10,6 +10,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.shortcuts import get_object_or_404
 
 from neural.community.models import Post, Reaction, Comment
+from neural.users.models import User, Profile, UserStrike
 from neural.community.serializers import (
     PostSerializer,
     CreatePostSerializer,
@@ -17,7 +18,10 @@ from neural.community.serializers import (
     CreateCommentSerializer,
     ReactionSerializer,
 )
-from neural.services.push_notifications import PushNotificationService, NotificationPayload
+from neural.services.push_notifications import (
+    PushNotificationService,
+    NotificationPayload,
+)
 from neural.users.models import PushNotification
 from neural.users.tasks import send_community_notification_to_all
 
@@ -84,7 +88,9 @@ class PostListCreateView(APIView):
 
             # Send push notification to all users (except the author) - async via Celery
             try:
-                user_name = request.user.get_full_name() or request.user.email.split("@")[0]
+                user_name = (
+                    request.user.get_full_name() or request.user.email.split("@")[0]
+                )
 
                 # Determine notification body based on post type
                 if post.post_type == Post.PostType.TRAINING:
@@ -92,7 +98,11 @@ class PostListCreateView(APIView):
                 elif post.post_type == Post.PostType.PHOTO:
                     body = f"{user_name} compartió una foto"
                 else:
-                    content_preview = post.content[:50] + "..." if len(post.content) > 50 else post.content
+                    content_preview = (
+                        post.content[:50] + "..."
+                        if len(post.content) > 50
+                        else post.content
+                    )
                     body = f"{user_name}: {content_preview}"
 
                 # Send asynchronously via Celery task
@@ -122,8 +132,9 @@ class PostDetailView(APIView):
 
     def get(self, request, pk):
         post = get_object_or_404(
-            Post.objects.select_related("author", "training", "training__slot")
-            .prefetch_related("reactions"),
+            Post.objects.select_related(
+                "author", "training", "training__slot"
+            ).prefetch_related("reactions"),
             pk=pk,
             is_active=True,
         )
@@ -161,7 +172,9 @@ class PostReactionView(APIView):
             if created and post.author_id != request.user.id:
                 try:
                     emoji = REACTION_EMOJIS.get(reaction_type, "👍")
-                    user_name = request.user.get_full_name() or request.user.email.split("@")[0]
+                    user_name = (
+                        request.user.get_full_name() or request.user.email.split("@")[0]
+                    )
 
                     payload = NotificationPayload(
                         title=f"{emoji} Nueva reacción",
@@ -257,8 +270,14 @@ class PostCommentsView(APIView):
             # Send push notification to post author (not for self-comments)
             if post.author_id != request.user.id:
                 try:
-                    user_name = request.user.get_full_name() or request.user.email.split("@")[0]
-                    comment_preview = comment.content[:50] + "..." if len(comment.content) > 50 else comment.content
+                    user_name = (
+                        request.user.get_full_name() or request.user.email.split("@")[0]
+                    )
+                    comment_preview = (
+                        comment.content[:50] + "..."
+                        if len(comment.content) > 50
+                        else comment.content
+                    )
 
                     payload = NotificationPayload(
                         title="💬 Nuevo comentario",
@@ -319,7 +338,9 @@ class UserTrainingsForPostView(APIView):
                 status__in=[UserTraining.Status.CONFIRMED, UserTraining.Status.DONE],
                 slot__date__gte=thirty_days_ago,
             )
-            .select_related("slot", "slot__class_training", "slot__class_training__training_type")
+            .select_related(
+                "slot", "slot__class_training", "slot__class_training__training_type"
+            )
             .order_by("-slot__date")[:5]
         )
 
@@ -346,3 +367,67 @@ class UserTrainingsForPostView(APIView):
                 )
 
         return Response({"trainings": data})
+
+
+class UserPublicProfileView(APIView):
+    """Get public profile of a user for community view."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        """Get user's public profile with stats."""
+        from neural.training.models import UserTraining
+
+        user = get_object_or_404(User, pk=user_id)
+
+        # Get profile
+        profile = Profile.objects.filter(user=user).first()
+
+        # Get current strike
+        current_strike = UserStrike.objects.filter(user=user, is_current=True).first()
+
+        # Get total trainings count
+        total_trainings = UserTraining.objects.filter(
+            user=user,
+            status__in=[UserTraining.Status.CONFIRMED, UserTraining.Status.DONE],
+        ).count()
+
+        # Get user's posts count
+        posts_count = Post.objects.filter(author=user, is_active=True).count()
+
+        # Get user's recent posts (last 5)
+        recent_posts = (
+            Post.objects.filter(author=user, is_active=True)
+            .select_related("training", "training__slot")
+            .prefetch_related("reactions")
+            .order_by("-created")[:5]
+        )
+
+        # Build photo URL
+        photo_url = None
+        if user.photo:
+            photo_url = request.build_absolute_uri(user.photo.url)
+        elif profile and profile.photo:
+            photo_url = request.build_absolute_uri(profile.photo.url)
+
+        # Build response
+        data = {
+            "id": user.id,
+            "name": user.get_full_name() or user.email.split("@")[0],
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "photo_url": photo_url,
+            "instagram": profile.instagram if profile else None,
+            "profession": profile.profession if profile else None,
+            "member_since": user.created.strftime("%B %Y") if user.created else None,
+            "stats": {
+                "total_trainings": total_trainings,
+                "current_strike": current_strike.weeks if current_strike else 0,
+                "posts_count": posts_count,
+            },
+            "recent_posts": PostSerializer(
+                recent_posts, many=True, context={"request": request}
+            ).data,
+        }
+
+        return Response(data)

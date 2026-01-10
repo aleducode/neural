@@ -43,6 +43,7 @@ from neural.api.views.community import (
     PostCommentsView,
     CommentDetailView,
     UserTrainingsForPostView,
+    UserPublicProfileView,
 )
 
 app_name = "api"
@@ -141,5 +142,10 @@ urlpatterns = [
         "community/trainings/",
         UserTrainingsForPostView.as_view(),
         name="community_trainings",
+    ),
+    path(
+        "community/users/<int:user_id>/",
+        UserPublicProfileView.as_view(),
+        name="community_user_profile",
     ),
 ]

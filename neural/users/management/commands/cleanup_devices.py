@@ -24,10 +24,9 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("DRY RUN - No changes will be made"))
 
         # Find users with more than one device
-        users_with_multiple = (
-            User.objects.annotate(device_count=Count("devices"))
-            .filter(device_count__gt=1)
-        )
+        users_with_multiple = User.objects.annotate(
+            device_count=Count("devices")
+        ).filter(device_count__gt=1)
 
         total_deleted = 0
 

@@ -136,9 +136,7 @@ class PostSerializer(serializers.ModelSerializer):
         """Get count of each reaction type."""
         summary = {"fire": 0, "muscle": 0, "clap": 0, "heart": 0}
         reactions = (
-            obj.reactions.values("reaction_type")
-            .annotate(count=Count("id"))
-            .order_by()
+            obj.reactions.values("reaction_type").annotate(count=Count("id")).order_by()
         )
         for r in reactions:
             if r["reaction_type"] in summary:
