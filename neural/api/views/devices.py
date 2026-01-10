@@ -30,6 +30,9 @@ class RegisterDeviceView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Delete all previous devices for this user (keep only the latest)
+        Device.objects.filter(user=request.user).exclude(device_id=device_id).delete()
+
         # Update or create device
         device, created = Device.objects.update_or_create(
             device_id=device_id,
