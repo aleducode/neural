@@ -1,0 +1,110 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Datos - Neural{% endblock %}
+
+{% block container %}
+<main class="adminuiux-content container-fluid vh-100">
+  <div class="auth-wrapper d-flex flex-column h-100">
+    <div class="row gx-3 align-items-center justify-content-center py-4 mt-auto">
+      <div class="col-11 col-sm-8 col-md-11 col-xl-11 col-xxl-10 login-box">
+        <div class="mb-4 text-center">
+          <img src="{% static 'images/brain.png' %}" class="width-50 mx-auto mb-3" alt="">
+          <h2 class="text-theme-accent-1 mb-0">Eliminación de Datos</h2>
+          <h1 class="fw-bold text-theme-1"><b>Neural</b></h1>
+        </div>
+
+        <div class="alert alert-info mb-4">
+          <h5 class="alert-heading"><i class="bi bi-info-circle"></i> Eliminación Selectiva de Datos</h5>
+          <p class="mb-0">Puede seleccionar qué tipos de datos desea eliminar de su cuenta. Su cuenta permanecerá activa y podrá seguir usando Neural Consciente con los datos restantes.</p>
+        </div>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          
+          {% if form.errors %}
+            <div class="alert alert-danger">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <p class="mb-1">{{ error }}</p>
+                {% endfor %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="form-floating mb-3">
+            {{ form.confirm_email }}
+            <label for="{{ form.confirm_email.id_for_label }}">Confirme su correo electrónico</label>
+            <small class="form-text text-muted">Debe coincidir con su correo electrónico registrado: <strong>{{ user_email }}</strong></small>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Seleccione los tipos de datos que desea eliminar:</label>
+            <div class="border rounded p-3">
+              {% for choice in form.data_types %}
+                <div class="form-check mb-2">
+                  {{ choice.tag }}
+                  <label class="form-check-label" for="{{ choice.id_for_label }}">
+                    {{ choice.choice_label }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+            {% if form.data_types.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.data_types.errors }}
+              </div>
+            {% endif %}
+            <small class="form-text text-muted">Puede seleccionar uno o varios tipos de datos. La eliminación es permanente e irreversible.</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.reason.id_for_label }}" class="form-label">Motivo (opcional)</label>
+            {{ form.reason }}
+            <small class="form-text text-muted">Comparta con nosotros el motivo de su decisión. Esto nos ayuda a mejorar nuestros servicios.</small>
+          </div>
+
+          <div class="alert alert-warning mb-4">
+            <h6 class="alert-heading">Advertencia</h6>
+            <p class="small mb-0">La eliminación de los datos seleccionados es <strong>PERMANENTE E IRREVERSIBLE</strong>. Una vez eliminados, no podrá recuperar esos datos. Su cuenta permanecerá activa, pero los datos seleccionados serán eliminados permanentemente.</p>
+          </div>
+
+          <div class="alert alert-secondary mb-4">
+            <h6 class="alert-heading">Datos que se Mantendrán</h6>
+            <p class="small mb-0">Los siguientes datos <strong>NO se eliminarán</strong> (solo se eliminan si elimina su cuenta completa): Información básica de la cuenta (nombre, correo electrónico, número de teléfono), credenciales de acceso, membresías activas, referencias de pago, rankings y strikes.</p>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-info btn-lg">
+              <i class="bi bi-trash"></i> Eliminar Datos Seleccionados
+            </button>
+            <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary">
+              Cancelar y Volver al Perfil
+            </a>
+          </div>
+        </form>
+
+        <div class="mt-4 text-center">
+          <a href="{% url 'users:data_deletion_info' %}" class="text-decoration-none">
+            <small>Ver información detallada sobre eliminación de datos</small>
+          </a>
+        </div>
+      </div>
+    </div>
+    <footer class="adminuiux-footer mt-auto">
+      <div class="container-fluid text-center">
+        <span class="small">Copyright @2026, <a target="_blank">Neural consciente</a>💙</span>
+      </div>
+    </footer>
+  </div>
+</main>
+{% endblock container %}

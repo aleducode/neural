@@ -248,3 +248,116 @@ class ProfileForm(forms.Form):
             setattr(self.user, field, value)
         self.user.save()
         return self.user
+
+
+class AccountDeletionForm(forms.Form):
+    """Account deletion request form."""
+
+    confirm_email = forms.EmailField(
+        label="Confirme su correo electrónico",
+        widget=forms.EmailInput(attrs={"class": "form-control", "autofocus": True}),
+    )
+    confirmation_text = forms.CharField(
+        label="Escriba 'ELIMINAR' para confirmar",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Escriba ELIMINAR para confirmar",
+            }
+        ),
+    )
+    reason = forms.CharField(
+        label="Motivo (opcional)",
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "rows": "3",
+                "placeholder": "¿Por qué desea eliminar su cuenta?",
+            }
+        ),
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        """User must be passed as a parameter."""
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_confirm_email(self):
+        """Email must match user's email."""
+        email = self.cleaned_data["confirm_email"]
+        if email.lower() != self.user.email.lower():
+            raise forms.ValidationError(
+                "El correo electrónico no coincide con su cuenta."
+            )
+        return email
+
+    def clean_confirmation_text(self):
+        """Confirmation text must be 'ELIMINAR'."""
+        text = self.cleaned_data["confirmation_text"]
+        if text.upper() != "ELIMINAR":
+            raise forms.ValidationError(
+                "Debe escribir 'ELIMINAR' en mayúsculas para confirmar."
+            )
+        return text
+
+
+class DataDeletionForm(forms.Form):
+    """Data deletion request form (without account deletion)."""
+
+    confirm_email = forms.EmailField(
+        label="Confirme su correo electrónico",
+        widget=forms.EmailInput(attrs={"class": "form-control", "autofocus": True}),
+    )
+    data_types = forms.MultipleChoiceField(
+        label="Seleccione los tipos de datos que desea eliminar",
+        choices=[
+            (
+                "profile",
+                "Datos de perfil (altura, fecha de nacimiento, dirección, etc.)",
+            ),
+            ("weights", "Historial de peso"),
+            ("trainings", "Historial de entrenamientos"),
+            ("stats", "Estadísticas de entrenamiento"),
+            ("devices", "Dispositivos registrados"),
+            ("notifications", "Notificaciones"),
+            ("photo", "Foto de perfil"),
+            ("all", "Todos los datos anteriores"),
+        ],
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+        required=True,
+    )
+    reason = forms.CharField(
+        label="Motivo (opcional)",
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "rows": "3",
+                "placeholder": "¿Por qué desea eliminar estos datos?",
+            }
+        ),
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        """User must be passed as a parameter."""
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_confirm_email(self):
+        """Email must match user's email."""
+        email = self.cleaned_data["confirm_email"]
+        if email.lower() != self.user.email.lower():
+            raise forms.ValidationError(
+                "El correo electrónico no coincide con su cuenta."
+            )
+        return email
+
+    def clean_data_types(self):
+        """At least one data type must be selected."""
+        data_types = self.cleaned_data["data_types"]
+        if not data_types:
+            raise forms.ValidationError(
+                "Debe seleccionar al menos un tipo de dato para eliminar."
+            )
+        return data_types

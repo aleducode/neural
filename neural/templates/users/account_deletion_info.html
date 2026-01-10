@@ -1,0 +1,127 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="application-name" content="Neural" />
+  <title>Eliminación de Cuenta - Neural</title>
+  <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.ico' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&family=SUSE:wght@100..800&display=swap"
+    rel="stylesheet">
+  <link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
+  <style>
+    :root {
+      --adminuiux-content-font: "Open Sans", sans-serif;
+      --adminuiux-content-font-weight: 400;
+      --adminuiux-title-font: "SUSE", sans-serif;
+      --adminuiux-title-font-weight: 600
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h1 class="h3 mb-0">Eliminación de Cuenta - Neural Consciente</h1>
+          </div>
+          <div class="card-body p-4">
+            <div class="mb-4 text-center">
+              <img src="{% static 'images/brain.png' %}" alt="Neural Logo" class="mb-3" style="width: 80px;">
+              <h2 class="text-primary">Neural Consciente</h2>
+              <p class="text-muted">Solicitud de Eliminación de Cuenta y Datos</p>
+            </div>
+
+            <div class="alert alert-warning">
+              <h4 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Información Importante</h4>
+              <p class="mb-0">Esta página proporciona información sobre cómo solicitar la eliminación permanente de su cuenta y todos los datos asociados en Neural Consciente.</p>
+            </div>
+
+            <h3 class="mt-4 mb-3">Pasos para Solicitar la Eliminación de su Cuenta</h3>
+            <ol class="mb-4">
+              <li class="mb-2"><strong>Inicie sesión</strong> en su cuenta de Neural Consciente usando sus credenciales (correo electrónico y contraseña).</li>
+              <li class="mb-2">Navegue a la página de <strong>Eliminación de Cuenta</strong> desde su perfil o acceda directamente a: <a href="{% url 'users:account_deletion' %}">Eliminar Cuenta</a></li>
+              <li class="mb-2"><strong>Confirme su correo electrónico</strong> ingresando su dirección de correo electrónico asociada a la cuenta.</li>
+              <li class="mb-2">Escriba <strong>"ELIMINAR"</strong> en el campo de confirmación para verificar su intención.</li>
+              <li class="mb-2"><strong>Opcional:</strong> Proporcione una razón para la eliminación de su cuenta (esto nos ayuda a mejorar nuestros servicios).</li>
+              <li class="mb-2">Haga clic en el botón <strong>"Eliminar Cuenta Permanentemente"</strong>.</li>
+              <li class="mb-2">Recibirá una confirmación de que su cuenta y todos los datos asociados han sido eliminados permanentemente.</li>
+            </ol>
+
+            <div class="alert alert-danger">
+              <h4 class="alert-heading"><i class="bi bi-shield-exclamation"></i> Advertencia</h4>
+              <p class="mb-0">La eliminación de su cuenta es <strong>PERMANENTE E IRREVERSIBLE</strong>. Una vez eliminada, no podrá recuperar su cuenta ni ninguno de sus datos.</p>
+            </div>
+
+            <h3 class="mt-4 mb-3">Datos que se Eliminarán</h3>
+            <p>Al eliminar su cuenta, se eliminarán permanentemente los siguientes datos asociados a su cuenta:</p>
+            <ul class="mb-4">
+              <li><strong>Información de la cuenta:</strong> Nombre, correo electrónico, número de teléfono, contraseña.</li>
+              <li><strong>Perfil de usuario:</strong> Foto de perfil, altura, fecha de nacimiento, dirección, contacto de emergencia, profesión, Instagram.</li>
+              <li><strong>Historial de peso:</strong> Todos los registros de peso almacenados.</li>
+              <li><strong>Historial de entrenamientos:</strong> Todas las sesiones de entrenamiento registradas (confirmadas, canceladas y completadas).</li>
+              <li><strong>Estadísticas de entrenamiento:</strong> Todas las estadísticas semanales y anuales (calorías, horas, número de entrenamientos).</li>
+              <li><strong>Membresías:</strong> Información de membresías activas e históricas.</li>
+              <li><strong>Referencias de pago:</strong> Historial de referencias de pago (los registros contables pueden ser retenidos según requisitos legales).</li>
+              <li><strong>Rankings:</strong> Posiciones y rankings de años anteriores.</li>
+              <li><strong>Strikes (racha de asistencia):</strong> Todas las rachas de asistencia semanal registradas.</li>
+              <li><strong>Dispositivos registrados:</strong> Todos los dispositivos móviles vinculados a su cuenta para notificaciones push.</li>
+              <li><strong>Notificaciones:</strong> Todas las notificaciones push enviadas y recibidas.</li>
+              <li><strong>Logs de notificaciones:</strong> Todos los registros de envío de notificaciones.</li>
+            </ul>
+
+            <h3 class="mt-4 mb-3">Datos que Pueden Ser Retenidos</h3>
+            <p>Por razones legales y de cumplimiento, podemos retener cierta información durante períodos específicos:</p>
+            <ul class="mb-4">
+              <li><strong>Registros de transacciones financieras:</strong> Se pueden retener registros contables de pagos por hasta 5 años según requisitos legales locales.</li>
+              <li><strong>Registros de auditoría:</strong> Podemos mantener registros de acceso y acciones del sistema por hasta 2 años para fines de seguridad y auditoría.</li>
+            </ul>
+
+            <h3 class="mt-4 mb-3">Período de Retención Adicional</h3>
+            <p>Después de solicitar la eliminación de su cuenta:</p>
+            <ul class="mb-4">
+              <li>Sus datos personales serán eliminados de nuestros sistemas activos <strong>dentro de 30 días</strong> después de su solicitud.</li>
+              <li>Las copias de seguridad pueden contener sus datos hasta por <strong>90 días adicionales</strong>, después de lo cual serán eliminadas permanentemente.</li>
+              <li>Los datos retenidos por requisitos legales pueden mantenerse hasta por <strong>5 años</strong> según lo requiera la ley.</li>
+            </ul>
+
+            <div class="mt-4 p-3 bg-light rounded">
+              <h4 class="mb-3">¿Necesita Ayuda?</h4>
+              <p class="mb-2">Si tiene preguntas sobre la eliminación de su cuenta o necesita asistencia, puede contactarnos:</p>
+              <ul class="mb-0">
+                <li>Correo electrónico: soporte@neural.com.co</li>
+                <li>A través de la aplicación: Contacte al soporte desde su perfil</li>
+              </ul>
+            </div>
+
+            <div class="mt-4 text-center">
+              {% if is_authenticated %}
+                <a href="{% url 'users:account_deletion' %}" class="btn btn-danger btn-lg">
+                  Proceder con la Eliminación de Cuenta
+                </a>
+              {% else %}
+                <a href="{% url 'users:login' %}" class="btn btn-primary btn-lg me-2">
+                  Iniciar Sesión
+                </a>
+                <a href="{% url 'users:account_deletion' %}" class="btn btn-outline-secondary btn-lg">
+                  Ver Formulario de Eliminación
+                </a>
+              {% endif %}
+            </div>
+          </div>
+          <div class="card-footer text-center text-muted">
+            <small>Neural Consciente - Última actualización: {% now "F Y" %}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

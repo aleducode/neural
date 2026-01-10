@@ -1,0 +1,135 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="application-name" content="Neural" />
+  <title>Eliminación de Datos - Neural</title>
+  <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.ico' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&family=SUSE:wght@100..800&display=swap"
+    rel="stylesheet">
+  <link href="{% static 'assets/css/app.css' %}" rel="stylesheet">
+  <style>
+    :root {
+      --adminuiux-content-font: "Open Sans", sans-serif;
+      --adminuiux-content-font-weight: 400;
+      --adminuiux-title-font: "SUSE", sans-serif;
+      --adminuiux-title-font-weight: 600
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header bg-info text-white">
+            <h1 class="h3 mb-0">Eliminación de Datos - Neural Consciente</h1>
+          </div>
+          <div class="card-body p-4">
+            <div class="mb-4 text-center">
+              <img src="{% static 'images/brain.png' %}" alt="Neural Logo" class="mb-3" style="width: 80px;">
+              <h2 class="text-info">Neural Consciente</h2>
+              <p class="text-muted">Solicitud de Eliminación de Datos (sin eliminar cuenta)</p>
+            </div>
+
+            <div class="alert alert-info">
+              <h4 class="alert-heading"><i class="bi bi-info-circle"></i> Información</h4>
+              <p class="mb-0">Esta página le permite solicitar la eliminación de datos específicos de su cuenta sin eliminar su cuenta completa. Puede seleccionar qué tipos de datos desea eliminar.</p>
+            </div>
+
+            <h3 class="mt-4 mb-3">Pasos para Solicitar la Eliminación de Datos</h3>
+            <ol class="mb-4">
+              <li class="mb-2"><strong>Inicie sesión</strong> en su cuenta de Neural Consciente usando sus credenciales (correo electrónico y contraseña).</li>
+              <li class="mb-2">Navegue a la página de <strong>Eliminación de Datos</strong> desde su perfil o acceda directamente a: <a href="{% url 'users:data_deletion' %}">Eliminar Datos</a></li>
+              <li class="mb-2"><strong>Confirme su correo electrónico</strong> ingresando su dirección de correo electrónico asociada a la cuenta.</li>
+              <li class="mb-2"><strong>Seleccione los tipos de datos</strong> que desea eliminar marcando las casillas correspondientes. Puede seleccionar uno o varios tipos de datos, o elegir "Todos los datos anteriores" para eliminar todo.</li>
+              <li class="mb-2"><strong>Opcional:</strong> Proporcione una razón para la eliminación de estos datos (esto nos ayuda a mejorar nuestros servicios).</li>
+              <li class="mb-2">Haga clic en el botón <strong>"Eliminar Datos Seleccionados"</strong>.</li>
+              <li class="mb-2">Recibirá una confirmación de que los datos seleccionados han sido eliminados exitosamente.</li>
+              <li class="mb-2">Su cuenta permanecerá activa y podrá seguir usando Neural Consciente con los datos restantes.</li>
+            </ol>
+
+            <div class="alert alert-warning">
+              <h4 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Advertencia</h4>
+              <p class="mb-0">La eliminación de datos es <strong>PERMANENTE E IRREVERSIBLE</strong>. Una vez eliminados, no podrá recuperar esos datos. Su cuenta permanecerá activa, pero los datos seleccionados serán eliminados permanentemente.</p>
+            </div>
+
+            <h3 class="mt-4 mb-3">Tipos de Datos que Puede Eliminar</h3>
+            <p>Puede seleccionar uno o varios de los siguientes tipos de datos para eliminar:</p>
+            <ul class="mb-4">
+              <li><strong>Datos de perfil:</strong> Altura, fecha de nacimiento, dirección, contacto de emergencia, profesión, Instagram.</li>
+              <li><strong>Historial de peso:</strong> Todos los registros de peso almacenados en su cuenta.</li>
+              <li><strong>Historial de entrenamientos:</strong> Todas las sesiones de entrenamiento registradas (confirmadas, canceladas y completadas).</li>
+              <li><strong>Estadísticas de entrenamiento:</strong> Todas las estadísticas semanales y anuales (calorías quemadas, horas de entrenamiento, número de entrenamientos).</li>
+              <li><strong>Dispositivos registrados:</strong> Todos los dispositivos móviles vinculados a su cuenta para notificaciones push.</li>
+              <li><strong>Notificaciones:</strong> Todas las notificaciones push enviadas y recibidas en su cuenta.</li>
+              <li><strong>Foto de perfil:</strong> Su foto de perfil actual (el resto de la información de perfil se mantendrá si no selecciona "Datos de perfil").</li>
+              <li><strong>Todos los datos anteriores:</strong> Seleccione esta opción para eliminar todos los tipos de datos mencionados anteriormente de una vez.</li>
+            </ul>
+
+            <h3 class="mt-4 mb-3">Datos que se Mantendrán</h3>
+            <p>Los siguientes datos <strong>NO se eliminarán</strong> cuando solicite la eliminación de datos (solo se eliminan si elimina su cuenta completa):</p>
+            <ul class="mb-4">
+              <li><strong>Información básica de la cuenta:</strong> Nombre, correo electrónico, número de teléfono (necesarios para mantener su cuenta activa).</li>
+              <li><strong>Credenciales de acceso:</strong> Nombre de usuario y contraseña (necesarios para iniciar sesión).</li>
+              <li><strong>Membresías activas:</strong> Sus membresías actuales y historial de membresías.</li>
+              <li><strong>Referencias de pago:</strong> Historial de referencias de pago (pueden ser retenidas según requisitos legales).</li>
+              <li><strong>Rankings:</strong> Posiciones y rankings de años anteriores.</li>
+              <li><strong>Strikes (racha de asistencia):</strong> Sus rachas de asistencia semanal registradas.</li>
+            </ul>
+
+            <h3 class="mt-4 mb-3">Período de Retención</h3>
+            <p>Después de solicitar la eliminación de datos específicos:</p>
+            <ul class="mb-4">
+              <li>Los datos seleccionados serán eliminados de nuestros sistemas activos <strong>dentro de 7 días</strong> después de su solicitud.</li>
+              <li>Las copias de seguridad pueden contener estos datos hasta por <strong>30 días adicionales</strong>, después de lo cual serán eliminadas permanentemente.</li>
+              <li>Su cuenta permanecerá activa y podrá seguir usando Neural Consciente con los datos restantes.</li>
+            </ul>
+
+            <h3 class="mt-4 mb-3">Datos Retenidos por Requisitos Legales</h3>
+            <p>Por razones legales y de cumplimiento, podemos retener cierta información durante períodos específicos:</p>
+            <ul class="mb-4">
+              <li><strong>Registros de transacciones financieras:</strong> Se pueden retener registros contables de pagos por hasta 5 años según requisitos legales locales, incluso si solicita la eliminación de datos.</li>
+              <li><strong>Registros de auditoría:</strong> Podemos mantener registros de acceso y acciones del sistema por hasta 2 años para fines de seguridad y auditoría.</li>
+            </ul>
+
+            <div class="mt-4 p-3 bg-light rounded">
+              <h4 class="mb-3">¿Necesita Ayuda?</h4>
+              <p class="mb-2">Si tiene preguntas sobre la eliminación de datos o necesita asistencia, puede contactarnos:</p>
+              <ul class="mb-0">
+                <li>Correo electrónico: soporte@neural.com.co</li>
+                <li>A través de la aplicación: Contacte al soporte desde su perfil</li>
+              </ul>
+            </div>
+
+            <div class="mt-4 text-center">
+              {% if is_authenticated %}
+                <a href="{% url 'users:data_deletion' %}" class="btn btn-info btn-lg">
+                  Proceder con la Eliminación de Datos
+                </a>
+              {% else %}
+                <a href="{% url 'users:login' %}" class="btn btn-primary btn-lg me-2">
+                  Iniciar Sesión
+                </a>
+                <a href="{% url 'users:data_deletion' %}" class="btn btn-outline-secondary btn-lg">
+                  Ver Formulario de Eliminación
+                </a>
+              {% endif %}
+            </div>
+          </div>
+          <div class="card-footer text-center text-muted">
+            <small>Neural Consciente - Última actualización: {% now "F Y" %}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -30,4 +30,26 @@ urlpatterns = [
         view=user_views.YearInReviewView.as_view(),
         name="year_in_review_year",
     ),
+    # Account deletion routes (for Google Play compliance)
+    path(
+        route="account-deletion-info/",
+        view=user_views.AccountDeletionInfoView.as_view(),
+        name="account_deletion_info",
+    ),
+    path(
+        route="account-deletion/",
+        view=user_views.AccountDeletionView.as_view(),
+        name="account_deletion",
+    ),
+    # Data deletion routes (for Google Play compliance)
+    path(
+        route="data-deletion-info/",
+        view=user_views.DataDeletionInfoView.as_view(),
+        name="data_deletion_info",
+    ),
+    path(
+        route="data-deletion/",
+        view=user_views.DataDeletionView.as_view(),
+        name="data_deletion",
+    ),
 ]

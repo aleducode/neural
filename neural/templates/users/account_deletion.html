@@ -1,0 +1,97 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Cuenta - Neural{% endblock %}
+
+{% block container %}
+<main class="adminuiux-content container-fluid vh-100">
+  <div class="auth-wrapper d-flex flex-column h-100">
+    <div class="row gx-3 align-items-center justify-content-center py-4 mt-auto">
+      <div class="col-11 col-sm-8 col-md-11 col-xl-11 col-xxl-10 login-box">
+        <div class="mb-4 text-center">
+          <img src="{% static 'images/brain.png' %}" class="width-50 mx-auto mb-3" alt="">
+          <h2 class="text-theme-accent-1 mb-0">Eliminación de Cuenta</h2>
+          <h1 class="fw-bold text-theme-1"><b>Neural</b></h1>
+        </div>
+
+        <div class="alert alert-danger mb-4">
+          <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Advertencia Importante</h5>
+          <p class="mb-2">Esta acción es <strong>PERMANENTE E IRREVERSIBLE</strong>. Al eliminar su cuenta:</p>
+          <ul class="mb-0">
+            <li>Se eliminará permanentemente toda su información personal</li>
+            <li>Se perderán todos sus datos de entrenamiento, estadísticas e historial</li>
+            <li>No podrá recuperar su cuenta ni ningún dato asociado</li>
+            <li>Sus membresías activas serán canceladas</li>
+          </ul>
+        </div>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          
+          {% if form.errors %}
+            <div class="alert alert-danger">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <p class="mb-1">{{ error }}</p>
+                {% endfor %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="form-floating mb-3">
+            {{ form.confirm_email }}
+            <label for="{{ form.confirm_email.id_for_label }}">Confirme su correo electrónico</label>
+            <small class="form-text text-muted">Debe coincidir con su correo electrónico registrado: <strong>{{ user_email }}</strong></small>
+          </div>
+
+          <div class="form-floating mb-3">
+            {{ form.confirmation_text }}
+            <label for="{{ form.confirmation_text.id_for_label }}">Escriba 'ELIMINAR' para confirmar</label>
+            <small class="form-text text-muted">Por favor escriba <strong>ELIMINAR</strong> en mayúsculas para confirmar que desea eliminar su cuenta permanentemente.</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.reason.id_for_label }}" class="form-label">Motivo (opcional)</label>
+            {{ form.reason }}
+            <small class="form-text text-muted">Comparta con nosotros el motivo de su decisión. Esto nos ayuda a mejorar nuestros servicios.</small>
+          </div>
+
+          <div class="alert alert-info mb-4">
+            <h6 class="alert-heading">¿Qué datos se eliminarán?</h6>
+            <p class="small mb-0">Al eliminar su cuenta, se eliminarán permanentemente: información de perfil, historial de entrenamientos, estadísticas, membresías, dispositivos registrados, notificaciones y todos los demás datos asociados a su cuenta.</p>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-danger btn-lg">
+              <i class="bi bi-trash"></i> Eliminar Cuenta Permanentemente
+            </button>
+            <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary">
+              Cancelar y Volver al Perfil
+            </a>
+          </div>
+        </form>
+
+        <div class="mt-4 text-center">
+          <a href="{% url 'users:account_deletion_info' %}" class="text-decoration-none">
+            <small>Ver información detallada sobre eliminación de cuenta</small>
+          </a>
+        </div>
+      </div>
+    </div>
+    <footer class="adminuiux-footer mt-auto">
+      <div class="container-fluid text-center">
+        <span class="small">Copyright @2026, <a target="_blank">Neural consciente</a>💙</span>
+      </div>
+    </footer>
+  </div>
+</main>
+{% endblock container %}

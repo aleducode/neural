@@ -21,8 +21,13 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 
 # Forms
-from neural.users.forms import SignUpForms
-from neural.users.forms import CustomAuthenticationForm, ProfileForm
+from neural.users.forms import (
+    SignUpForms,
+    CustomAuthenticationForm,
+    ProfileForm,
+    AccountDeletionForm,
+    DataDeletionForm,
+)
 
 # Models
 from neural.training.models import UserTraining
@@ -399,3 +404,151 @@ class YearInReviewView(LoginRequiredMixin, TemplateView):
         )
 
         return context
+
+
+class AccountDeletionInfoView(TemplateView):
+    """Information-only view for account deletion (for Google Play listing)."""
+
+    template_name = "users/account_deletion_info.html"
+
+    def get_context_data(self, **kwargs):
+        """Add context data."""
+        context = super().get_context_data(**kwargs)
+        context["is_authenticated"] = self.request.user.is_authenticated
+        if self.request.user.is_authenticated:
+            context["user_email"] = self.request.user.email
+        return context
+
+
+class AccountDeletionView(LoginRequiredMixin, FormView):
+    """Account deletion request view for Google Play compliance."""
+
+    template_name = "users/account_deletion.html"
+    form_class = AccountDeletionForm
+
+    def get_form_kwargs(self):
+        """Pass user to form."""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Add context data for the deletion page."""
+        context = super().get_context_data(**kwargs)
+        context["user_email"] = self.request.user.email
+        return context
+
+    def form_valid(self, form):
+        """Handle account deletion request."""
+        user = self.request.user
+        form.cleaned_data.get("reason", "")
+
+        # Log the deletion request (optional - for audit purposes)
+        # You might want to create a model to track deletion requests
+
+        # Delete the user account
+        # This will cascade delete all related data due to CASCADE relationships
+        email = user.email
+        user.delete()
+
+        messages.success(
+            self.request,
+            f"Su cuenta ({email}) y todos los datos asociados han sido eliminados permanentemente.",
+        )
+        return HttpResponseRedirect(reverse_lazy("users:login"))
+
+
+class DataDeletionInfoView(TemplateView):
+    """Information-only view for data deletion (for Google Play listing)."""
+
+    template_name = "users/data_deletion_info.html"
+
+    def get_context_data(self, **kwargs):
+        """Add context data."""
+        context = super().get_context_data(**kwargs)
+        context["is_authenticated"] = self.request.user.is_authenticated
+        if self.request.user.is_authenticated:
+            context["user_email"] = self.request.user.email
+        return context
+
+
+class DataDeletionView(LoginRequiredMixin, FormView):
+    """Data deletion request view (without account deletion) for Google Play compliance."""
+
+    template_name = "users/data_deletion.html"
+    form_class = DataDeletionForm
+
+    def get_form_kwargs(self):
+        """Pass user to form."""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Add context data for the deletion page."""
+        context = super().get_context_data(**kwargs)
+        context["user_email"] = self.request.user.email
+        return context
+
+    def form_valid(self, form):
+        """Handle data deletion request."""
+        user = self.request.user
+        data_types = form.cleaned_data.get("data_types", [])
+        form.cleaned_data.get("reason", "")
+
+        deleted_items = []
+
+        # Delete selected data types
+        if "all" in data_types or "profile" in data_types:
+            if hasattr(user, "profile"):
+                user.profile.delete()
+                deleted_items.append("Perfil completo")
+
+        if "all" in data_types or "photo" in data_types:
+            if user.photo:
+                user.photo.delete()
+                user.photo = None
+                user.save(update_fields=["photo"])
+                deleted_items.append("Foto de perfil")
+
+        if "all" in data_types or "weights" in data_types:
+            count = user.weights.count()
+            user.weights.all().delete()
+            if count > 0:
+                deleted_items.append(f"Historial de peso ({count} registros)")
+
+        if "all" in data_types or "trainings" in data_types:
+            count = user.trainings.count()
+            user.trainings.all().delete()
+            if count > 0:
+                deleted_items.append(f"Historial de entrenamientos ({count} registros)")
+
+        if "all" in data_types or "stats" in data_types:
+            count = user.stats.count()
+            user.stats.all().delete()
+            if count > 0:
+                deleted_items.append(
+                    f"Estadísticas de entrenamiento ({count} registros)"
+                )
+
+        if "all" in data_types or "devices" in data_types:
+            count = user.devices.count()
+            user.devices.all().delete()
+            if count > 0:
+                deleted_items.append(f"Dispositivos registrados ({count} dispositivos)")
+
+        if "all" in data_types or "notifications" in data_types:
+            count = user.notifications.count()
+            user.notifications.all().delete()
+            if count > 0:
+                deleted_items.append(f"Notificaciones ({count} notificaciones)")
+
+        if deleted_items:
+            messages.success(
+                self.request,
+                f"Los siguientes datos han sido eliminados exitosamente: {', '.join(deleted_items)}.",
+            )
+        else:
+            messages.info(self.request, "No se encontraron datos para eliminar.")
+
+        return HttpResponseRedirect(reverse_lazy("users:profile"))
