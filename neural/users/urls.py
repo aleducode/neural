@@ -32,12 +32,12 @@ urlpatterns = [
     ),
     # Account deletion routes (for Google Play compliance)
     path(
-        route="account-deletion-info/",
+        route="delete/",
         view=user_views.AccountDeletionInfoView.as_view(),
         name="account_deletion_info",
     ),
     path(
-        route="account-deletion/",
+        route="delete-data/",
         view=user_views.AccountDeletionView.as_view(),
         name="account_deletion",
     ),
