@@ -101,11 +101,11 @@ class SlotsView(APIView):
                 class_training__training_type__slug_name=training_type_slug
             )
 
-        # If today, filter by current time + 20 minutes
+        # If today, exclude slots that have already started
         now = timezone.localtime()
         if date == now.date():
-            cutoff_time = (now + timedelta(minutes=20)).time()
-            slots = slots.filter(class_training__hour_init__gte=cutoff_time)
+            current_time = now.time()
+            slots = slots.filter(class_training__hour_init__gte=current_time)
 
         # Order by hour
         slots = slots.order_by("class_training__hour_init")
