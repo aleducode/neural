@@ -111,9 +111,9 @@ class PendingView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        phone_neural = f"57{settings.NEURAL_PHONE}"
-        message = f"https://wa.me/{phone_neural}?text=Hola+Neural+estoy+listo+para+iniciar+mis+entrenos+mi+nombre+es+{user.first_name}+{user.last_name}."
-        context["message"] = message
+        base_text = f"Hola+Neural+estoy+listo+para+iniciar+mis+entrenos+mi+nombre+es+{user.first_name}+{user.last_name}."
+        context["message_funcional"] = f"https://wa.me/573224710677?text={base_text}"
+        context["message_complementarios"] = f"https://wa.me/573332654533?text={base_text}"
         return context
 
 

@@ -317,7 +317,6 @@ MESSAGE_TAGS = {
     messages.ERROR: "alert-danger",
 }
 
-NEURAL_PHONE = env("NEURAL_PHONE")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # BOLD
