@@ -51,6 +51,23 @@
   data-bs-target="#list-example" data-bs-smooth-scroll="true" tabindex="0"
   data-sidebarlayout="adminuiux-sidebar-standard" data-headerlayout="adminuiux-header-standard"
   data-headerfill="adminuiux-header-transparent">
+  <script>
+    (function(){
+      var ua = navigator.userAgent || '';
+      if (/iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+        document.documentElement.style.overflow = 'hidden';
+        document.write('\
+          <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#1a1a2e;z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;">\
+            <img src="/static/images/brain.png" alt="Neural" style="width:80px;margin-bottom:1rem;">\
+            <h2 style="color:#f5a623;margin:0 0 0.25rem;">Neural</h2>\
+            <h1 style="color:#fff;font-weight:bold;margin:0 0 1.5rem;font-size:2rem;">Consciente</h1>\
+            <p style="color:#ccc;font-size:1rem;margin-bottom:2rem;">Para una mejor experiencia,<br>descarga nuestra app</p>\
+            <a href="https://apps.apple.com/co/app/neural-consciente/id6756985459" style="display:inline-block;background:#f5a623;color:#1a1a2e;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:bold;font-size:1.1rem;">Descargar en App Store</a>\
+          </div>');
+        document.close();
+      }
+    })();
+  </script>
   <div class="pageloader">
     <div class="container h-100">
       <div class="row justify-content-center align-items-center text-center h-100 pb-ios">
