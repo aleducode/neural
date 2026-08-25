@@ -1,0 +1,140 @@
+{% comment %}
+Puerta de entrada a las apps nativas.
+
+  iOS      -> bloquea la web y manda a la App Store (la app ya esta publicada).
+  Android  -> banner no bloqueante invitando a ser probador de la prueba cerrada.
+
+Cuando Android salga a produccion: mover ANDROID_URL a la ficha de Play y
+cambiar android_blocking a true para que se comporte igual que iOS.
+{% endcomment %}
+<style>
+  .neural-gate,
+  .neural-gate-bar { font-family: "SUSE", "Open Sans", -apple-system, system-ui, sans-serif; }
+
+  .neural-gate {
+    position: fixed; inset: 0; z-index: 999999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 2rem 1.5rem;
+    background: radial-gradient(120% 90% at 50% 0%, #2a2a4a 0%, #1a1a2e 55%, #12121f 100%);
+    color: #fff;
+  }
+  .neural-gate__icon {
+    width: 92px; height: 92px; margin-bottom: 1.25rem; border-radius: 22px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+  }
+  .neural-gate__brand { margin: 0; font-size: 1.05rem; letter-spacing: .18em; text-transform: uppercase; color: #f5a623; }
+  .neural-gate__title { margin: .15rem 0 1rem; font-size: 2.1rem; font-weight: 700; line-height: 1.1; }
+  .neural-gate__text { margin: 0 0 2rem; max-width: 22rem; font-size: 1rem; line-height: 1.5; color: #c8c8d4; }
+  .neural-gate__cta {
+    display: inline-block; padding: 15px 34px; border-radius: 14px;
+    background: #f5a623; color: #1a1a2e; font-size: 1.05rem; font-weight: 700;
+    text-decoration: none; box-shadow: 0 10px 26px rgba(245, 166, 35, .32);
+  }
+  .neural-gate__cta:active { transform: translateY(1px); }
+  .neural-gate__hint { margin: 1.5rem 0 0; font-size: .82rem; color: #7c7c92; }
+
+  .neural-gate-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 99998;
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 15px calc(13px + env(safe-area-inset-bottom, 0px));
+    background: #1a1a2e; color: #fff; font-size: 14px;
+    box-shadow: 0 -2px 14px rgba(0, 0, 0, .35);
+  }
+  .neural-gate-bar__icon { width: 36px; height: 36px; border-radius: 9px; flex: none; }
+  .neural-gate-bar__body { flex: 1; line-height: 1.35; min-width: 0; }
+  .neural-gate-bar__body strong { color: #f5a623; }
+  .neural-gate-bar__body span { color: #b9b9c6; }
+  .neural-gate-bar__cta {
+    flex: none; padding: 10px 16px; border-radius: 10px;
+    background: #f5a623; color: #1a1a2e; font-weight: 700; text-decoration: none; white-space: nowrap;
+  }
+  .neural-gate-bar__close {
+    flex: none; padding: 0 4px; border: 0; background: none;
+    color: #6f6f85; font-size: 22px; line-height: 1; cursor: pointer;
+  }
+</style>
+
+<script>
+  (function () {
+    var IOS_URL = "https://apps.apple.com/co/app/neural-consciente/id6756985459";
+    var ANDROID_URL = "https://play.google.com/apps/testing/com.ducode.neural";
+    var ICON = "/static/images/brain.png";
+    var DISMISS_KEY = "neural_android_banner";
+
+    var ua = navigator.userAgent || "";
+    var isIOS = /iPhone|iPad|iPod/.test(ua) ||
+                (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    var isAndroid = /Android/.test(ua);
+
+    if (!isIOS && !isAndroid) return;
+
+    function el(tag, cls, html) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (html) n.innerHTML = html;
+      return n;
+    }
+
+    function gate() {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+
+      var g = el("div", "neural-gate");
+      var icon = el("img", "neural-gate__icon");
+      icon.src = ICON;
+      icon.alt = "Neural";
+      g.appendChild(icon);
+      g.appendChild(el("p", "neural-gate__brand", "Neural"));
+      g.appendChild(el("h1", "neural-gate__title", "Consciente"));
+      g.appendChild(el("p", "neural-gate__text",
+        "Agenda tus entrenos, sigue tu racha y conecta con la comunidad desde la app."));
+
+      var cta = el("a", "neural-gate__cta", "Abrir en la App Store");
+      cta.href = IOS_URL;
+      g.appendChild(cta);
+      g.appendChild(el("p", "neural-gate__hint",
+        "¿Ya la tienes instalada? Ábrela desde tu pantalla de inicio."));
+
+      document.body.appendChild(g);
+    }
+
+    function bar() {
+      try {
+        if (localStorage.getItem(DISMISS_KEY) === "off") return;
+      } catch (e) {}
+
+      var b = el("div", "neural-gate-bar");
+      var icon = el("img", "neural-gate-bar__icon");
+      icon.src = ICON;
+      icon.alt = "";
+      b.appendChild(icon);
+      b.appendChild(el("div", "neural-gate-bar__body",
+        "<strong>Ya tenemos app para Android</strong><br><span>Ayúdanos a lanzarla: únete como probador.</span>"));
+
+      var cta = el("a", "neural-gate-bar__cta", "Probar");
+      cta.href = ANDROID_URL;
+      cta.target = "_blank";
+      cta.rel = "noopener";
+      b.appendChild(cta);
+
+      var close = el("button", "neural-gate-bar__close", "&times;");
+      close.type = "button";
+      close.setAttribute("aria-label", "Cerrar");
+      close.onclick = function () {
+        try { localStorage.setItem(DISMISS_KEY, "off"); } catch (e) {}
+        b.remove();
+      };
+      b.appendChild(close);
+
+      document.body.appendChild(b);
+    }
+
+    function run() { if (isIOS) { gate(); } else { bar(); } }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", run);
+    } else {
+      run();
+    }
+  })();
+</script>
