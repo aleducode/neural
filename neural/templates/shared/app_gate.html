@@ -32,6 +32,11 @@ quitar el enlace de salida.
   }
   .neural-gate__cta:active { transform: translateY(1px); }
   .neural-gate__hint { margin: 1.5rem 0 0; max-width: 20rem; font-size: .82rem; line-height: 1.45; color: #7c7c92; }
+  .neural-gate__second {
+    display: inline-block; margin-top: 1.1rem; padding: 12px 26px;
+    border: 1px solid rgba(255, 255, 255, .28); border-radius: 12px;
+    color: #e6e6ef; font-size: .95rem; font-weight: 600; text-decoration: none;
+  }
   .neural-gate__skip {
     margin-top: 2rem; padding: 6px; border: 0; background: none;
     color: #8a8aa0; font-size: .9rem; text-decoration: underline; cursor: pointer;
@@ -42,6 +47,7 @@ quitar el enlace de salida.
   (function () {
     var IOS_URL = "https://apps.apple.com/co/app/neural-consciente/id6756985459";
     var ANDROID_URL = "https://play.google.com/apps/testing/com.ducode.neural";
+    var ANDROID_STORE_URL = "https://play.google.com/store/apps/details?id=com.ducode.neural";
     var ICON = "/static/images/brain.png";
     var DISMISS_KEY = "neural_android_banner";
 
@@ -111,7 +117,13 @@ quitar el enlace de salida.
       g.appendChild(cta);
 
       g.appendChild(el("p", "neural-gate__hint",
-        "Dale a «Become a tester» y vuelve a la Play Store para descargarla."));
+        "Paso 1: dale a «Become a tester». Paso 2: descárgala de la Play Store."));
+
+      var store = el("a", "neural-gate__second", "Ya activé mi prueba &middot; Descargar");
+      store.href = ANDROID_STORE_URL;
+      store.target = "_blank";
+      store.rel = "noopener";
+      g.appendChild(store);
 
       var skip = el("button", "neural-gate__skip", "Seguir en la web por ahora");
       skip.type = "button";
