@@ -19,7 +19,9 @@ quitar el enlace de salida.
     color: #fff;
   }
   .neural-gate__icon {
-    width: 92px; height: 92px; margin-bottom: 1.25rem; border-radius: 22px;
+    /* brain.png es negro: sin fondo claro se pierde contra el degradado */
+    width: 92px; height: 92px; margin-bottom: 1.25rem; padding: 12px;
+    box-sizing: border-box; border-radius: 22px; background: #fff;
     box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
   }
   .neural-gate__brand { margin: 0; font-size: 1.05rem; letter-spacing: .18em; text-transform: uppercase; color: #f5a623; }
