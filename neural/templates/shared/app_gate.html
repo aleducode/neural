@@ -2,14 +2,14 @@
 Puerta de entrada a las apps nativas.
 
   iOS      -> bloquea la web y manda a la App Store (la app ya esta publicada).
-  Android  -> banner no bloqueante invitando a ser probador de la prueba cerrada.
+  Android  -> bloquea la web y manda a activar la prueba cerrada, con salida
+              para quien todavia no este autorizado como probador.
 
-Cuando Android salga a produccion: mover ANDROID_URL a la ficha de Play y
-cambiar android_blocking a true para que se comporte igual que iOS.
+Cuando Android salga a produccion: apuntar ANDROID_URL a la ficha de Play y
+quitar el enlace de salida.
 {% endcomment %}
 <style>
-  .neural-gate,
-  .neural-gate-bar { font-family: "SUSE", "Open Sans", -apple-system, system-ui, sans-serif; }
+  .neural-gate { font-family: "SUSE", "Open Sans", -apple-system, system-ui, sans-serif; }
 
   .neural-gate {
     position: fixed; inset: 0; z-index: 999999;
@@ -31,26 +31,10 @@ cambiar android_blocking a true para que se comporte igual que iOS.
     text-decoration: none; box-shadow: 0 10px 26px rgba(245, 166, 35, .32);
   }
   .neural-gate__cta:active { transform: translateY(1px); }
-  .neural-gate__hint { margin: 1.5rem 0 0; font-size: .82rem; color: #7c7c92; }
-
-  .neural-gate-bar {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 99998;
-    display: flex; align-items: center; gap: 12px;
-    padding: 13px 15px calc(13px + env(safe-area-inset-bottom, 0px));
-    background: #1a1a2e; color: #fff; font-size: 14px;
-    box-shadow: 0 -2px 14px rgba(0, 0, 0, .35);
-  }
-  .neural-gate-bar__icon { width: 36px; height: 36px; border-radius: 9px; flex: none; }
-  .neural-gate-bar__body { flex: 1; line-height: 1.35; min-width: 0; }
-  .neural-gate-bar__body strong { color: #f5a623; }
-  .neural-gate-bar__body span { color: #b9b9c6; }
-  .neural-gate-bar__cta {
-    flex: none; padding: 10px 16px; border-radius: 10px;
-    background: #f5a623; color: #1a1a2e; font-weight: 700; text-decoration: none; white-space: nowrap;
-  }
-  .neural-gate-bar__close {
-    flex: none; padding: 0 4px; border: 0; background: none;
-    color: #6f6f85; font-size: 22px; line-height: 1; cursor: pointer;
+  .neural-gate__hint { margin: 1.5rem 0 0; max-width: 20rem; font-size: .82rem; line-height: 1.45; color: #7c7c92; }
+  .neural-gate__skip {
+    margin-top: 2rem; padding: 6px; border: 0; background: none;
+    color: #8a8aa0; font-size: .9rem; text-decoration: underline; cursor: pointer;
   }
 </style>
 
@@ -75,10 +59,17 @@ cambiar android_blocking a true para que se comporte igual que iOS.
       return n;
     }
 
-    function gate() {
+    function lock() {
       document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
+    }
 
+    function unlock() {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    }
+
+    function shell(text) {
       var g = el("div", "neural-gate");
       var icon = el("img", "neural-gate__icon");
       icon.src = ICON;
@@ -86,8 +77,13 @@ cambiar android_blocking a true para que se comporte igual que iOS.
       g.appendChild(icon);
       g.appendChild(el("p", "neural-gate__brand", "Neural"));
       g.appendChild(el("h1", "neural-gate__title", "Consciente"));
-      g.appendChild(el("p", "neural-gate__text",
-        "Agenda tus entrenos, sigue tu racha y conecta con la comunidad desde la app."));
+      g.appendChild(el("p", "neural-gate__text", text));
+      return g;
+    }
+
+    function iosGate() {
+      lock();
+      var g = shell("Agenda tus entrenos, sigue tu racha y conecta con la comunidad desde la app.");
 
       var cta = el("a", "neural-gate__cta", "Abrir en la App Store");
       cta.href = IOS_URL;
@@ -98,38 +94,38 @@ cambiar android_blocking a true para que se comporte igual que iOS.
       document.body.appendChild(g);
     }
 
-    function bar() {
+    function androidGate() {
+      // Android sigue en prueba cerrada, asi que quien todavia no este
+      // autorizado necesita poder volver a la web. La eleccion se recuerda.
       try {
         if (localStorage.getItem(DISMISS_KEY) === "off") return;
       } catch (e) {}
 
-      var b = el("div", "neural-gate-bar");
-      var icon = el("img", "neural-gate-bar__icon");
-      icon.src = ICON;
-      icon.alt = "";
-      b.appendChild(icon);
-      b.appendChild(el("div", "neural-gate-bar__body",
-        "<strong>Ya tenemos app para Android</strong><br><span>Ayúdanos a lanzarla: únete como probador.</span>"));
+      lock();
+      var g = shell("Ya tenemos app para Android y está en pruebas. Actívala con tu cuenta de Gmail y descárgala de la Play Store.");
 
-      var cta = el("a", "neural-gate-bar__cta", "Probar");
+      var cta = el("a", "neural-gate__cta", "Activar mi prueba");
       cta.href = ANDROID_URL;
       cta.target = "_blank";
       cta.rel = "noopener";
-      b.appendChild(cta);
+      g.appendChild(cta);
 
-      var close = el("button", "neural-gate-bar__close", "&times;");
-      close.type = "button";
-      close.setAttribute("aria-label", "Cerrar");
-      close.onclick = function () {
+      g.appendChild(el("p", "neural-gate__hint",
+        "Dale a «Become a tester» y vuelve a la Play Store para descargarla."));
+
+      var skip = el("button", "neural-gate__skip", "Seguir en la web por ahora");
+      skip.type = "button";
+      skip.onclick = function () {
         try { localStorage.setItem(DISMISS_KEY, "off"); } catch (e) {}
-        b.remove();
+        unlock();
+        g.remove();
       };
-      b.appendChild(close);
+      g.appendChild(skip);
 
-      document.body.appendChild(b);
+      document.body.appendChild(g);
     }
 
-    function run() { if (isIOS) { gate(); } else { bar(); } }
+    function run() { if (isIOS) { iosGate(); } else { androidGate(); } }
 
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", run);
