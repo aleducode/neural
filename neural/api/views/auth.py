@@ -113,7 +113,11 @@ class PasswordResetRequestView(APIView):
             form.save(
                 request=request,
                 use_https=request.is_secure(),
-                email_template_name="registration/password_reset_email.html",
+                # El .txt es el cuerpo de texto y el .html la parte rica. Antes
+                # iba el HTML como texto y sin parte HTML, asi que el correo
+                # llegaba con el markup crudo a la vista.
+                email_template_name="registration/password_reset_email.txt",
+                html_email_template_name="registration/password_reset_email.html",
             )
 
         # Always return success to prevent email enumeration
