@@ -53,4 +53,9 @@ class PasswordResetConfirmViewCustom(PasswordResetConfirmView):
 
 
 class PasswordResetCustomView(PasswordResetView):
-    html_email_template_name = PasswordResetView.email_template_name
+    # email_template_name es el cuerpo de TEXTO del correo. Apuntaba al mismo
+    # HTML que html_email_template_name, asi que la parte text/plain llegaba
+    # con el HTML crudo adentro: eso es lo que muestran Outlook y cualquier
+    # cliente que prefiera texto plano.
+    email_template_name = "registration/password_reset_email.txt"
+    html_email_template_name = "registration/password_reset_email.html"
