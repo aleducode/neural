@@ -569,10 +569,9 @@ class LeaderboardView(APIView):
                 # alguien que pidio no aparecer.
                 "next_up": (
                     {
-                        "name": (
-                            above.get_full_name().strip()
-                            or above.email.split("@")[0]
-                        ),
+                        # Sin nombre cargado va null, no el prefijo del correo:
+                        # eso pondria media direccion ajena en el muro de otro.
+                        "name": above.get_full_name().strip() or None,
                         "value": above.value,
                     }
                     if above
