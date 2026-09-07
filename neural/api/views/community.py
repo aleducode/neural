@@ -494,6 +494,15 @@ class LeaderboardView(APIView):
             return request.build_absolute_uri(profile.photo.url)
         return None
 
+    def _display_name(self, user):
+        """Nombre del socio, o None si nunca lo cargo.
+
+        Antes caia al prefijo del correo, que publicaba media direccion ajena
+        en la pantalla de otro socio. La app pinta las iniciales cuando esto
+        viene vacio.
+        """
+        return user.get_full_name().strip() or None
+
     def _initials(self, user):
         name = user.get_full_name().strip()
         parts = name.split()
@@ -545,7 +554,7 @@ class LeaderboardView(APIView):
                 {
                     "position": index + 1,
                     "user_id": user.id,
-                    "name": user.get_full_name().strip() or user.email.split("@")[0],
+                    "name": self._display_name(user),
                     "photo_url": self._photo_url(request, user),
                     "initials": self._initials(user),
                     "value": user.value,
@@ -569,9 +578,7 @@ class LeaderboardView(APIView):
                 # alguien que pidio no aparecer.
                 "next_up": (
                     {
-                        # Sin nombre cargado va null, no el prefijo del correo:
-                        # eso pondria media direccion ajena en el muro de otro.
-                        "name": above.get_full_name().strip() or None,
+                        "name": self._display_name(above),
                         "value": above.value,
                     }
                     if above
