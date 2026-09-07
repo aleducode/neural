@@ -556,13 +556,28 @@ class LeaderboardView(APIView):
         for index, user in enumerate(ranked):
             if user.id != request.user.id:
                 continue
+            above = ranked[index - 1] if index else None
             me = {
                 "position": index + 1,
                 "value": user.value,
                 # Diferencia con quien esta justo arriba, para que concuerde
                 # con la posicion. Puede ser 0: mismo valor, y solo los separa
                 # el desempate por nombre.
-                "to_next": (values[index - 1] - user.value) if index else None,
+                "to_next": (above.value - user.value) if above else None,
+                # Quien esta justo arriba. Sale de `ranked`, que ya excluye a
+                # quienes se ocultaron del ranking, asi que no puede filtrar a
+                # alguien que pidio no aparecer.
+                "next_up": (
+                    {
+                        "name": (
+                            above.get_full_name().strip()
+                            or above.email.split("@")[0]
+                        ),
+                        "value": above.value,
+                    }
+                    if above
+                    else None
+                ),
             }
             break
 
