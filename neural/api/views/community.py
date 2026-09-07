@@ -535,18 +535,15 @@ class LeaderboardView(APIView):
         # Desempate estable por nombre para que no salte entre refrescos.
         ranked = list(users.order_by("-value", "first_name", "last_name", "id"))
 
+        # Posiciones unicas y consecutivas: dos socios con el mismo valor
+        # quedan en puestos distintos, separados por el desempate de arriba.
         values = [u.value for u in ranked]
-
-        def position_of(index):
-            """Ranking de competencia: a igual valor, igual posicion."""
-            value = values[index]
-            return sum(1 for v in values if v > value) + 1
 
         entries = []
         for index, user in enumerate(ranked[:limit]):
             entries.append(
                 {
-                    "position": position_of(index),
+                    "position": index + 1,
                     "user_id": user.id,
                     "name": user.get_full_name().strip() or user.email.split("@")[0],
                     "photo_url": self._photo_url(request, user),
@@ -559,13 +556,13 @@ class LeaderboardView(APIView):
         for index, user in enumerate(ranked):
             if user.id != request.user.id:
                 continue
-            my_value = user.value
-            better = [v for v in values if v > my_value]
             me = {
-                "position": position_of(index),
-                "value": my_value,
-                # Cuanto falta para alcanzar el valor inmediatamente superior.
-                "to_next": (min(better) - my_value) if better else None,
+                "position": index + 1,
+                "value": user.value,
+                # Diferencia con quien esta justo arriba, para que concuerde
+                # con la posicion. Puede ser 0: mismo valor, y solo los separa
+                # el desempate por nombre.
+                "to_next": (values[index - 1] - user.value) if index else None,
             }
             break
 
