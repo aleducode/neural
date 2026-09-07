@@ -23,6 +23,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "emergency_contact_phone",
             "profession",
             "instagram",
+            "hide_from_leaderboard",
         ]
         read_only_fields = ["id", "age"]
 
@@ -50,6 +51,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             "emergency_contact_phone",
             "profession",
             "instagram",
+            "hide_from_leaderboard",
         ]
 
 

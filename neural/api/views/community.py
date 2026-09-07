@@ -522,9 +522,14 @@ class LeaderboardView(APIView):
         # is_client no alcanza para separar socios: las cuentas internas
         # (neuralconsciente@gmail.com y otras dos) lo tienen en True y se
         # colaban de primeras en el ranking.
-        users = User.objects.filter(
-            is_active=True, is_verified=True, is_client=True, is_staff=False
-        ).select_related("profile")
+        users = (
+            User.objects.filter(
+                is_active=True, is_verified=True, is_client=True, is_staff=False
+            )
+            # exclude() y no filter(): quien no tiene Profile sigue entrando.
+            .exclude(profile__hide_from_leaderboard=True)
+            .select_related("profile")
+        )
         users = self._annotate(users, metric, start, end)
 
         # Desempate estable por nombre para que no salte entre refrescos.

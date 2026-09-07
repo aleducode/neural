@@ -193,6 +193,14 @@ class Profile(NeuralBaseModel):
     emergency_contact_phone = models.CharField(max_length=500, blank=True, null=True)
     profession = models.CharField(max_length=500, blank=True, null=True)
     instagram = models.CharField(max_length=500, blank=True, null=True)
+    hide_from_leaderboard = models.BooleanField(
+        "Ocultar del ranking",
+        default=False,
+        help_text=(
+            "Saca al socio del ranking de comunidad. No solo lo esconde: deja "
+            "de contar para las posiciones de los demás."
+        ),
+    )
 
     def __str__(self):
         return "Profile of {}".format(self.user)
