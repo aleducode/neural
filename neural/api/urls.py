@@ -9,6 +9,11 @@ from neural.api.views.auth import (
     PasswordResetRequestView,
     RegisterView,
 )
+from neural.api.views.password_reset import (
+    PasswordResetRequestView as PasswordResetCodeView,
+    PasswordResetVerifyView,
+    PasswordResetConfirmView,
+)
 from neural.api.views.dashboard import DashboardView
 from neural.api.views.membership import (
     CreatePaymentView,
@@ -58,6 +63,24 @@ urlpatterns = [
         "auth/password-reset/",
         PasswordResetRequestView.as_view(),
         name="password_reset",
+    ),
+    # Flujo por codigo de 6 digitos, para la app. La ruta de arriba sigue
+    # mandando el link: los binarios viejos de la prueba cerrada dependen de
+    # el y un codigo los dejaria sin donde ponerlo.
+    path(
+        "auth/password-reset/code/",
+        PasswordResetCodeView.as_view(),
+        name="password_reset_code",
+    ),
+    path(
+        "auth/password-reset/verify/",
+        PasswordResetVerifyView.as_view(),
+        name="password_reset_verify",
+    ),
+    path(
+        "auth/password-reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="password_reset_confirm_code",
     ),
     path("auth/me/", MeView.as_view(), name="me"),
     # Dashboard

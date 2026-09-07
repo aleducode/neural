@@ -343,6 +343,55 @@ class UserPaymentReference(NeuralBaseModel):
         return f"{self.user} - {self.reference} - {self.amount}"
 
 
+class PasswordResetCode(NeuralBaseModel):
+    """Código de un solo uso para recuperar la contraseña desde la app.
+
+    El link por correo obliga a salir al navegador y volver, y la app no tiene
+    deep links, así que el usuario quedaba varado en el navegador. Con el
+    código se resuelve todo adentro de la app.
+
+    El código y el token se guardan hasheados: si alguien lee la base no puede
+    tomar cuentas prestadas.
+    """
+
+    CODE_TTL = timedelta(minutes=10)
+    TOKEN_TTL = timedelta(minutes=10)
+    MAX_ATTEMPTS = 5
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="reset_codes"
+    )
+    code_hash = models.CharField(max_length=128)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    used_at = models.DateTimeField(blank=True, null=True)
+
+    # Se llenan al verificar el código: el token es lo único que autoriza el
+    # cambio de contraseña, y muere al usarse.
+    token_hash = models.CharField(max_length=128, blank=True, default="")
+    token_expires_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Código de recuperación"
+        verbose_name_plural = "Códigos de recuperación"
+        ordering = ["-created"]
+
+    def __str__(self):
+        return f"{self.user} - {self.created}"
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.expires_at
+
+    @property
+    def is_burned(self):
+        return self.attempts >= self.MAX_ATTEMPTS
+
+    @property
+    def is_usable(self):
+        return not (self.used_at or self.is_expired or self.is_burned)
+
+
 class Device(NeuralBaseModel):
     """Device model for push notifications."""
 
