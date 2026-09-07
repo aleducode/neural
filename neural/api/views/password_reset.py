@@ -173,8 +173,14 @@ class PasswordResetVerifyView(APIView):
                     {"detail": "Demasiados intentos. Pedí un código nuevo."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            # Los intentos van dentro del texto porque el cliente descarta los
+            # campos sueltos de un 400 y solo conserva detail y errors.
+            plural = "intento" if restantes == 1 else "intentos"
             return Response(
-                {"detail": "El código no es correcto", "attempts_left": restantes},
+                {
+                    "detail": f"El código no es correcto. Te queda{'' if restantes == 1 else 'n'} {restantes} {plural}.",
+                    "attempts_left": restantes,
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
