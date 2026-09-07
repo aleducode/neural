@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from neural.community.models import Post, Reaction, Comment
 from neural.users.models import User, Profile, UserStrike
@@ -431,3 +432,147 @@ class UserPublicProfileView(APIView):
         }
 
         return Response(data)
+
+
+class LeaderboardView(APIView):
+    """Ranking de la comunidad por entrenamientos, racha o publicaciones."""
+
+    permission_classes = [IsAuthenticated]
+
+    METRICS = ("trainings", "strike", "posts")
+    PERIODS = ("week", "month", "all")
+    MAX_ENTRIES = 100
+
+    def _period_range(self, period):
+        """Rango de fechas del periodo.
+
+        La semana es la ISO (lunes a domingo), la misma que usan UserStats y
+        UserStrike, para que el ranking no contradiga a la racha.
+        """
+        from datetime import timedelta
+
+        today = timezone.localdate()
+        if period == "week":
+            start = today - timedelta(days=today.weekday())
+            return start, start + timedelta(days=6)
+        if period == "month":
+            start = today.replace(day=1)
+            next_month = (start + timedelta(days=32)).replace(day=1)
+            return start, next_month - timedelta(days=1)
+        return None, None
+
+    def _annotate(self, users, metric, start, end):
+        from django.db.models import Count, Max, Q
+        from django.db.models.functions import Coalesce
+
+        from neural.training.models import UserTraining
+
+        if metric == "strike":
+            # La racha es un acumulado propio: el periodo no aplica.
+            return users.annotate(
+                value=Coalesce(
+                    Max("strikes__weeks", filter=Q(strikes__is_current=True)), 0
+                )
+            )
+
+        if metric == "posts":
+            condition = Q(posts__is_active=True)
+            if start:
+                condition &= Q(posts__created__date__gte=start, posts__created__date__lte=end)
+            return users.annotate(value=Count("posts", filter=condition, distinct=True))
+
+        condition = Q(trainings__status=UserTraining.Status.CONFIRMED)
+        if start:
+            condition &= Q(trainings__slot__date__gte=start, trainings__slot__date__lte=end)
+        return users.annotate(value=Count("trainings", filter=condition, distinct=True))
+
+    def _photo_url(self, request, user):
+        if user.photo:
+            return request.build_absolute_uri(user.photo.url)
+        profile = getattr(user, "profile", None)
+        if profile and profile.photo:
+            return request.build_absolute_uri(profile.photo.url)
+        return None
+
+    def _initials(self, user):
+        name = user.get_full_name().strip()
+        parts = name.split()
+        if len(parts) >= 2:
+            return f"{parts[0][0]}{parts[1][0]}".upper()
+        if name:
+            return name[:2].upper()
+        return user.email[:2].upper()
+
+    def get(self, request):
+        metric = request.query_params.get("metric", "trainings")
+        period = request.query_params.get("period", "week")
+        if metric not in self.METRICS:
+            metric = "trainings"
+        if period not in self.PERIODS:
+            period = "week"
+
+        try:
+            limit = min(int(request.query_params.get("limit", 25)), self.MAX_ENTRIES)
+        except (TypeError, ValueError):
+            limit = 25
+        limit = max(limit, 1)
+
+        start, end = self._period_range(period)
+
+        # is_client no alcanza para separar socios: las cuentas internas
+        # (neuralconsciente@gmail.com y otras dos) lo tienen en True y se
+        # colaban de primeras en el ranking.
+        users = User.objects.filter(
+            is_active=True, is_verified=True, is_client=True, is_staff=False
+        ).select_related("profile")
+        users = self._annotate(users, metric, start, end)
+
+        # Desempate estable por nombre para que no salte entre refrescos.
+        ranked = list(users.order_by("-value", "first_name", "last_name", "id"))
+
+        values = [u.value for u in ranked]
+
+        def position_of(index):
+            """Ranking de competencia: a igual valor, igual posicion."""
+            value = values[index]
+            return sum(1 for v in values if v > value) + 1
+
+        entries = []
+        for index, user in enumerate(ranked[:limit]):
+            entries.append(
+                {
+                    "position": position_of(index),
+                    "user_id": user.id,
+                    "name": user.get_full_name().strip() or user.email.split("@")[0],
+                    "photo_url": self._photo_url(request, user),
+                    "initials": self._initials(user),
+                    "value": user.value,
+                }
+            )
+
+        me = None
+        for index, user in enumerate(ranked):
+            if user.id != request.user.id:
+                continue
+            my_value = user.value
+            better = [v for v in values if v > my_value]
+            me = {
+                "position": position_of(index),
+                "value": my_value,
+                # Cuanto falta para alcanzar el valor inmediatamente superior.
+                "to_next": (min(better) - my_value) if better else None,
+            }
+            break
+
+        return Response(
+            {
+                "period": {
+                    "start": start.isoformat() if start else None,
+                    "end": end.isoformat() if end else None,
+                },
+                "metric": metric,
+                "me": me,
+                "entries": entries,
+                "total": len(ranked),
+            }
+        )
