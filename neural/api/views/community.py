@@ -46,6 +46,21 @@ def display_name(user):
     return user.get_full_name().strip() or None
 
 
+def initials(user):
+    """Dos letras para el avatar. Sin nombre cargado salen del correo.
+
+    Dos letras no reconstruyen una direccion, y son estables para esa persona,
+    asi que el socio se ve igual en el ranking y en su perfil.
+    """
+    name = user.get_full_name().strip()
+    parts = name.split()
+    if len(parts) >= 2:
+        return f"{parts[0][0]}{parts[1][0]}".upper()
+    if name:
+        return name[:2].upper()
+    return user.email[:2].upper()
+
+
 class FeedView(APIView):
     """Get community feed with pagination."""
 
@@ -424,6 +439,7 @@ class UserPublicProfileView(APIView):
         data = {
             "id": user.id,
             "name": display_name(user),
+            "initials": initials(user),
             "first_name": user.first_name,
             "last_name": user.last_name,
             "photo_url": photo_url,
@@ -503,15 +519,6 @@ class LeaderboardView(APIView):
             return request.build_absolute_uri(profile.photo.url)
         return None
 
-    def _initials(self, user):
-        name = user.get_full_name().strip()
-        parts = name.split()
-        if len(parts) >= 2:
-            return f"{parts[0][0]}{parts[1][0]}".upper()
-        if name:
-            return name[:2].upper()
-        return user.email[:2].upper()
-
     def get(self, request):
         metric = request.query_params.get("metric", "trainings")
         period = request.query_params.get("period", "week")
@@ -556,7 +563,7 @@ class LeaderboardView(APIView):
                     "user_id": user.id,
                     "name": display_name(user),
                     "photo_url": self._photo_url(request, user),
-                    "initials": self._initials(user),
+                    "initials": initials(user),
                     "value": user.value,
                 }
             )
