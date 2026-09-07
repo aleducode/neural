@@ -10,6 +10,7 @@ pedir uno nuevo mata al anterior.
 
 import hashlib
 import secrets
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
@@ -148,6 +149,24 @@ class PasswordResetVerifyView(APIView):
         if not check_password(code, entry.code_hash):
             entry.attempts += 1
             entry.save(update_fields=["attempts", "modified"])
+
+            # La pantalla tiene boton de reenvio, asi que el usuario suele
+            # tener dos correos y probar el primero. Decirle que se equivoco
+            # al escribir lo manda a revisar el teclado en vez del correo.
+            reemplazado = any(
+                check_password(code, viejo.code_hash)
+                for viejo in user.reset_codes.filter(
+                    used_at__isnull=False,
+                    created__gte=timezone.now() - timedelta(hours=1),
+                )[:5]
+            )
+            if reemplazado:
+                return Response(
+                    {"detail": "Ese código quedó viejo porque pediste otro. "
+                               "Usá el del último correo."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             restantes = PasswordResetCode.MAX_ATTEMPTS - entry.attempts
             if restantes <= 0:
                 return Response(
