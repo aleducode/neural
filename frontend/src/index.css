@@ -141,3 +141,13 @@
     letter-spacing: 0;
   }
 }
+
+/* Fuera de @layer y con la misma especificidad que la regla heredada: el
+   manager.css del panel viejo fija `body.manager-body { color: var(--text-primary) }`
+   con variables que no tienen version oscura. Todo lo que hereda el color --un
+   <input> de shadcn, por ejemplo, que es `color: inherit`-- se pintaba oscuro
+   sobre fondo oscuro, y el texto quedaba invisible al escribir. */
+body.manager-body,
+body {
+  color: hsl(var(--foreground));
+}
