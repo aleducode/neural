@@ -277,3 +277,10 @@ neural/media/
 .env
 .envs/*
 !.envs/.local/
+.agents/
+
+# Volcados del .pen: son derivados, se regeneran con el skill pen-to-manager
+docs/design/dump/
+
+# Capturas de verificacion de Playwright
+.playwright-mcp/
