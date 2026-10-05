@@ -40,6 +40,10 @@ from neural.api.views.notifications import (
     NotificationCountView,
     SendNotificationView,
 )
+from neural.api.views.videos import (
+    MyPackagesView,
+    VideoProgressView,
+)
 from neural.api.views.community import (
     FeedView,
     PostListCreateView,
@@ -93,6 +97,9 @@ urlpatterns = [
     path("training/cancel/", CancelView.as_view(), name="cancel"),
     path("training/my-trainings/", MyTrainingsView.as_view(), name="my_trainings"),
     path("training/types/", TrainingTypesView.as_view(), name="training_types"),
+    # Videos
+    path("videos/packages/", MyPackagesView.as_view(), name="my_video_packages"),
+    path("videos/progress/", VideoProgressView.as_view(), name="video_progress"),
     # Membership
     path("membership/", MembershipView.as_view(), name="membership"),
     path(

@@ -323,3 +323,17 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # BOLD
 BOLD_KEY = env("BOLD_KEY", default="mA6B-yZMWWEjM5Y5UJxiUz5vMx4MIBkORAh3_zk0o_k")
 BOLD_SECRET = env("BOLD_SECRET", default="B24ZRXiazgcgsr2T_30fKQ")
+
+# CLOUDFLARE STREAM
+# ------------------------------------------------------------------------------
+# Account id and subdomain are not secrets --they travel in every playback
+# URL-- so they ship with a default. The token is a credential: without it,
+# the panel falls back to uploading to our own storage.
+CLOUDFLARE_ACCOUNT_ID = env(
+    "CLOUDFLARE_ACCOUNT_ID", default="0288f162d220397c4fbbe3cd214c266f"
+)
+CLOUDFLARE_STREAM_SUBDOMAIN = env(
+    "CLOUDFLARE_STREAM_SUBDOMAIN",
+    default="customer-rt5q8wj7jqrniyze.cloudflarestream.com",
+)
+CLOUDFLARE_STREAM_TOKEN = env("CLOUDFLARE_STREAM_TOKEN", default="")
