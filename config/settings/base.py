@@ -324,6 +324,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 BOLD_KEY = env("BOLD_KEY", default="mA6B-yZMWWEjM5Y5UJxiUz5vMx4MIBkORAh3_zk0o_k")
 BOLD_SECRET = env("BOLD_SECRET", default="B24ZRXiazgcgsr2T_30fKQ")
 
+# RESERVAS
+# ------------------------------------------------------------------------------
+# Reservar nunca valido la membresia. Encenderlo deja fuera a quien no tenga
+# plan vigente --46 personas el dia que se midio--, asi que se enciende a
+# proposito y despues de regularizarlas: `manage.py membership_debt` las lista.
+ENFORCE_MEMBERSHIP_ON_BOOKING = env.bool("ENFORCE_MEMBERSHIP_ON_BOOKING", default=False)
+
 # CLOUDFLARE STREAM
 # ------------------------------------------------------------------------------
 # Account id and subdomain are not secrets --they travel in every playback

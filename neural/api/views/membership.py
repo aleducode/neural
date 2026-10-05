@@ -5,6 +5,7 @@ import random
 import string
 
 from django.conf import settings
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -14,6 +15,7 @@ from neural.api.serializers.membership import (
     NeuralPlanSerializer,
     UserMembershipSerializer,
 )
+from neural.training.rules import membership_summary
 from neural.users.models import NeuralPlan, UserMembership, UserPaymentReference
 
 
@@ -42,6 +44,9 @@ class MembershipView(APIView):
             {
                 "current_membership": current_membership,
                 "available_plans": NeuralPlanSerializer(plans, many=True).data,
+                # Lo que la app muestra tal cual: hasta cuando vale el plan y,
+                # si es tiquetera, cuantas sesiones quedan por agendar.
+                "summary": membership_summary(user, timezone.localdate()),
             }
         )
 

@@ -873,6 +873,21 @@ def _iso_weeks(today, count):
     return list(reversed(weeks))
 
 
+def plan_choices():
+    """Los planes que recepción puede activar, con lo que el panel necesita
+    mostrar antes de confirmar: cuánto dura y cuántas sesiones trae."""
+    return [
+        {
+            "value": str(p.pk),
+            "label": p.name,
+            "days": p.duration,
+            "sessions": p.sessions,
+            "price": f"$ {_money(p.price):,}".replace(",", ".") if p.price else None,
+        }
+        for p in NeuralPlan.objects.order_by("sessions", "duration")
+    ]
+
+
 def member_detail(user_id, today):
     """«41. Member - Detail 360»: everything Neural knows about a member."""
     user = (
@@ -1071,6 +1086,10 @@ def member_detail(user_id, today):
             "total": duration,
             "status": state,
             "tone": tone,
+            "isTicketPack": bool(membership and membership.sessions_total),
+            "sessionsTotal": membership.sessions_total if membership else 0,
+            "sessionsUsed": membership.sessions_used if membership else 0,
+            "sessionsLeft": membership.sessions_left if membership else None,
         },
         "weekly": weekly,
         "weeklyTotal": sum(w["value"] for w in weekly),

@@ -44,6 +44,7 @@ from neural.services.push_notifications import (
 from neural.users.display import display_name, initials, photo_url
 from neural.manager import metrics
 from neural.manager.forms import (
+    ActivatePlanForm,
     VideoForm,
     VideoPackageForm,
     AssignmentForm,
@@ -357,10 +358,28 @@ class MemberDetailView(DetailBase):
             "packageDetailUrl": str(
                 reverse("manager:package_detail", kwargs={"pk": 0})
             ),
+            "planChoices": metrics.plan_choices(),
         }
 
     def post(self, request, *args, **kwargs):
+        """La ficha y la activacion de plan comparten pantalla, asi que comparten
+        endpoint: las separa el campo `action`."""
         member = self.get_object()
+
+        if request.POST.get("action") == "activate-plan":
+            form = ActivatePlanForm(request.POST)
+            if form.is_valid():
+                membresia = form.save(member)
+                messages.success(
+                    request,
+                    f"{membresia.plan.name} activado hasta el "
+                    f"{date_format(membresia.expiration_date, 'j \\d\\e F \\d\\e Y')}.",
+                )
+                return redirect("manager:user_detail", pk=member.pk)
+            return self.render_to_response(
+                self.get_context_data(obj=member, errors=form.errors.get_json_data())
+            )
+
         form = MemberProfileForm(request.POST, instance_pk=member.pk)
         if form.is_valid():
             form.save(member)

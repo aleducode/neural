@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import {
   ArrowLeft,
@@ -23,6 +23,7 @@ import {
   DetailHero,
   FormFooter,
   KeyValue,
+  SelectField,
   TextField,
   WeekBars,
   type Tone,
@@ -58,7 +59,12 @@ type Props = {
   kpis: Kpi[];
   form: Record<string, string | number | boolean>;
   age: string | null;
+  planChoices: { value: string; label: string; days: number; sessions: number; price: string | null }[];
   membership: {
+    isTicketPack: boolean;
+    sessionsTotal: number;
+    sessionsUsed: number;
+    sessionsLeft: number | null;
     plan: string | null;
     type: string | null;
     price: string | null;
@@ -111,6 +117,7 @@ export default function MemberDetail({
   form,
   age,
   membership,
+  planChoices,
   weekly,
   weeklyTotal,
   activity,
@@ -320,7 +327,48 @@ export default function MemberDetail({
                 <dl className="flex flex-col gap-2">
                   <KeyValue term="Inicio">{membership.start ?? "—"}</KeyValue>
                   <KeyValue term="Vence">{membership.end ?? "—"}</KeyValue>
+                  {membership.isTicketPack && (
+                    <KeyValue term="Sesiones">
+                      {membership.sessionsLeft} de {membership.sessionsTotal} sin usar
+                    </KeyValue>
+                  )}
                 </dl>
+
+                {membership.isTicketPack && (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span
+                        className={
+                          membership.sessionsLeft === 0
+                            ? "font-medium text-warning"
+                            : "text-muted-foreground"
+                        }
+                      >
+                        {membership.sessionsLeft === 0
+                          ? "Ya usó todas sus sesiones"
+                          : `${membership.sessionsLeft} ${membership.sessionsLeft === 1 ? "sesión" : "sesiones"} por agendar`}
+                      </span>
+                      <span className="tabular-nums text-faint">
+                        {membership.sessionsUsed} de {membership.sessionsTotal}
+                      </span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-accent">
+                      <div
+                        className={
+                          membership.sessionsLeft === 0
+                            ? "h-full rounded-full bg-[hsl(var(--warning))]"
+                            : "h-full rounded-full bg-primary"
+                        }
+                        style={{
+                          width: `${Math.max(
+                            Math.round((membership.sessionsUsed / Math.max(membership.sessionsTotal, 1)) * 100),
+                            2,
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
                 {progress !== null && membership.daysLeft !== null && (
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between text-xs">
@@ -353,6 +401,8 @@ export default function MemberDetail({
             ) : (
               <EmptyCard icon={<BadgeCheck />} title="Sin membresía activa" detail="No tiene ninguna membresía vigente." />
             )}
+
+            <ActivarPlan planes={planChoices} csrfToken={csrfToken} />
           </Widget>
 
           <Widget>
@@ -502,5 +552,84 @@ function EmptyCard({ icon, title, detail }: { icon: ReactNode; title: string; de
         <EmptyDescription>{detail}</EmptyDescription>
       </EmptyHeader>
     </Empty>
+  );
+}
+
+
+/**
+ * Activar un plan a quien pagó por fuera de la app.
+ *
+ * La fecha de vencimiento no se escribe: se calcula y se muestra antes de
+ * confirmar. Escribirla a mano es lo que dejó 139 membresías con una duración
+ * que no corresponde a su plan.
+ */
+function ActivarPlan({
+  planes,
+  csrfToken,
+}: {
+  planes: { value: string; label: string; days: number; sessions: number; price: string | null }[];
+  csrfToken: string;
+}) {
+  const [planId, setPlanId] = useState(planes[0]?.value ?? "");
+  const [desde, setDesde] = useState(() => new Date().toISOString().slice(0, 10));
+  const plan = planes.find((p) => p.value === planId);
+
+  const vence = (() => {
+    if (!plan || !desde) return null;
+    const d = new Date(`${desde}T00:00:00`);
+    if (Number.isNaN(d.getTime())) return null;
+    d.setDate(d.getDate() + plan.days);
+    return d.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
+  })();
+
+  if (!planes.length) return null;
+
+  return (
+    <form method="post" className="flex flex-col gap-3 border-t border-border p-5">
+      <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+      <input type="hidden" name="action" value="activate-plan" />
+
+      <p className="text-sm font-medium text-foreground">Activar un plan</p>
+      <p className="-mt-2 text-xs text-muted-foreground">
+        Para quien pagó en recepción. La fecha de vencimiento la pone el sistema.
+      </p>
+
+      <SelectField
+        name="plan"
+        label="Plan"
+        defaultValue={planId}
+        onChange={setPlanId}
+        options={planes.map((p) => ({
+          value: p.value,
+          label: p.sessions ? `${p.label} — ${p.sessions} sesiones` : p.label,
+        }))}
+      />
+
+      <TextField
+        name="init_date"
+        label="Desde"
+        type="date"
+        defaultValue={desde}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDesde(event.target.value)}
+      />
+
+      {plan && vence && (
+        <p className="rounded-md border border-border bg-secondary px-3 py-2 text-xs text-muted-foreground">
+          Vence el <span className="font-medium text-foreground">{vence}</span>
+          {" "}({plan.days} días)
+          {plan.sessions > 0 && (
+            <>
+              {" · "}
+              <span className="font-medium text-foreground">{plan.sessions} sesiones</span>
+              {" para agendar"}
+            </>
+          )}
+        </p>
+      )}
+
+      <Button type="submit" size="sm" className="self-end">
+        Activar plan
+      </Button>
+    </form>
   );
 }

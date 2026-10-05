@@ -1,9 +1,18 @@
 """Manager app forms."""
 
+from datetime import timedelta
+
 from django import forms
 from django.contrib.auth import authenticate
+from django.utils import timezone
 
-from neural.users.models import User, PushNotification, Device, Profile
+from neural.users.models import (
+    User,
+    PushNotification,
+    Device,
+    NeuralPlan,
+    Profile,
+)
 from neural.training.models import (
     Classes,
     PackageAssignment,
@@ -341,3 +350,50 @@ class AssignmentForm(forms.Form):
         return [
             PackageAssignment.objects.get_or_create(package=package, everyone=True)[0]
         ]
+
+
+class ActivatePlanForm(forms.Form):
+    """Activar un plan a un usuario que pagó por fuera de la app.
+
+    La fecha de vencimiento no se escribe: sale del plan. Se pedía a mano y se
+    erraba --139 de 513 membresías no coinciden con la duración de su plan, hay
+    mensualidades de 7 días y otras de 365--.
+    """
+
+    plan = forms.IntegerField()
+    init_date = forms.DateField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._plan = None
+
+    def clean_plan(self):
+        # El id viaja desde el navegador: se resuelve contra la base, no se
+        # confia en el.
+        pk = self.cleaned_data["plan"]
+        self._plan = NeuralPlan.objects.filter(pk=pk).first()
+        if self._plan is None:
+            raise forms.ValidationError("Ese plan no existe.")
+        return pk
+
+    def clean_init_date(self):
+        return self.cleaned_data.get("init_date") or timezone.localdate()
+
+    def save(self, member):
+        plan = self._plan
+        inicio = self.cleaned_data["init_date"]
+
+        # Se desactiva lo anterior: dos membresias activas a la vez hacen que
+        # "hasta cuando tiene" dependa de cual lea cada pantalla.
+        member.memberships.filter(is_active=True).update(is_active=False)
+
+        membresia, _ = member.memberships.update_or_create(
+            plan=plan,
+            init_date=inicio,
+            defaults={
+                "is_active": True,
+                "expiration_date": inicio + timedelta(days=plan.duration),
+                "sessions_total": plan.sessions,
+            },
+        )
+        return membresia

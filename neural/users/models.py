@@ -72,6 +72,15 @@ class NeuralPlan(NeuralBaseModel):
     description = models.CharField(max_length=500)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     duration = models.PositiveIntegerField(default=30)
+    sessions = models.PositiveIntegerField(
+        "Sesiones incluidas",
+        default=0,
+        help_text="0 = plan por tiempo, sin tope de reservas. Mayor que 0 = tiquetera.",
+    )
+
+    @property
+    def is_ticket_pack(self):
+        return self.sessions > 0
 
     def __str__(self):
         return self.name
@@ -94,6 +103,20 @@ class UserMembership(NeuralBaseModel):
         MENSUAL = "MENSUAL", "Mensualidad"
         QUARTER = "QUARTER", "Trimestre"
         SEMESTER = "SEMESTER", "Semestre"
+        TICKETS = "TICKETS", "Tiquetera"
+
+    # Los tres planes historicos tienen un tipo propio; cualquier otro plan
+    # --las tiqueteras-- cae en TICKETS.
+    PLAN_BY_TYPE = {
+        "MENSUAL": "Mensualidad",
+        "QUARTER": "Trimestre",
+        "SEMESTER": "Semestre",
+    }
+    TYPE_BY_PLAN = {
+        "Mensualidad": "MENSUAL",
+        "Trimestre": "QUARTER",
+        "Semestre": "SEMESTER",
+    }
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="memberships")
     membership_type = models.CharField(
@@ -121,10 +144,54 @@ class UserMembership(NeuralBaseModel):
         null=True,
     )
 
+    sessions_total = models.PositiveIntegerField(
+        "Sesiones compradas",
+        default=0,
+        help_text="Copia del plan al activarlo. 0 = plan por tiempo.",
+    )
+
     @property
     def days_left(self):
         date_now = timezone.localdate()
         return (self.expiration_date - date_now).days + 1
+
+    @property
+    def is_ticket_pack(self):
+        return self.sessions_total > 0
+
+    @property
+    def sessions_used(self):
+        """Reservas que consumieron una sesion de esta tiquetera.
+
+        Se cuenta en vez de llevar un contador: una reserva cancelada devuelve
+        la sesion sola, sin un decremento que se pueda perder a mitad de camino.
+        """
+        if not self.sessions_total:
+            return 0
+        from neural.training.models import UserTraining
+
+        reservas = UserTraining.objects.filter(
+            user_id=self.user_id,
+            slot__date__gte=self.init_date,
+            status__in=(UserTraining.Status.CONFIRMED, UserTraining.Status.DONE),
+        )
+        if self.expiration_date:
+            reservas = reservas.filter(slot__date__lte=self.expiration_date)
+        return reservas.count()
+
+    @property
+    def sessions_left(self):
+        if not self.sessions_total:
+            return None
+        return max(0, self.sessions_total - self.sessions_used)
+
+    def is_valid_on(self, day):
+        """Si esta membresia cubre ese dia. No mira las sesiones."""
+        if not self.is_active or not self.init_date:
+            return False
+        if self.init_date > day:
+            return False
+        return self.expiration_date is None or self.expiration_date >= day
 
     def save(self, *args, **kwargs):
         # Reset cache membership
@@ -132,14 +199,20 @@ class UserMembership(NeuralBaseModel):
         cache_key = f"user_membership_{self.user.id}_{now.date()}"
         # Reset cache membership
         cache.delete(cache_key)
-        dict_plans = {
-            "MENSUAL": "Mensualidad",
-            "QUARTER": "Trimestre",
-            "SEMESTER": "Semestre",
-        }
-        self.plan = NeuralPlan.objects.filter(
-            name=dict_plans.get(self.membership_type)
-        ).last()
+        # Antes esto reescribia el plan a partir de membership_type en cada
+        # guardado. apply_membership() nunca fija membership_type, asi que toda
+        # compra de Trimestre o Semestre quedaba registrada como Mensualidad:
+        # 34 "mensualidades" de produccion duran 60 dias o mas, tres de ellas
+        # 365. Ahora manda el plan cuando viene, y el tipo se deduce de el; sin
+        # plan se conserva el camino viejo.
+        if self.plan_id:
+            self.membership_type = self.TYPE_BY_PLAN.get(
+                self.plan.name, self.MembershipType.TICKETS
+            )
+        else:
+            self.plan = NeuralPlan.objects.filter(
+                name=self.PLAN_BY_TYPE.get(self.membership_type)
+            ).last()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -332,6 +405,7 @@ class UserPaymentReference(NeuralBaseModel):
                 "is_active": True,
                 "expiration_date": timezone.localdate()
                 + timedelta(days=self.plan.duration),
+                "sessions_total": self.plan.sessions,
             },
         )
 

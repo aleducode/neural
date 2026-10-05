@@ -13,7 +13,9 @@ from neural.api.serializers.training import (
     SlotSerializer,
     UserTrainingSerializer,
 )
+from neural.training import rules as booking_rules
 from neural.training.models import Slot, TrainingType, UserTraining
+from neural.training.rules import check_booking
 from neural.users.models import UserStats, UserStrike
 
 
@@ -228,6 +230,16 @@ class BookView(APIView):
             return Response(
                 {"error": "Ya tienes una reserva para este día"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # La membresia: vigencia y, si es tiquetera, sesiones que le quedan.
+        # Solo bloquea cuando el control esta encendido; apagado, la regla se
+        # evalua igual para poder medirla sin dejar a nadie afuera.
+        puede, motivo = check_booking(user, slot.date)
+        if not puede and booking_rules.enforced():
+            return Response(
+                {"error": motivo},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         # Check availability
