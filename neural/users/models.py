@@ -33,8 +33,11 @@ class User(NeuralBaseModel, AbstractUser):
         regex=r"\+?1?\d{9,15}$",
         message="phone number must be entered in the format +99999999999",
     )
+    # Nulo y no cadena vacia: la columna es unica, asi que un "" solo cabe en
+    # una cuenta. Guardar la ficha de un segundo usuario sin telefono reventaba
+    # con IntegrityError. En Postgres varios NULL no chocan entre si.
     phone_number = models.CharField(
-        validators=[phone_regex], max_length=17, unique=True
+        validators=[phone_regex], max_length=17, unique=True, blank=True, null=True
     )
 
     photo = models.ImageField(

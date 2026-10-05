@@ -196,7 +196,8 @@ class MemberProfileForm(forms.Form):
         # IntegrityError instead of saying what the problem is.
         phone = (self.cleaned_data.get("phone_number") or "").strip()
         if not phone:
-            return ""
+            # None y no "": la columna es unica y el "" ya esta tomado.
+            return None
         clash = User.objects.filter(phone_number=phone)
         if self.instance_pk:
             clash = clash.exclude(pk=self.instance_pk)
@@ -211,7 +212,9 @@ class MemberProfileForm(forms.Form):
     def save(self, user):
         data = self.cleaned_data
         for field in self.USER_FIELDS:
-            setattr(user, field, data.get(field) or "")
+            # El telefono vacio va como None; los nombres como cadena vacia.
+            vacio = None if field == "phone_number" else ""
+            setattr(user, field, data.get(field) or vacio)
         user.save(update_fields=list(self.USER_FIELDS))
 
         profile, _ = Profile.objects.get_or_create(user=user)
