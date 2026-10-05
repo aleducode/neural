@@ -5,11 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | Neural Manager</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Geist (la tipografia de ui.shadcn.com) viaja dentro de manager.css como
+       woff2 auto-hospedado: sin request a Google y sin salto de fuente. -->
   <link rel="stylesheet" href="{% static 'manager/bundle/manager.css' %}">
-  <style>body { margin: 0; font-family: Inter, system-ui, sans-serif; }</style>
+  <style>body { margin: 0; }</style>
 </head>
 <body>
   {{ island_props|json_script:"login-props" }}

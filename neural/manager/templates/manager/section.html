@@ -1,0 +1,13 @@
+{% extends "manager/base.html" %}
+
+{% block title %}{{ view.page_title }}{% endblock %}
+
+{% comment %}
+  Plantilla unica de las pantallas de seccion: Django renderiza la pagina y la
+  autenticacion, la isla recibe los datos por json_script --que escapa, al
+  contrario de |safe-- y pinta la tabla.
+{% endcomment %}
+{% block content %}
+{{ island_props|json_script:"section-props" }}
+<div data-island="{{ island }}" data-props="section-props"></div>
+{% endblock %}

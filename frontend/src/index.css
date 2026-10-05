@@ -1,51 +1,143 @@
+/* Geist, la misma tipografia que usa ui.shadcn.com (--font-sans: "Geist").
+   Va auto-hospedada en el bundle: sin request a un tercero y sin FOUT.
+   El .pen pide Inter Tight; esto se aparta del diseño a pedido explicito. */
+@import "@fontsource-variable/geist/index.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Nombres estandar de shadcn para que los bloques oficiales entren sin
-   tocarlos, pero con los valores de docs/DESIGN_SYSTEM.md: el panel ya tenia
-   identidad y las islas la heredan. manager.css usa otros nombres
-   (--bg-primary, --text-primary), asi que no hay choque. */
+/* Tokens contados sobre docs/design/manager.pen, no mirados: ver
+   .claude/skills/pen-to-manager/references/design-tokens.md.
+   Ese .pen es la fuente de verdad del panel, por encima de
+   docs/DESIGN_SYSTEM.md, que describe la version anterior. */
 @layer base {
   :root {
     --background: 0 0% 100%;              /* #ffffff */
-    --foreground: 222.2 47.4% 11.2%;      /* #0f172a */
+    --foreground: 240 10% 6%;             /* #0d0d12 */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card-foreground: 240 10% 6%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --primary: 222.2 47.4% 11.2%;         /* #0f172a */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 98%;             /* #f8fafc */
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;               /* #f1f5f9 */
-    --muted-foreground: 215.4 16.3% 46.9%; /* #64748b */
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;         /* #ef4444 */
-    --destructive-foreground: 0 0% 100%;
-    --border: 214.3 31.8% 91.4%;          /* #e2e8f0 */
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 47.4% 11.2%;
-    --radius: 0.75rem;                    /* radio de tarjetas del sistema */
+    --popover-foreground: 240 10% 6%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-  .dark {
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* Verde de marca del diseño */
+    --primary: 142 71% 45%;               /* #22c55e */
+    --primary-foreground: 240 10% 6%;     /* el glifo del KPI va oscuro, no blanco */
+
+    --secondary: 210 33% 97%;             /* #f6f8fa */
+    --secondary-foreground: 240 10% 6%;
+    --muted: 210 33% 97%;                 /* #f6f8fa */
+    --muted-foreground: 222 10% 45%;      /* #666d80 */
+    --accent: 210 20% 94%;                /* #eceff3 */
+    --accent-foreground: 240 10% 6%;
+
+    --destructive: 345 78% 39%;           /* #b21634 */
+    --destructive-foreground: 0 0% 100%;
+
+    /* El diseño separa stroke de relleno: 481 bordes en #dfe1e7, y #eceff3
+       solo como fondo de badge neutro. No son el mismo token. */
+    --border: 225 14% 89%;                /* #dfe1e7 */
+    --input: 225 14% 89%;
+    --ring: 142 71% 45%;
+
+    /* Texto terciario del diseño. Solo a 14px o más: a 12px no pasa AA. */
+    --faint: 220 10% 55%;                 /* #818898 */
+
+    /* Estados. Cada par es fondo + tinta, tal cual el .pen. */
+    --positive: 169 53% 33%;              /* #28806f */
+    --positive-soft: 166 49% 91%;         /* #ddf3ef */
+    --negative: 345 78% 39%;              /* #b21634 */
+    --negative-soft: 345 76% 95%;         /* #fce8ec */
+    --negative-strong: 345 78% 33%;       /* #96132c */
+    --negative-strong-soft: 345 71% 92%;  /* #fadbe1 */
+    --warning: 36 56% 42%;                /* #a77b2e */
+    --warning-soft: 41 100% 96%;          /* #fff9ed */
+
+    /* Series de datos. El .pen usa #ffbe4c para la segunda, pero contra el
+       verde da ΔE 4,9 en protanopia (validador del skill dataviz). #a77b2e es
+       el ámbar de texto del propio diseño y pasa con ΔE 10,6. */
+    --series-1: #22c55e;
+    --series-2: #a77b2e;
+    /* Rampa del donut: un solo hue, tres pasos, de más a menos. */
+    --donut-1: #22c55e;
+    --donut-2: #6bd893;
+    --donut-3: #99e4b5;
+    --viz-surface: #ffffff;
+
+    /* 16 en tarjetas, 8 en botones e items, 4 en checkbox. */
+    --radius: 1rem;
+
+    --sidebar-background: 210 33% 97%;    /* #f6f8fa */
+    --sidebar-foreground: 240 10% 6%;
+    --sidebar-primary: 240 10% 6%;        /* item activo: fill #0d0d12 */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 0 0% 100%;
+    --sidebar-accent-foreground: 240 10% 6%;
+    --sidebar-border: 225 14% 89%;
+    --sidebar-ring: 142 71% 45%;
+  }
+
+  :root[data-theme="dark"] {
+    --background: 220 35% 11%;            /* #121a26 */
+    --foreground: 0 0% 100%;
+    --card: 220 30% 14%;
+    --card-foreground: 0 0% 100%;
+    --popover: 220 30% 14%;
+    --popover-foreground: 0 0% 100%;
+    --secondary: 220 30% 16%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 30% 16%;
+    --muted-foreground: 220 9% 72%;
+    --accent: 220 30% 20%;
+    --accent-foreground: 0 0% 100%;
+    --border: 220 25% 22%;
+    --input: 220 25% 22%;
+    --faint: 220 9% 65%;                  /* #a4acb9 */
+
+    /* Los pares de estado se re-eligen contra la superficie oscura, no se
+       invierten: un #ddf3ef sobre #121a26 es un parche de luz. */
+    --positive: 166 60% 60%;
+    --positive-soft: 169 40% 18%;
+    --negative: 345 85% 72%;
+    --negative-soft: 345 40% 20%;
+    --negative-strong: 345 85% 72%;
+    --negative-strong-soft: 345 40% 20%;
+    --warning: 41 90% 70%;
+    --warning-soft: 38 35% 18%;
+
+    /* Pasos propios del modo oscuro, elegidos contra #121a26 y validados, no
+       invertidos: #4ade80 + #e0b23c se salia de la banda de luminosidad y
+       quedaba en ΔE 6,6. Este par da 12,7 y pasa los cinco chequeos. */
+    --series-1: #12b05c;
+    --series-2: #a85206;
+    --donut-1: #4ade80;
+    --donut-2: #22c55e;
+    --donut-3: #15803d;
+    --viz-surface: #121a26;
+
+    --sidebar-background: 220 35% 11%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 240 10% 6%;
+    --sidebar-accent: 220 30% 16%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 25% 22%;
+  }
+
+  /* Mismo trato que ui.shadcn.com le da a su <body>: la clase `antialiased`,
+     font-synthesis-weight y text-rendering. Sin esto Geist se ve mas gorda y
+     mas sucia en macOS, que es lo que delata que "no es la misma fuente". */
+  body {
+    font-family: "Geist Variable", Geist, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* La variable trae los pesos de verdad: sintetizar un semibold falso a
+       partir del regular es lo que ensucia los numeros. */
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    /* El .pen pone letterSpacing 0.02em en casi toda etiqueta, pero ese valor
+       compensa lo angosto de Inter Tight. shadcn usa --tracking-normal: 0em
+       con Geist, asi que aqui tambien va en 0. */
+    letter-spacing: 0;
   }
 }

@@ -1,10 +1,24 @@
-import { Bell, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { AlertTriangle, Bell, BellPlus, Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TablePagination } from "@/components/ui/data-table";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
-import { Table, TableCell, TableHead, TableRow } from "@/components/ui/table";
+import { MemberAvatar } from "@/components/ui/member-avatar";
+import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatWidget, type Kpi } from "@/components/ui/stat-widget";
+import { Table, TableCell, TableHead } from "@/components/ui/table";
+import { Widget, WidgetHeader } from "@/components/ui/widget";
+import { NotificationDetailDialog, toneFor } from "@/islands/NotificationDetail";
 import { cn } from "@/lib/utils";
 
 type Choice = { value: string; label: string };
@@ -14,241 +28,269 @@ type Row = {
   userId: number;
   userName: string;
   userInitials: string;
+  userPhoto: string | null;
   title: string;
   body: string;
   type: string;
   status: string;
   statusLabel: string;
   created: string;
+  attempts: number;
+  failures: number;
 };
 
 type Props = {
+  kpis: Kpi[];
   feedUrl: string;
+  detailUrl: string;
+  sendUrl: string;
   userDetailUrl: string;
   types: Choice[];
   statuses: Choice[];
 };
 
-function badgeFor(status: string) {
-  if (status === "sent" || status === "delivered") return "success" as const;
-  if (status === "failed") return "error" as const;
-  if (status === "read") return "info" as const;
-  return "neutral" as const;
-}
-
 export default function NotificationsTable({
+  kpis,
   feedUrl,
+  detailUrl,
+  sendUrl,
   userDetailUrl,
   types,
   statuses,
 }: Props) {
-  const [query, setQuery] = useState("");
-  const [type, setType] = useState("");
-  const [status, setStatus] = useState("");
-  const [page, setPage] = useState(1);
-
   const [rows, setRows] = useState<Row[]>([]);
+  const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [failed, setFailed] = useState(false);
+  const [query, setQuery] = useState("");
+  const [type, setType] = useState("");
+  const [status, setStatus] = useState("");
+  const [abierta, setAbierta] = useState<number | null>(null);
 
-  // Una peticion en vuelo a la vez: si el usuario sigue tecleando, la
-  // respuesta vieja no puede pisar a la nueva.
-  const request = useRef(0);
-
-  const load = useCallback(async () => {
-    const ticket = ++request.current;
+  // La página la arma el servidor: son miles de filas y no caben en una isla.
+  const cargar = useCallback(async () => {
     setLoading(true);
-    setFailed(false);
-
-    const params = new URLSearchParams({ page: String(page) });
-    if (query.trim()) params.set("q", query.trim());
-    if (type) params.set("type", type);
-    if (status) params.set("status", status);
-
+    const url = new URL(feedUrl, window.location.origin);
+    url.searchParams.set("page", String(page));
+    if (query.trim()) url.searchParams.set("q", query.trim());
+    if (type) url.searchParams.set("type", type);
+    if (status) url.searchParams.set("status", status);
     try {
-      const response = await fetch(`${feedUrl}?${params}`, {
-        headers: { "X-Requested-With": "XMLHttpRequest" },
-        credentials: "same-origin",
-      });
-      if (!response.ok) throw new Error(String(response.status));
+      const response = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
       const data = await response.json();
-      if (ticket !== request.current) return;
       setRows(data.results);
       setPages(data.pages);
       setTotal(data.total);
-    } catch {
-      if (ticket !== request.current) return;
-      setFailed(true);
     } finally {
-      if (ticket === request.current) setLoading(false);
+      setLoading(false);
     }
   }, [feedUrl, page, query, type, status]);
 
-  // Debounce solo para lo que se escribe; los selects responden al instante.
+  // Cada tecla no puede ser una consulta: se espera a que pare de escribir.
+  const primera = useRef(true);
   useEffect(() => {
-    const timer = setTimeout(load, query ? 300 : 0);
-    return () => clearTimeout(timer);
-  }, [load, query]);
+    if (primera.current) {
+      primera.current = false;
+      cargar();
+      return;
+    }
+    const id = window.setTimeout(cargar, 300);
+    return () => window.clearTimeout(id);
+  }, [cargar]);
 
-  function reset(apply: () => void) {
-    apply();
+  const filtrar = (set: (value: string) => void) => (value: string) => {
+    set(value);
     setPage(1);
-  }
-
-  const selectClass =
-    "h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+  };
+  const porPagina = 30;
 
   return (
-    <div className="rounded-lg border border-border bg-background">
-      <div className="flex flex-wrap items-center gap-3 border-b border-border px-6 py-5">
-        <div className="relative w-full max-w-xs">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(event) => reset(() => setQuery(event.target.value))}
-            placeholder="Buscar por usuario o título..."
-            className="pl-9"
-            aria-label="Buscar notificaciones"
-          />
-        </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Notificaciones"
+        description="Todo lo que el panel le mandó a los usuarios, y qué respondió Expo."
+      >
+        <Button size="sm" asChild>
+          <a href={sendUrl}>
+            <BellPlus />
+            Enviar notificación
+          </a>
+        </Button>
+      </PageHeader>
 
-        <select
-          className={selectClass}
-          value={type}
-          onChange={(event) => reset(() => setType(event.target.value))}
-          aria-label="Filtrar por tipo"
-        >
-          <option value="">Todos los tipos</option>
-          {types.map((choice) => (
-            <option key={choice.value} value={choice.value}>
-              {choice.label}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className={selectClass}
-          value={status}
-          onChange={(event) => reset(() => setStatus(event.target.value))}
-          aria-label="Filtrar por estado"
-        >
-          <option value="">Todos los estados</option>
-          {statuses.map((choice) => (
-            <option key={choice.value} value={choice.value}>
-              {choice.label}
-            </option>
-          ))}
-        </select>
-
-        <span className="ml-auto text-xs text-muted-foreground">
-          {loading ? "Cargando..." : `${total.toLocaleString("es-CO")} notificaciones`}
-        </span>
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        {kpis.map((kpi) => (
+          <StatWidget {...kpi} key={kpi.key} />
+        ))}
       </div>
 
-      {failed ? (
-        <div className="px-8 py-16 text-center">
-          <p className="mb-4 text-sm text-muted-foreground">
-            No se pudo cargar el historial.
-          </p>
-          <Button variant="outline" size="sm" onClick={load}>
-            Reintentar
-          </Button>
-        </div>
-      ) : rows.length === 0 && !loading ? (
-        <div className="px-8 py-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
-            <Bell className="h-6 w-6" />
+      <Widget>
+        <WidgetHeader icon={<Bell className="size-5" />} title="Historial de envíos">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                type="search"
+                value={query}
+                onChange={(event) => filtrar(setQuery)(event.target.value)}
+                placeholder="Buscar por usuario o título"
+                aria-label="Buscar por usuario o título"
+                className="h-8 w-56 rounded-md pl-9 text-xs"
+              />
+            </div>
+            <Filtro value={type} onChange={filtrar(setType)} options={types} label="Todos los tipos" />
+            <Filtro value={status} onChange={filtrar(setStatus)} options={statuses} label="Todos los estados" />
           </div>
-          <h5 className="mb-2 text-base font-semibold text-foreground">
-            No se encontraron notificaciones
-          </h5>
-          <p className="text-sm text-muted-foreground">
-            {query ? `No hay resultados para "${query}"` : "No hay notificaciones con estos filtros"}
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className={cn("transition-opacity", loading && "opacity-50")}>
-            <Table>
+        </WidgetHeader>
+
+        {loading && rows.length === 0 ? (
+          <div className="flex flex-col gap-2 p-5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        ) : rows.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Bell />
+              </EmptyMedia>
+              <EmptyTitle>Sin notificaciones</EmptyTitle>
+              <EmptyDescription>
+                {query || type || status
+                  ? "Ningún envío coincide con los filtros."
+                  : "Todavía no se envió ninguna notificación."}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <>
+            <Table className={cn("min-w-[860px]", loading && "opacity-60")}>
               <thead>
                 <tr>
                   <TableHead>Usuario</TableHead>
                   <TableHead>Notificación</TableHead>
                   <TableHead>Tipo</TableHead>
+                  <TableHead>Enviada</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead>Fecha</TableHead>
+                  <TableHead className="text-right">Detalle</TableHead>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <TableRow key={row.id}>
+                  <tr
+                    key={row.id}
+                    className="border-b border-border transition-colors last:border-0 hover:bg-secondary"
+                  >
                     <TableCell>
                       <a
                         href={userDetailUrl.replace("/0/", `/${row.userId}/`)}
-                        className="flex items-center gap-3 no-underline"
+                        className="flex items-center gap-2.5 no-underline"
                       >
-                        <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white">
-                          {row.userInitials}
-                        </span>
+                        <MemberAvatar
+                          name={row.userName}
+                          initials={row.userInitials}
+                          photo={row.userPhoto}
+                        />
                         <span className="truncate text-sm font-medium text-foreground">
                           {row.userName}
                         </span>
                       </a>
                     </TableCell>
                     <TableCell>
-                      <div className="max-w-[280px]">
-                        <div className="truncate text-sm font-medium text-foreground">
-                          {row.title}
-                        </div>
-                        <div className="truncate text-xs text-muted-foreground">{row.body}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="inline-flex rounded border border-border bg-muted px-2 py-0.5 text-[0.6875rem] font-medium text-muted-foreground">
-                        {row.type}
+                      <span className="block max-w-xs truncate text-sm font-medium text-foreground">
+                        {row.title}
+                      </span>
+                      <span className="block max-w-xs truncate text-xs text-muted-foreground">
+                        {row.body}
                       </span>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={badgeFor(row.status)}>{row.statusLabel}</Badge>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                      {row.type}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {row.created}
                     </TableCell>
-                  </TableRow>
+                    <TableCell>
+                      <span className="flex items-center gap-2">
+                        <Badge dot variant={toneFor(row.status)}>
+                          {row.statusLabel}
+                        </Badge>
+                        {/* La fila ya avisa del fallo: no hay que abrir el
+                            modal para saber que algo salio mal. */}
+                        {row.failures > 0 && (
+                          <span
+                            className="flex items-center gap-1 text-xs text-destructive"
+                            title={`${row.failures} de ${row.attempts} dispositivos fallaron`}
+                          >
+                            <AlertTriangle className="size-3.5" />
+                            {row.failures}/{row.attempts}
+                          </span>
+                        )}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" onClick={() => setAbierta(row.id)}>
+                        Ver logs
+                      </Button>
+                    </TableCell>
+                  </tr>
                 ))}
               </tbody>
             </Table>
-          </div>
 
-          {pages > 1 && (
-            <div className="flex items-center justify-center gap-2 px-6 py-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setPage(page - 1)}
-                disabled={page <= 1 || loading}
-                aria-label="Página anterior"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="px-2 text-sm text-muted-foreground">
-                {page} de {pages}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setPage(page + 1)}
-                disabled={page >= pages || loading}
-                aria-label="Página siguiente"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </>
-      )}
+            <TablePagination
+              from={(page - 1) * porPagina + 1}
+              to={Math.min(page * porPagina, total)}
+              total={total}
+              page={page}
+              pages={pages}
+              pageSize={porPagina}
+              onPage={setPage}
+              noun="notificaciones"
+            />
+          </>
+        )}
+      </Widget>
+
+      <NotificationDetailDialog
+        id={abierta}
+        detailUrl={detailUrl}
+        userDetailUrl={userDetailUrl}
+        onClose={() => setAbierta(null)}
+      />
     </div>
+  );
+}
+
+function Filtro({
+  value,
+  onChange,
+  options,
+  label,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: Choice[];
+  label: string;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      aria-label={label}
+      className="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <option value="">{label}</option>
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
   );
 }

@@ -2,7 +2,18 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 
 import AppShell from "./islands/AppShell";
+import Bookings from "./islands/Bookings";
+import CalendarMonth from "./islands/CalendarMonth";
+import ClassDetail from "./islands/ClassDetail";
+import Classes from "./islands/Classes";
 import Dashboard from "./islands/Dashboard";
+import MemberDetail from "./islands/MemberDetail";
+import Members from "./islands/Members";
+import PackageDetail from "./islands/PackageDetail";
+import Packages from "./islands/Packages";
+import Payments from "./islands/Payments";
+import Plans from "./islands/Plans";
+import Videos from "./islands/Videos";
 import Login from "./islands/Login";
 import NotificationsTable from "./islands/NotificationsTable";
 import SendNotification from "./islands/SendNotification";
@@ -18,19 +29,32 @@ import UsersTable from "./islands/UsersTable";
 const ISLANDS: Record<string, (props: any) => JSX.Element> = {
   "app-shell": AppShell,
   dashboard: Dashboard,
+  members: Members,
+  "member-detail": MemberDetail,
+  "class-detail": ClassDetail,
+  classes: Classes,
+  bookings: Bookings,
+  calendar: CalendarMonth,
+  payments: Payments,
+  plans: Plans,
+  videos: Videos,
+  packages: Packages,
+  "package-detail": PackageDetail,
   login: Login,
   "notifications-table": NotificationsTable,
   "send-notification": SendNotification,
   "users-table": UsersTable,
 };
 
-function readProps(name: string): object {
-  const node = document.getElementById(`${name}-props`);
+/** El id del <script> de props: data-props si viene, si no "<isla>-props".
+ *  Las pantallas de seccion comparten plantilla, asi que comparten id. */
+function readProps(id: string): object {
+  const node = document.getElementById(id);
   if (!node?.textContent) return {};
   try {
     return JSON.parse(node.textContent);
   } catch (error) {
-    console.error(`[manager] props ilegibles para la isla "${name}"`, error);
+    console.error(`[manager] props ilegibles en "${id}"`, error);
     return {};
   }
 }
@@ -54,7 +78,7 @@ document.querySelectorAll<HTMLElement>("[data-island]").forEach((node) => {
     return;
   }
   try {
-    createRoot(node).render(<Island {...readProps(name)} />);
+    createRoot(node).render(<Island {...readProps(node.dataset.props ?? `${name}-props`)} />);
   } catch (error) {
     console.error(`[manager] la isla "${name}" no pudo montarse`, error);
   }

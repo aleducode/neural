@@ -6,24 +6,31 @@ from django.contrib.auth import login, logout
 from django.middleware.csrf import get_token
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Q, Count, Max, Prefetch
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.formats import date_format
+from django.core.exceptions import ValidationError
+from neural.training.models import (
+    Classes,
+    PackageVideo,
+    TrainingType,
+    Video,
+    VideoPackage,
+)
 from django.views.generic import (
     View,
     TemplateView,
     FormView,
-    DetailView,
     ListView,
     UpdateView,
 )
 
 from neural.users.models import (
+    PushNotificationLog,
     User,
-    Profile,
     UserMembership,
     Device,
     PushNotification,
@@ -32,8 +39,18 @@ from neural.services.push_notifications import (
     PushNotificationService,
     NotificationPayload,
 )
-from neural.users.display import display_name, initials
-from neural.manager.forms import ManagerLoginForm, SendNotificationForm, DeviceForm
+from neural.users.display import display_name, initials, photo_url
+from neural.manager import metrics
+from neural.manager.forms import (
+    VideoForm,
+    VideoPackageForm,
+    AssignmentForm,
+    ManagerLoginForm,
+    SendNotificationForm,
+    DeviceForm,
+    MemberProfileForm,
+    ClassForm,
+)
 
 
 class SuperStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -52,14 +69,41 @@ class SuperStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
             return redirect("manager:login")
         return super().handle_no_permission()
 
-    # Navegacion del shell. Vive aca porque todas las pantallas del panel
-    # pasan por este mixin.
+    # Shell navigation. It lives here because every panel screen
+    # goes through this mixin.
     NAV = [
         ("Principal", [("Dashboard", "manager:dashboard", "dashboard", ("dashboard",))]),
         (
             "Gestión",
             [
-                ("Usuarios", "manager:user_list", "users", ("user_list", "user_detail", "device_edit")),
+                # user_list stays alive for old links, but the design's users
+                # screen is member_list: they share one menu item.
+                ("Usuarios", "manager:member_list", "users", ("member_list", "user_list", "user_detail", "device_edit")),
+                ("Clases", "manager:class_list", "dumbbell", ("class_list", "class_detail")),
+                ("Reservas", "manager:booking_list", "calendar-check", ("booking_list",)),
+            ],
+        ),
+        (
+            "Contenido",
+            [
+                ("Videos", "manager:video_list", "video", ("video_list",)),
+                ("Paquetes", "manager:package_list", "library", ("package_list", "package_detail")),
+            ],
+        ),
+        (
+            "Operación",
+            [("Calendario", "manager:calendar", "calendar", ("calendar",))],
+        ),
+        (
+            "Finanzas",
+            [
+                ("Pagos", "manager:payment_list", "wallet", ("payment_list",)),
+                ("Planes", "manager:plan_list", "layers", ("plan_list",)),
+            ],
+        ),
+        (
+            "Comunicación",
+            [
                 (
                     "Notificaciones",
                     "manager:notification_list",
@@ -120,8 +164,8 @@ class ManagerLoginView(FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        # El login no pasa por SuperStaffRequiredMixin, asi que arma sus props
-        # por su cuenta: todavia no hay sesion de la que sacar un usuario.
+        # Login does not go through SuperStaffRequiredMixin, so it builds its
+        # own props: there is no session yet to read a user from.
         context = super().get_context_data(**kwargs)
         form = context["form"]
         context["island_props"] = {
@@ -139,11 +183,10 @@ class ManagerLoginView(FormView):
 
 
 class ManagerLogoutView(SuperStaffRequiredMixin, View):
-    """Cierra la sesion del panel.
+    """Logs out of the panel.
 
-    Solo POST: con GET bastaba un <img src=".../logout/"> en cualquier pagina
-    ajena para cerrarle la sesion a quien la visitara.
-    """
+    POST only: with GET, an <img src=".../logout/"> on any foreign page was enough
+    to log out whoever visited it."""
 
     def post(self, request, *args, **kwargs):
         logout(request)
@@ -152,7 +195,11 @@ class ManagerLogoutView(SuperStaffRequiredMixin, View):
 
 
 class DashboardView(SuperStaffRequiredMixin, TemplateView):
-    """Resumen general. Es una isla."""
+    """The business dashboard. It is an island.
+
+    Every widget comes from a real model. What the design asked for and Neural does
+    not have --trainers, payment method, class photo-- is replaced by the data that
+    does exist, and the label says so. See neural/manager/metrics.py."""
 
     template_name = "manager/dashboard.html"
     page_title = "Dashboard"
@@ -161,66 +208,26 @@ class DashboardView(SuperStaffRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         today = timezone.localdate()
 
-        # is_staff fuera: las cuentas internas tienen is_client=True y venian
-        # inflando el total de socios.
-        socios = User.objects.filter(is_client=True, is_staff=False)
-
         context["island_props"] = {
-            "stats": [
-                {
-                    "label": "Total socios",
-                    "value": socios.count(),
-                    "description": "Usuarios registrados",
-                },
-                {
-                    "label": "Membresías activas",
-                    "value": UserMembership.objects.filter(is_active=True).count(),
-                    "description": "Con membresía vigente",
-                },
-                {
-                    "label": "Dispositivos",
-                    "value": Device.objects.filter(is_active=True).count(),
-                    "description": "Dispositivos activos",
-                },
-                {
-                    "label": "Notificaciones hoy",
-                    "value": PushNotification.objects.filter(created__date=today).count(),
-                    "description": "Enviadas hoy",
-                },
-            ],
-            "users": [
-                {
-                    "id": u.pk,
-                    "name": display_name(u) or "Sin nombre",
-                    "initials": initials(u),
-                    "email": u.email,
-                    "joined": date_format(timezone.localtime(u.date_joined), "d M Y"),
-                }
-                for u in socios.order_by("-date_joined")[:5]
-            ],
-            "notifications": [
-                {
-                    "id": n.pk,
-                    "title": n.title,
-                    "userName": display_name(n.user) or "Sin nombre",
-                    "status": n.status,
-                    "statusLabel": n.get_status_display(),
-                }
-                for n in PushNotification.objects.select_related("user").order_by("-created")[:5]
-            ],
+            "today": date_format(today, "l, j \\d\\e F \\d\\e Y").capitalize(),
+            "kpis": metrics.kpis(today),
+            "growth": metrics.growth(today),
+            "classes": metrics.popular_classes(today),
+            "revenue": metrics.revenue_by_plan(today),
+            "payments": metrics.recent_payments(),
+            "gaps": metrics.no_data_notice(),
             "usersUrl": str(reverse("manager:user_list")),
-            "notificationsUrl": str(reverse("manager:notification_list")),
             "userDetailUrl": str(reverse("manager:user_detail", kwargs={"pk": 0})),
+            "sendUrl": str(reverse("manager:send_notification")),
         }
         return context
 
 
 class UserListView(SuperStaffRequiredMixin, ListView):
-    """Lista de socios. La tabla es una isla de React.
+    """Member list. The table is a React island.
 
-    Buscar, filtrar y paginar pasaron al cliente: son ~740 filas, caben de
-    sobra en una respuesta y asi cada tecla deja de recargar la pagina.
-    """
+    Search, filter and pagination moved to the client: there are ~740 rows, they
+    fit comfortably in one response, and this way no keystroke reloads the page."""
 
     page_title = "Usuarios"
 
@@ -229,8 +236,8 @@ class UserListView(SuperStaffRequiredMixin, ListView):
 
     def get_queryset(self):
         return (
-            # is_staff fuera: las cuentas internas tienen is_client=True y se
-            # colaban como socios.
+            # Staff excluded: internal accounts carry is_client=True and were
+            # slipping in as members.
             User.objects.filter(is_client=True, is_staff=False)
             .annotate(device_count=Count("devices", filter=Q(devices__is_active=True)))
             .select_related("profile")
@@ -270,54 +277,114 @@ class UserListView(SuperStaffRequiredMixin, ListView):
                 }
                 for user in context["users"]
             ],
-            # La isla reemplaza el 0 por el id real.
+            # The island replaces the 0 with the real id.
             "detailUrl": str(reverse("manager:user_detail", kwargs={"pk": 0})),
         }
         return context
 
 
-class UserDetailView(SuperStaffRequiredMixin, DetailView):
-    """Detail view for a single user."""
+class DetailBase(SuperStaffRequiredMixin, TemplateView):
+    """Base for the design's two detail screens.
 
-    page_title = "Detalle de usuario"
+    TemplateView and not View: the shell mixin builds its props in
+    get_context_data, which View does not have. GET renders and POST saves on the
+    same URL, so the form keeps working if the island does not mount."""
 
-    template_name = "manager/users/detail.html"
-    context_object_name = "user_obj"
+    template_name = "manager/section.html"
+    island = ""
 
-    def get_queryset(self):
-        return User.objects.filter(is_client=True).select_related("profile")
+    def get_object(self):
+        raise NotImplementedError
+
+    def build_props(self, obj):
+        raise NotImplementedError
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.object
-
-        # Solo lectura: get_or_create convertia una visita en una escritura y
-        # llenaba la tabla de perfiles vacios de gente que solo fuiste a mirar.
-        context["profile"] = Profile.objects.filter(user=user).first()
-
-        # Active membership
-        context["membership"] = UserMembership.objects.filter(
-            user=user, is_active=True
-        ).first()
-
-        # All memberships history
-        context["membership_history"] = UserMembership.objects.filter(
-            user=user
-        ).order_by("-created")[:10]
-
-        # Devices
-        context["devices"] = Device.objects.filter(user=user).order_by("-created")
-
-        # Notifications
-        context["notifications"] = PushNotification.objects.filter(user=user).order_by(
-            "-created"
-        )[:20]
-
+        obj = kwargs.get("obj") or self.get_object()
+        context["island"] = self.island
+        context["island_props"] = {
+            **self.build_props(obj),
+            "errors": kwargs.get("errors") or {},
+            "csrfToken": get_token(self.request),
+        }
         return context
 
 
+class MemberDetailView(DetailBase):
+    """«41. Member - Detail 360»: everything Neural knows about a member."""
+
+    page_title = "Detalle del usuario"
+    island = "member-detail"
+
+    def get_object(self):
+        return get_object_or_404(
+            User.objects.filter(is_client=True, is_staff=False), pk=self.kwargs["pk"]
+        )
+
+    def build_props(self, member):
+        return {
+            **metrics.member_detail(member.pk, timezone.localdate()),
+            "backUrl": str(reverse("manager:member_list")),
+            "sendUrl": str(
+                reverse("manager:send_notification_user", kwargs={"user_id": member.pk})
+            ),
+            "videoPackages": metrics.member_videos(member),
+            "packageDetailUrl": str(
+                reverse("manager:package_detail", kwargs={"pk": 0})
+            ),
+        }
+
+    def post(self, request, *args, **kwargs):
+        member = self.get_object()
+        form = MemberProfileForm(request.POST, instance_pk=member.pk)
+        if form.is_valid():
+            form.save(member)
+            messages.success(request, "Ficha actualizada.")
+            return redirect("manager:user_detail", pk=member.pk)
+        return self.render_to_response(
+            self.get_context_data(obj=member, errors=form.errors.get_json_data())
+        )
+
+
+class ClassDetailView(DetailBase):
+    """«42. Class - Detail 360»: everything that happens in one schedule."""
+
+    page_title = "Detalle de la clase"
+    island = "class-detail"
+
+    def get_object(self):
+        return get_object_or_404(
+            Classes.objects.select_related("training_type"), pk=self.kwargs["pk"]
+        )
+
+    def build_props(self, klass):
+        return {
+            **metrics.class_detail(klass.pk, timezone.localdate()),
+            "backUrl": str(reverse("manager:class_list")),
+            "calendarUrl": str(reverse("manager:calendar")),
+            "userDetailUrl": str(reverse("manager:user_detail", kwargs={"pk": 0})),
+        }
+
+    def post(self, request, *args, **kwargs):
+        klass = self.get_object()
+        form = ClassForm(request.POST, request.FILES)
+        errors = None
+        if form.is_valid():
+            try:
+                form.save(klass)
+            except ValidationError as error:
+                errors = {"__all__": [{"message": m} for m in error.messages]}
+            else:
+                messages.success(request, "Clase actualizada.")
+                return redirect("manager:class_detail", pk=klass.pk)
+        return self.render_to_response(
+            self.get_context_data(obj=klass, errors=errors or form.errors.get_json_data())
+        )
+
+
 class NotificationFilterMixin:
-    """Filtros compartidos por la pagina y por el endpoint que la alimenta."""
+    """Filters shared by the page and by the endpoint that feeds it."""
 
     def filtered_notifications(self):
         queryset = PushNotification.objects.select_related("user").order_by("-created")
@@ -343,11 +410,10 @@ class NotificationFilterMixin:
 
 
 class NotificationListView(SuperStaffRequiredMixin, NotificationFilterMixin, TemplateView):
-    """Historial de notificaciones. La tabla es una isla.
+    """Notification history. The table is an island.
 
-    Son miles de filas, asi que a diferencia de la de socios esta se pagina en
-    el servidor: la isla pide cada pagina a NotificationFeedView.
-    """
+    There are thousands of rows, so unlike the member list this one paginates on
+    the server: the island asks NotificationFeedView for each page."""
 
     page_title = "Notificaciones"
 
@@ -356,7 +422,10 @@ class NotificationListView(SuperStaffRequiredMixin, NotificationFilterMixin, Tem
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["island_props"] = {
+            **metrics.notifications_page(timezone.localdate()),
             "feedUrl": str(reverse("manager:notification_feed")),
+            "detailUrl": str(reverse("manager:notification_detail", kwargs={"pk": 0})),
+            "sendUrl": str(reverse("manager:send_notification")),
             "userDetailUrl": str(reverse("manager:user_detail", kwargs={"pk": 0})),
             "types": [
                 {"value": v, "label": label}
@@ -371,12 +440,19 @@ class NotificationListView(SuperStaffRequiredMixin, NotificationFilterMixin, Tem
 
 
 class NotificationFeedView(SuperStaffRequiredMixin, NotificationFilterMixin, View):
-    """Pagina de notificaciones en JSON, para la isla."""
+    """One page of notifications as JSON, for the island."""
 
     PAGE_SIZE = 30
 
     def get(self, request, *args, **kwargs):
-        queryset = self.filtered_notifications()
+        queryset = self.filtered_notifications().annotate(
+            attempts=Count("logs", distinct=True),
+            failures=Count(
+                "logs",
+                filter=Q(logs__status=PushNotificationLog.Status.ERROR),
+                distinct=True,
+            ),
+        )
         total = queryset.count()
 
         try:
@@ -397,8 +473,11 @@ class NotificationFeedView(SuperStaffRequiredMixin, NotificationFilterMixin, Vie
                 "status": n.status,
                 "statusLabel": n.get_status_display(),
                 "created": date_format(timezone.localtime(n.created), "d M Y, H:i"),
+                "userPhoto": photo_url(n.user),
+                "attempts": n.attempts,
+                "failures": n.failures,
             }
-            for n in queryset[offset : offset + self.PAGE_SIZE]
+            for n in queryset[offset:offset + self.PAGE_SIZE]
         ]
 
         return JsonResponse(
@@ -409,6 +488,19 @@ class NotificationFeedView(SuperStaffRequiredMixin, NotificationFilterMixin, Vie
                 "total": total,
             }
         )
+
+
+class NotificationDetailView(SuperStaffRequiredMixin, View):
+    """One delivery in detail as JSON: the modal asks for it when it opens.
+
+    Separate from the feed because Expo's payloads are large: sending them with
+    every table row would ship megabytes almost nobody looks at."""
+
+    def get(self, request, *args, **kwargs):
+        try:
+            return JsonResponse(metrics.notification_detail(self.kwargs["pk"]))
+        except PushNotification.DoesNotExist:
+            return JsonResponse({"error": "No existe esa notificación."}, status=404)
 
 
 class SendNotificationView(SuperStaffRequiredMixin, FormView):
@@ -442,8 +534,8 @@ class SendNotificationView(SuperStaffRequiredMixin, FormView):
                 "email": user.email,
             }
 
-        # Son ~140 con dispositivo activo: caben en la pagina, y asi el
-        # buscador responde sin ir al servidor ni cargar jQuery y Select2.
+        # About 140 have an active device: they fit in the page, and the
+        # search answers without a round trip or loading jQuery and Select2.
         context["island_props"] = {
             "users": [card(u) for u in self.fields_queryset()],
             "types": [
@@ -517,3 +609,240 @@ class DeviceEditView(SuperStaffRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, "Dispositivo actualizado correctamente.")
         return super().form_valid(form)
+
+
+class SectionView(SuperStaffRequiredMixin, TemplateView):
+    """Base for the section screens.
+
+    They all share one shape in the .pen --header, four KPIs, table card-- and one
+    shape here: a function in metrics.py returning the props, and an island that
+    paints them."""
+
+    island = ""
+    metric = None
+
+    def get_template_names(self):
+        return ["manager/section.html"]
+
+    def build_props(self, today):
+        return self.metric(today)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = timezone.localdate()
+        context["island"] = self.island
+        context["island_props"] = {
+            **self.build_props(today),
+            "userDetailUrl": str(reverse("manager:user_detail", kwargs={"pk": 0})),
+            "sendUrl": str(reverse("manager:send_notification")),
+            "calendarUrl": str(reverse("manager:calendar")),
+            "classDetailUrl": str(reverse("manager:class_detail", kwargs={"pk": 0})),
+            "packageDetailUrl": str(reverse("manager:package_detail", kwargs={"pk": 0})),
+            "csrfToken": get_token(self.request),
+        }
+        return context
+
+
+class VideoListView(SectionView):
+    """The video library."""
+
+    page_title = "Videos"
+    island = "videos"
+    metric = staticmethod(metrics.videos_page)
+
+    def build_props(self, today):
+        return {
+            **self.metric(today),
+            "uploadUrl": str(reverse("manager:video_upload")),
+            "levelChoices": [
+                {"value": value, "label": label} for value, label in Video.Level.choices
+            ],
+            "sourceChoices": [
+                {"value": value, "label": label} for value, label in Video.Source.choices
+            ],
+            "trainingTypes": [
+                {"value": str(t.pk), "label": t.name}
+                for t in TrainingType.objects.order_by("name")
+            ],
+        }
+
+    def post(self, request, *args, **kwargs):
+        """Create or edit a video on the same screen."""
+        pk = request.POST.get("id")
+        instance = Video.objects.filter(pk=pk).first() if pk else None
+        form = VideoForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request, "Video actualizado." if instance else "Video creado."
+            )
+            return redirect("manager:video_list")
+        context = self.get_context_data()
+        context["island_props"]["errors"] = form.errors.get_json_data()
+        return self.render_to_response(context)
+
+
+class PackageListView(SectionView):
+    """The video packages."""
+
+    page_title = "Paquetes"
+    island = "packages"
+    metric = staticmethod(metrics.packages_page)
+
+    def post(self, request, *args, **kwargs):
+        form = VideoPackageForm(request.POST, request.FILES)
+        if form.is_valid():
+            package = form.save()
+            return redirect("manager:package_detail", pk=package.pk)
+        context = self.get_context_data()
+        context["island_props"]["errors"] = form.errors.get_json_data()
+        return self.render_to_response(context)
+
+
+class PackageDetailView(DetailBase):
+    """The package builder: videos in order and who receives it."""
+
+    page_title = "Paquete de videos"
+    island = "package-detail"
+
+    def get_object(self):
+        return get_object_or_404(VideoPackage, pk=self.kwargs["pk"])
+
+    def build_props(self, package):
+        return {
+            **metrics.package_detail(package.pk),
+            "backUrl": str(reverse("manager:package_list")),
+            "userDetailUrl": str(reverse("manager:user_detail", kwargs={"pk": 0})),
+            "videoListUrl": str(reverse("manager:video_list")),
+        }
+
+    def post(self, request, *args, **kwargs):
+        """Every builder action comes through here.
+
+        One endpoint and an `action` field instead of six URLs: the form keeps working
+        without JavaScript and there are not six routes to maintain."""
+        package = self.get_object()
+        action = request.POST.get("action", "save")
+        errors = None
+
+        if action == "save":
+            form = VideoPackageForm(request.POST, request.FILES, instance=package)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Paquete actualizado.")
+            else:
+                errors = form.errors.get_json_data()
+
+        elif action == "add-video":
+            video_id = request.POST.get("video")
+            if video_id:
+                last_order = package.items.aggregate(n=Max("order"))["n"] or 0
+                PackageVideo.objects.get_or_create(
+                    package=package,
+                    video_id=video_id,
+                    defaults={"order": last_order + 1},
+                )
+
+        elif action == "remove-video":
+            package.items.filter(pk=request.POST.get("item")).delete()
+            self._reordenar(package)
+
+        elif action == "move-video":
+            self._mover(package, request.POST.get("item"), request.POST.get("dir"))
+
+        elif action == "assign":
+            form = AssignmentForm(request.POST)
+            if form.is_valid():
+                form.save(package)
+            else:
+                errors = form.errors.get_json_data()
+
+        elif action == "unassign":
+            package.assignments.filter(pk=request.POST.get("assignment")).delete()
+
+        if errors:
+            return self.render_to_response(
+                self.get_context_data(obj=package, errors=errors)
+            )
+        return redirect("manager:package_detail", pk=package.pk)
+
+    @staticmethod
+    def _reordenar(package):
+        """Leaves the order as 1..n with no gaps after a delete or a move."""
+        for position, item in enumerate(package.items.order_by("order", "id"), start=1):
+            if item.order != position:
+                PackageVideo.objects.filter(pk=item.pk).update(order=position)
+
+    def _mover(self, package, item_id, direction):
+        items = list(package.items.order_by("order", "id"))
+        indexes = {str(i.pk): n for n, i in enumerate(items)}
+        if item_id not in indexes:
+            return
+        current = indexes[item_id]
+        target = current - 1 if direction == "up" else current + 1
+        if not 0 <= target < len(items):
+            return
+        items[current], items[target] = items[target], items[current]
+        for position, item in enumerate(items, start=1):
+            PackageVideo.objects.filter(pk=item.pk).update(order=position)
+
+
+class MemberListView(SectionView):
+    """«14. Member - List View» with Neural's members."""
+
+    page_title = "Usuarios"
+    island = "members"
+    metric = staticmethod(metrics.members_page)
+
+
+class ClassListView(SectionView):
+    """«19. Class - List View» sobre TrainingType + Classes."""
+
+    page_title = "Clases"
+    island = "classes"
+    metric = staticmethod(metrics.classes_page)
+
+
+class BookingListView(SectionView):
+    """«22. Booking - List View» sobre UserTraining."""
+
+    page_title = "Reservas"
+    island = "bookings"
+    metric = staticmethod(metrics.bookings_page)
+
+
+class PaymentListView(SectionView):
+    """«26. Transactions - List View» sobre UserPaymentReference."""
+
+    page_title = "Pagos"
+    island = "payments"
+    metric = staticmethod(metrics.payments_page)
+
+
+class PlanListView(SectionView):
+    """The NeuralPlan catalogue, read as «30. Settings - Plan»."""
+
+    page_title = "Planes"
+    island = "plans"
+    metric = staticmethod(metrics.plans_page)
+
+
+class CalendarView(SectionView):
+    """«23. Calendar View - Month» over the month's Slots."""
+
+    page_title = "Calendario"
+    island = "calendar"
+
+    def build_props(self, today):
+        # The month arrives via querystring so calendar navigation leaves
+        # shareable URLs instead of client-only state.
+        def as_int(field, low, high):
+            try:
+                value = int(self.request.GET.get(field, ""))
+            except (TypeError, ValueError):
+                return None
+            return value if low <= value <= high else None
+
+        return metrics.calendar_month(
+            today, year=as_int("year", 2000, 2100), month=as_int("month", 1, 12)
+        )

@@ -28,3 +28,19 @@ def initials(user):
     if name:
         return name[:2].upper()
     return user.email[:2].upper()
+
+
+def photo_url(user):
+    """La foto del socio, o None.
+
+    Hay dos campos: User.photo y Profile.photo. Gana la del perfil, que es la
+    que la app movil deja cambiar; si no hay ninguna, el avatar cae a iniciales.
+    """
+    perfil = getattr(user, "profile", None)
+    for campo in (getattr(perfil, "photo", None), user.photo):
+        if campo:
+            try:
+                return campo.url
+            except ValueError:
+                continue
+    return None

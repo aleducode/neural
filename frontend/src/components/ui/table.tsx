@@ -7,10 +7,17 @@ export const Table = ({ className, ...props }: React.HTMLAttributes<HTMLTableEle
   </div>
 );
 
-export const TableHead = ({ className, ...props }: React.HTMLAttributes<HTMLTableCellElement>) => (
+// ThHTMLAttributes y no HTMLAttributes: si no, `scope` no tipa y una tabla
+// deja de decirle al lector de pantalla a que pertenece cada celda.
+export const TableHead = ({
+  className,
+  scope = "col",
+  ...props
+}: React.ThHTMLAttributes<HTMLTableCellElement>) => (
   <th
+    scope={scope}
     className={cn(
-      "border-b border-border bg-secondary px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground first:pl-6 last:pr-6",
+      "h-10 border-b border-border bg-secondary px-3 text-left text-sm font-medium text-muted-foreground first:pl-5 last:pr-5",
       className,
     )}
     {...props}
@@ -23,7 +30,7 @@ export const TableRow = ({ className, ...props }: React.HTMLAttributes<HTMLTable
 
 export const TableCell = ({ className, ...props }: React.HTMLAttributes<HTMLTableCellElement>) => (
   <td
-    className={cn("border-b border-border px-4 py-4 align-middle first:pl-6 last:pr-6", className)}
+    className={cn("h-16 border-b border-border px-3 align-middle first:pl-5 last:pr-5", className)}
     {...props}
   />
 );

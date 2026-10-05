@@ -1,4 +1,4 @@
-import { AlertCircle, Dumbbell, LogIn } from "lucide-react";
+import { AlertCircle, LogIn } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,15 +10,16 @@ type Props = {
   /** Errores que ya devolvio Django tras un intento fallido. */
   errors: string[];
   email: string;
+  logoUrl: string;
 };
 
-export default function Login({ csrfToken, errors, email }: Props) {
+export default function Login({ csrfToken, errors, email, logoUrl }: Props) {
   return (
     <div className="flex min-h-svh w-full items-center justify-center bg-muted p-6">
       <div className="flex w-full max-w-sm flex-col gap-6">
         <div className="flex items-center justify-center gap-2 self-center text-lg font-semibold text-foreground">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Dumbbell className="size-5" />
+          <div className="flex size-10 items-center justify-center rounded-lg bg-white p-1.5 ring-1 ring-border">
+            <img src={logoUrl} alt="" className="size-full object-contain" />
           </div>
           Neural Manager
         </div>

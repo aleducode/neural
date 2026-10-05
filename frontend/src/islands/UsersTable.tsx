@@ -154,7 +154,7 @@ export default function UsersTable({ users, detailUrl }: Props) {
                         className={cn(
                           "flex h-10 w-10 flex-none items-center justify-center rounded-full text-sm font-semibold",
                           user.membership
-                            ? "bg-emerald-500 text-white"
+                            ? "bg-primary text-primary-foreground"
                             : "bg-muted text-muted-foreground",
                         )}
                       >

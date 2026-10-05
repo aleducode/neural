@@ -14,7 +14,7 @@
   </a>
 </div>
 
-{% comment %} Isla de React. A diferencia de la de socios, los datos no vienen en la
+{% comment %} Isla de React. A diferencia de la de usuarios, los datos no vienen en la
    pagina: son miles de filas y se piden por pagina a notification_feed. {% endcomment %}
 {{ island_props|json_script:"notifications-table-props" }}
 <div data-island="notifications-table"></div>

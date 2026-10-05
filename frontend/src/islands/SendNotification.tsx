@@ -10,7 +10,7 @@ type Candidate = { id: number; name: string; initials: string; email: string };
 type Props = {
   users: Candidate[];
   types: { value: string; label: string }[];
-  /** Cuando se entra desde el detalle de un socio, ya viene elegido. */
+  /** Cuando se entra desde el detalle de un usuario, ya viene elegido. */
   lockedUser: Candidate | null;
   defaultType: string;
   cancelUrl: string;
@@ -70,7 +70,7 @@ export default function SendNotification({
           </h2>
         </div>
 
-        <div className="space-y-5 p-6">
+        <div className="flex flex-col gap-5 p-6">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">
               Usuario *
@@ -78,7 +78,7 @@ export default function SendNotification({
 
             {lockedUser ? (
               <div className="flex items-center gap-3 rounded-md border border-border bg-secondary p-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white">
+                <span className="flex size-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
                   {lockedUser.initials}
                 </span>
                 <div className="min-w-0">
@@ -227,7 +227,7 @@ export default function SendNotification({
           <div className="rounded-xl border border-border bg-muted p-4">
             <div className="rounded-lg bg-background p-3 shadow-sm">
               <div className="flex items-start gap-3">
-                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white">
+                <span className="flex size-8 flex-none items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
                   N
                 </span>
                 <div className="min-w-0 flex-1">
@@ -244,7 +244,7 @@ export default function SendNotification({
             <div className="mt-3 text-center text-[0.6875rem] text-muted-foreground">Ahora</div>
           </div>
 
-          <ul className="mt-4 space-y-1 border-t border-border pt-4 text-xs text-muted-foreground">
+          <ul className="mt-4 flex flex-col gap-1 border-t border-border pt-4 text-xs text-muted-foreground">
             <li>La notificación se enviará inmediatamente</li>
             <li>El usuario debe tener un dispositivo registrado</li>
             <li>Se enviará a todos los dispositivos activos del usuario</li>

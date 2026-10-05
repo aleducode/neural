@@ -1,187 +1,289 @@
-import { ArrowRight, Bell, Users } from "lucide-react";
+import {
+  ArrowRight,
+  BellPlus,
+  CalendarClock,
+  CreditCard,
+  Flame,
+  LineChart,
+  Wallet,
+} from "lucide-react";
 
+import GrowthChart, { type GrowthPoint, type GrowthSeries } from "@/components/charts/GrowthChart";
+import RevenueDonut, { type Segment } from "@/components/charts/RevenueDonut";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MemberAvatar } from "@/components/ui/member-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { StatWidget, type Kpi } from "@/components/ui/stat-widget";
 import { Table, TableCell, TableHead, TableRow } from "@/components/ui/table";
+import { DeltaPill, Widget, WidgetHeader } from "@/components/ui/widget";
 
-type Stat = { label: string; value: number; description: string };
-type RecentUser = { id: number; name: string; initials: string; email: string; joined: string };
-type RecentNotification = {
+type PopularClass = {
   id: number;
-  title: string;
-  userName: string;
+  name: string;
+  kind: string;
+  duration: string | null;
+  bookings: number;
+  image: string;
+};
+
+type Payment = {
+  id: number;
+  userId: number;
+  reference: string;
+  name: string;
+  initials: string;
+  photo: string | null;
+  plan: string;
+  amount: string;
+  date: string;
+  paid: boolean;
   status: string;
-  statusLabel: string;
 };
 
 type Props = {
-  stats: Stat[];
-  users: RecentUser[];
-  notifications: RecentNotification[];
+  today: string;
+  kpis: Kpi[];
+  growth: {
+    points: GrowthPoint[];
+    total: number;
+    delta: number | null;
+    range: string;
+    series: GrowthSeries[];
+  };
+  classes: PopularClass[];
+  revenue: { segments: Segment[]; total: string; period: string };
+  payments: Payment[];
+  gaps: string[];
   usersUrl: string;
-  notificationsUrl: string;
   userDetailUrl: string;
+  sendUrl: string;
 };
 
-function badgeFor(status: string) {
-  if (status === "sent" || status === "delivered") return "success" as const;
-  if (status === "failed") return "error" as const;
-  if (status === "read") return "info" as const;
-  return "neutral" as const;
-}
-
-function Empty({ icon, title, text }: { icon: JSX.Element; title: string; text: string }) {
-  return (
-    <div className="px-8 py-14 text-center">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
-        {icon}
-      </div>
-      <h5 className="mb-2 text-base font-semibold text-foreground">{title}</h5>
-      <p className="text-sm text-muted-foreground">{text}</p>
-    </div>
-  );
-}
-
 export default function Dashboard({
-  stats,
-  users,
-  notifications,
+  today,
+  kpis,
+  growth,
+  classes,
+  revenue,
+  payments,
+  gaps,
   usersUrl,
-  notificationsUrl,
   userDetailUrl,
+  sendUrl,
 }: Props) {
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.label} className="p-5 transition-colors hover:border-slate-300">
-            <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {stat.label}
-            </div>
-            <div className="text-3xl font-bold leading-none text-foreground">
-              {stat.value.toLocaleString("es-CO")}
-            </div>
-            <div className="mt-2 text-xs text-muted-foreground">{stat.description}</div>
-          </Card>
+    <div className="flex flex-col gap-6">
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+          <p className="text-base text-muted-foreground">
+            Usuarios, ingresos y ocupación · {today}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <a href={sendUrl}>
+              <BellPlus />
+              Enviar notificación
+            </a>
+          </Button>
+          <Button size="sm" asChild>
+            <a href={usersUrl}>
+              Ver usuarios
+              <ArrowRight />
+            </a>
+          </Button>
+        </div>
+      </header>
+
+      {gaps.length > 0 && (
+        <Alert>
+          <AlertTitle>Faltan datos para algunos widgets</AlertTitle>
+          <AlertDescription>
+            Hay widgets vacíos porque {gaps.join(" y ")}. Lo que ves abajo es lo que el sistema
+            tiene, no un ejemplo.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        {kpis.map((kpi) => (
+          <StatWidget {...kpi} key={kpi.key} />
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <Card>
-          <CardHeader className="flex items-start justify-between gap-4">
-            <div>
-              <CardTitle>Usuarios recientes</CardTitle>
-              <CardDescription>Últimos usuarios registrados</CardDescription>
-            </div>
-            <Button variant="outline" size="sm" asChild>
-              <a href={usersUrl}>
-                Ver todos
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-          </CardHeader>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_372px]">
+        <Widget className="min-h-[400px]">
+          <WidgetHeader icon={<LineChart className="size-5" />} title="Crecimiento de usuarios" />
 
-          {users.length === 0 ? (
-            <Empty
-              icon={<Users className="h-6 w-6" />}
-              title="Sin usuarios"
-              text="No hay usuarios registrados aún."
-            />
+          {/* Cabecera de datos: el numero heroe, su variacion y la leyenda.
+              Con dos series la leyenda no es opcional. */}
+          <div className="flex flex-wrap items-center justify-between gap-4 p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-2xl font-semibold tabular-nums text-foreground">
+                {growth.total}
+              </span>
+              <DeltaPill delta={growth.delta} basis="entre el primer y el último mes" />
+              <span className="text-sm text-muted-foreground">usuarios nuevos {growth.range}</span>
+            </div>
+            <ul className="flex items-center gap-3">
+              {growth.series.map((serie) => (
+                <li key={serie.key} className="flex items-center gap-1.5">
+                  <span
+                    className="size-2 flex-none rounded-sm"
+                    style={{
+                      background: serie.key === "newUsers" ? "var(--series-1)" : "var(--series-2)",
+                    }}
+                    aria-hidden="true"
+                  />
+                  <span className="text-sm text-muted-foreground">{serie.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <GrowthChart points={growth.points} series={growth.series} />
+        </Widget>
+
+        <Widget className="min-h-[400px]">
+          <WidgetHeader icon={<Flame className="size-5" />} title="Clases más pedidas">
+            <span className="text-xs text-muted-foreground">Últimos 30 días</span>
+          </WidgetHeader>
+
+          {classes.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Flame />
+                </EmptyMedia>
+                <EmptyTitle>Sin reservas este mes</EmptyTitle>
+                <EmptyDescription>
+                  Ningún tipo de entrenamiento tuvo reservas en los últimos 30 días.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
-            <Table>
-              <thead>
-                <tr>
-                  <TableHead>Usuario</TableHead>
-                  <TableHead>Fecha</TableHead>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <a
-                        href={userDetailUrl.replace("/0/", `/${user.id}/`)}
-                        className="flex items-center gap-3 no-underline"
-                      >
-                        <span className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-emerald-500 text-sm font-semibold text-white">
-                          {user.initials}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-foreground">
-                            {user.name}
-                          </span>
-                          <span className="block truncate text-xs text-muted-foreground">
-                            {user.email}
-                          </span>
-                        </span>
-                      </a>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                      {user.joined}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </tbody>
-            </Table>
+            <ul className="flex flex-col gap-4 p-5">
+              {classes.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-center gap-3 rounded-xl border border-border p-3"
+                >
+                  {/* Foto del tipo de entrenamiento (TrainingType.photo), con
+                      una de respaldo mientras el gimnasio no suba la suya. */}
+                  <img
+                    src={item.image}
+                    alt=""
+                    width={80}
+                    height={88}
+                    loading="lazy"
+                    className="h-[88px] w-20 flex-none rounded-xl bg-secondary object-cover"
+                  />
+                  <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
+                      <p className="text-xs text-faint">{item.kind}</p>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 text-xs text-faint">
+                      <span className="flex items-center gap-1">
+                        <CalendarClock className="size-4" aria-hidden="true" />
+                        {item.duration ?? "Sin horario fijo"}
+                      </span>
+                      <span className="tabular-nums">{item.bookings} reservas</span>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
-        </Card>
+        </Widget>
+      </div>
 
-        <Card>
-          <CardHeader className="flex items-start justify-between gap-4">
-            <div>
-              <CardTitle>Notificaciones recientes</CardTitle>
-              <CardDescription>Últimas notificaciones enviadas</CardDescription>
-            </div>
-            <Button variant="outline" size="sm" asChild>
-              <a href={notificationsUrl}>
-                Ver todas
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </Button>
-          </CardHeader>
+      <div className="grid gap-6 xl:grid-cols-[372px_minmax(0,1fr)]">
+        <Widget className="min-h-[400px]">
+          <WidgetHeader icon={<Wallet className="size-5" />} title="Ingresos por plan">
+            <span className="text-xs text-muted-foreground">{revenue.period}</span>
+          </WidgetHeader>
+          <RevenueDonut {...revenue} />
+        </Widget>
 
-          {notifications.length === 0 ? (
-            <Empty
-              icon={<Bell className="h-6 w-6" />}
-              title="Sin notificaciones"
-              text="No hay notificaciones enviadas aún."
-            />
+        <Widget>
+          <WidgetHeader icon={<CreditCard className="size-5" />} title="Últimos pagos" />
+
+          {payments.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <CreditCard />
+                </EmptyMedia>
+                <EmptyTitle>Sin pagos registrados</EmptyTitle>
+                <EmptyDescription>
+                  Todavía no hay ninguna referencia de pago en el sistema.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
-            <Table>
+            <Table className="min-w-[640px]">
               <thead>
                 <tr>
-                  <TableHead>Notificación</TableHead>
+                  <TableHead>Referencia</TableHead>
+                  <TableHead>Usuario</TableHead>
+                  <TableHead>Monto</TableHead>
+                  <TableHead>Fecha</TableHead>
                   <TableHead>Estado</TableHead>
                 </tr>
               </thead>
               <tbody>
-                {notifications.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <div className="max-w-[250px]">
-                        <div className="truncate text-sm font-medium text-foreground">
-                          {item.title}
-                        </div>
-                        <div className="truncate text-xs text-muted-foreground">
-                          {item.userName}
-                        </div>
-                      </div>
+                {payments.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell className="text-sm font-medium tabular-nums text-foreground">
+                      {payment.reference}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={badgeFor(item.status)}>{item.statusLabel}</Badge>
+                      <a
+                        href={userDetailUrl.replace("/0/", `/${payment.userId}/`)}
+                        className="flex items-center gap-2.5 no-underline"
+                      >
+                        <MemberAvatar
+                          name={payment.name}
+                          initials={payment.initials}
+                          photo={payment.photo}
+                        />
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-medium text-foreground">
+                            {payment.name}
+                          </span>
+                          <span className="block truncate text-xs text-muted-foreground">
+                            {payment.plan}
+                          </span>
+                        </span>
+                      </a>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-sm font-medium tabular-nums text-foreground">
+                      {payment.amount}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-sm text-foreground">
+                      {payment.date}
+                    </TableCell>
+                    <TableCell>
+                      <Badge dot variant={payment.paid ? "success" : "neutral"}>
+                        {payment.status}
+                      </Badge>
                     </TableCell>
                   </TableRow>
                 ))}
               </tbody>
             </Table>
           )}
-        </Card>
+        </Widget>
       </div>
     </div>
   );
