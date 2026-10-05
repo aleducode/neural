@@ -3,6 +3,7 @@ import "./index.css";
 
 import AppShell from "./islands/AppShell";
 import Dashboard from "./islands/Dashboard";
+import Login from "./islands/Login";
 import NotificationsTable from "./islands/NotificationsTable";
 import SendNotification from "./islands/SendNotification";
 import UsersTable from "./islands/UsersTable";
@@ -17,6 +18,7 @@ import UsersTable from "./islands/UsersTable";
 const ISLANDS: Record<string, (props: any) => JSX.Element> = {
   "app-shell": AppShell,
   dashboard: Dashboard,
+  login: Login,
   "notifications-table": NotificationsTable,
   "send-notification": SendNotification,
   "users-table": UsersTable,

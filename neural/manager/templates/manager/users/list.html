@@ -10,8 +10,8 @@
   </div>
 </div>
 
-{# Isla de React: buscar, filtrar y paginar ocurren en el cliente.
-   json_script escapa el contenido, asi que un nombre con < o & no rompe nada. #}
+{% comment %} Isla de React: buscar, filtrar y paginar ocurren en el cliente.
+   json_script escapa el contenido, asi que un nombre con < o & no rompe nada. {% endcomment %}
 {{ island_props|json_script:"users-table-props" }}
 <div data-island="users-table"></div>
 {% endblock %}

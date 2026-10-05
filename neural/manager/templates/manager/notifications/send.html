@@ -23,8 +23,8 @@
   </div>
 {% endif %}
 
-{# Isla de React: el buscador de usuario y la vista previa viven aca.
-   El formulario sigue siendo un POST normal a esta misma vista. #}
+{% comment %} Isla de React: el buscador de usuario y la vista previa viven aca.
+   El formulario sigue siendo un POST normal a esta misma vista. {% endcomment %}
 {{ island_props|json_script:"send-notification-props" }}
 <div data-island="send-notification"></div>
 {% endblock %}

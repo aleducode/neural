@@ -28,9 +28,9 @@
     {% endfor %}
   {% endif %}
 
-  {# El shell (sidebar + header) es una isla de React. El contenido lo sigue
+  {% comment %} El shell (sidebar + header) es una isla de React. El contenido lo sigue
      renderizando Django: la isla lo adopta dentro del inset al montarse, por
-     eso nace oculto y sin estilos propios. #}
+     eso nace oculto y sin estilos propios. {% endcomment %}
   {{ shell_props|json_script:"app-shell-props" }}
   <div data-island="app-shell"></div>
 

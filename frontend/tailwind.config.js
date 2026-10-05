@@ -2,9 +2,6 @@
 export default {
     darkMode: ["class"],
     content: ["./src/**/*.{ts,tsx}", "../neural/manager/templates/**/*.html"],
-  // manager.css sigue vistiendo las pantallas que todavia no son islas, asi
-  // que el reset de Tailwind no puede entrar a pisarlas.
-  corePlugins: { preflight: false },
   theme: {
   	extend: {
   		colors: {

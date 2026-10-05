@@ -119,6 +119,18 @@ class ManagerLoginView(FormView):
                 return redirect("manager:dashboard")
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        # El login no pasa por SuperStaffRequiredMixin, asi que arma sus props
+        # por su cuenta: todavia no hay sesion de la que sacar un usuario.
+        context = super().get_context_data(**kwargs)
+        form = context["form"]
+        context["island_props"] = {
+            "csrfToken": get_token(self.request),
+            "errors": [str(e) for errors in form.errors.values() for e in errors],
+            "email": form.data.get("email", ""),
+        }
+        return context
+
     def form_valid(self, form):
         user = form.get_user()
         login(self.request, user)
