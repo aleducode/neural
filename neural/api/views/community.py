@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from neural.community.models import Post, Reaction, Comment
 from neural.users.models import User, Profile, UserStrike
+from neural.users.display import display_name, initials
 from neural.community.serializers import (
     PostSerializer,
     CreatePostSerializer,
@@ -35,30 +36,6 @@ REACTION_EMOJIS = {
     "clap": "👏",
     "heart": "❤️",
 }
-
-
-def display_name(user):
-    """Nombre del socio, o None si nunca lo cargo.
-
-    Antes caia al prefijo del correo, que publicaba media direccion ajena en
-    la pantalla de otro socio. La app pinta las iniciales cuando viene vacio.
-    """
-    return user.get_full_name().strip() or None
-
-
-def initials(user):
-    """Dos letras para el avatar. Sin nombre cargado salen del correo.
-
-    Dos letras no reconstruyen una direccion, y son estables para esa persona,
-    asi que el socio se ve igual en el ranking y en su perfil.
-    """
-    name = user.get_full_name().strip()
-    parts = name.split()
-    if len(parts) >= 2:
-        return f"{parts[0][0]}{parts[1][0]}".upper()
-    if name:
-        return name[:2].upper()
-    return user.email[:2].upper()
 
 
 class FeedView(APIView):

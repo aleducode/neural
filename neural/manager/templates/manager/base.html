@@ -16,6 +16,9 @@
 
   <!-- Manager CSS -->
   <link rel="stylesheet" href="{% static 'manager/css/manager.css' %}">
+  <!-- Islas de React (Tailwind + shadcn). Se construye con `npm run build`
+       dentro de frontend/ y el resultado se versiona. -->
+  <link rel="stylesheet" href="{% static 'manager/bundle/manager.css' %}">
 
   {% block css %}{% endblock %}
 </head>
@@ -88,6 +91,7 @@
 
   <!-- Manager JS -->
   <script src="{% static 'manager/js/manager.js' %}"></script>
+  <script type="module" src="{% static 'manager/bundle/manager.js' %}"></script>
   {% block js %}{% endblock %}
 </body>
 </html>

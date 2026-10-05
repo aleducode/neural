@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Los tokens salen de docs/DESIGN_SYSTEM.md, no del tema por defecto de
+   shadcn: el panel ya tenia identidad y las islas tienen que heredarla.
+   Van prefijados con --mgr- para no chocar con manager.css. */
+:root {
+  --mgr-background: 0 0% 100%;          /* #ffffff */
+  --mgr-foreground: 222.2 47.4% 11.2%;  /* #0f172a */
+  --mgr-muted: 210 40% 96.1%;           /* #f1f5f9 */
+  --mgr-muted-foreground: 215.4 16.3% 46.9%; /* #64748b */
+  --mgr-border: 214.3 31.8% 91.4%;      /* #e2e8f0 */
+  --mgr-input: 214.3 31.8% 91.4%;
+  --mgr-ring: 222.2 47.4% 11.2%;
+  --mgr-primary: 222.2 47.4% 11.2%;     /* #0f172a */
+  --mgr-primary-foreground: 0 0% 100%;
+  --mgr-secondary: 210 40% 98%;         /* #f8fafc */
+  --mgr-secondary-foreground: 222.2 47.4% 11.2%;
+  --mgr-destructive: 0 84.2% 60.2%;     /* #ef4444 */
+  --mgr-destructive-foreground: 0 0% 100%;
+  --mgr-success: 142.1 70.6% 45.3%;     /* #22c55e */
+  --mgr-success-foreground: 144.9 80.4% 10%;
+  --mgr-radius: 0.75rem;                /* radio de tarjetas del sistema */
+}

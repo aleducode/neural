@@ -5,8 +5,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db.models import Q, Count, Prefetch
 from django.shortcuts import redirect, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.views.generic import (
     TemplateView,
     FormView,
@@ -26,6 +27,7 @@ from neural.services.push_notifications import (
     PushNotificationService,
     NotificationPayload,
 )
+from neural.users.display import display_name, initials
 from neural.manager.forms import ManagerLoginForm, SendNotificationForm, DeviceForm
 
 
@@ -107,15 +109,20 @@ class DashboardView(SuperStaffRequiredMixin, TemplateView):
 
 
 class UserListView(SuperStaffRequiredMixin, ListView):
-    """List view for users with search and filters."""
+    """Lista de socios. La tabla es una isla de React.
+
+    Buscar, filtrar y paginar pasaron al cliente: son ~740 filas, caben de
+    sobra en una respuesta y asi cada tecla deja de recargar la pagina.
+    """
 
     template_name = "manager/users/list.html"
     context_object_name = "users"
-    paginate_by = 20
 
     def get_queryset(self):
-        queryset = (
-            User.objects.filter(is_client=True)
+        return (
+            # is_staff fuera: las cuentas internas tienen is_client=True y se
+            # colaban como socios.
+            User.objects.filter(is_client=True, is_staff=False)
             .annotate(device_count=Count("devices", filter=Q(devices__is_active=True)))
             .select_related("profile")
             .prefetch_related(
@@ -128,38 +135,35 @@ class UserListView(SuperStaffRequiredMixin, ListView):
             .order_by("-date_joined")
         )
 
-        # Search
-        search = self.request.GET.get("q", "").strip()
-        if search:
-            queryset = queryset.filter(
-                Q(first_name__icontains=search)
-                | Q(last_name__icontains=search)
-                | Q(email__icontains=search)
-                | Q(phone_number__icontains=search)
-            )
-
-        # Filter by membership status
-        membership_filter = self.request.GET.get("membership", "")
-        if membership_filter == "active":
-            queryset = queryset.filter(memberships__is_active=True)
-        elif membership_filter == "inactive":
-            queryset = queryset.exclude(memberships__is_active=True)
-
-        return queryset
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("q", "")
-        context["membership_filter"] = self.request.GET.get("membership", "")
-
-        # Counts for filter tabs
-        base_queryset = User.objects.filter(is_client=True)
-        context["total_count"] = base_queryset.count()
-        context["active_count"] = (
-            base_queryset.filter(memberships__is_active=True).distinct().count()
-        )
-        context["inactive_count"] = context["total_count"] - context["active_count"]
-
+        context["island_props"] = {
+            "users": [
+                {
+                    "id": user.pk,
+                    "name": display_name(user) or "Sin nombre",
+                    "initials": initials(user),
+                    "email": user.email,
+                    "phone": user.phone_number or "—",
+                    "joined": date_format(timezone.localtime(user.date_joined), "d M Y"),
+                    "devices": user.device_count,
+                    "membership": (
+                        {
+                            "expires": (
+                                date_format(membership.expiration_date, "d M Y")
+                                if membership.expiration_date
+                                else None
+                            )
+                        }
+                        if (membership := next(iter(user.active_memberships), None))
+                        else None
+                    ),
+                }
+                for user in context["users"]
+            ],
+            # La isla reemplaza el 0 por el id real.
+            "detailUrl": str(reverse("manager:user_detail", kwargs={"pk": 0})),
+        }
         return context
 
 
