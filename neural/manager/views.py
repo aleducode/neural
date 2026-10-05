@@ -370,10 +370,11 @@ class MemberDetailView(DetailBase):
             form = ActivatePlanForm(request.POST)
             if form.is_valid():
                 membresia = form.save(member)
+                # El formato lleva barras invertidas y un f-string no las admite
+                # en la expresion, asi que se arma antes.
+                vence = date_format(membresia.expiration_date, "j \\d\\e F \\d\\e Y")
                 messages.success(
-                    request,
-                    f"{membresia.plan.name} activado hasta el "
-                    f"{date_format(membresia.expiration_date, 'j \\d\\e F \\d\\e Y')}.",
+                    request, f"{membresia.plan.name} activado hasta el {vence}."
                 )
                 return redirect("manager:user_detail", pk=member.pk)
             return self.render_to_response(
