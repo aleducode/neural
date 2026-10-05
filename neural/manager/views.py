@@ -713,6 +713,15 @@ class PackageListView(SectionView):
     island = "packages"
     metric = staticmethod(metrics.packages_page)
 
+    def build_props(self, today):
+        return {
+            **self.metric(today),
+            "kindChoices": [
+                {"value": value, "label": label}
+                for value, label in VideoPackage.Kind.choices
+            ],
+        }
+
     def post(self, request, *args, **kwargs):
         form = VideoPackageForm(request.POST, request.FILES)
         if form.is_valid():
