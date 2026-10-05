@@ -1,14 +1,19 @@
 """Manager app views."""
 
+import math
+
 from django.contrib.auth import login, logout
+from django.middleware.csrf import get_token
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db.models import Q, Count, Prefetch
+from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import (
+    View,
     TemplateView,
     FormView,
     DetailView,
@@ -47,6 +52,59 @@ class SuperStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
             return redirect("manager:login")
         return super().handle_no_permission()
 
+    # Navegacion del shell. Vive aca porque todas las pantallas del panel
+    # pasan por este mixin.
+    NAV = [
+        ("Principal", [("Dashboard", "manager:dashboard", "dashboard", ("dashboard",))]),
+        (
+            "Gestión",
+            [
+                ("Usuarios", "manager:user_list", "users", ("user_list", "user_detail", "device_edit")),
+                (
+                    "Notificaciones",
+                    "manager:notification_list",
+                    "bell",
+                    ("notification_list", "send_notification", "send_notification_user"),
+                ),
+            ],
+        ),
+    ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        current = getattr(self.request.resolver_match, "url_name", "")
+        context["shell_props"] = {
+            "title": self.shell_title,
+            "nav": [
+                {
+                    "group": group,
+                    "items": [
+                        {
+                            "label": label,
+                            "url": str(reverse(route)),
+                            "icon": icon,
+                            "active": current in actives,
+                        }
+                        for label, route, icon, actives in items
+                    ],
+                }
+                for group, items in self.NAV
+            ],
+            "user": {
+                "name": display_name(user) or user.email,
+                "initials": initials(user),
+                "role": "Superusuario" if user.is_superuser else "Staff",
+            },
+            "logoutUrl": str(reverse("manager:logout")),
+            "csrfToken": get_token(self.request),
+        }
+        return context
+
+    @property
+    def shell_title(self):
+        return getattr(self, "page_title", "Manager")
+
 
 class ManagerLoginView(FormView):
     """Login view for manager panel."""
@@ -68,43 +126,80 @@ class ManagerLoginView(FormView):
         return super().form_valid(form)
 
 
-class ManagerLogoutView(SuperStaffRequiredMixin, TemplateView):
-    """Logout view for manager panel."""
+class ManagerLogoutView(SuperStaffRequiredMixin, View):
+    """Cierra la sesion del panel.
 
-    def get(self, request, *args, **kwargs):
+    Solo POST: con GET bastaba un <img src=".../logout/"> en cualquier pagina
+    ajena para cerrarle la sesion a quien la visitara.
+    """
+
+    def post(self, request, *args, **kwargs):
         logout(request)
         messages.info(request, "Has cerrado sesión correctamente.")
         return redirect("manager:login")
 
 
 class DashboardView(SuperStaffRequiredMixin, TemplateView):
-    """Dashboard view with general statistics."""
+    """Resumen general. Es una isla."""
 
     template_name = "manager/dashboard.html"
+    page_title = "Dashboard"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         today = timezone.localdate()
 
-        context["total_users"] = User.objects.filter(is_client=True).count()
-        context["active_memberships"] = UserMembership.objects.filter(
-            is_active=True
-        ).count()
-        context["total_devices"] = Device.objects.filter(is_active=True).count()
-        context["notifications_today"] = PushNotification.objects.filter(
-            created__date=today
-        ).count()
+        # is_staff fuera: las cuentas internas tienen is_client=True y venian
+        # inflando el total de socios.
+        socios = User.objects.filter(is_client=True, is_staff=False)
 
-        # Recent users
-        context["recent_users"] = User.objects.filter(is_client=True).order_by(
-            "-date_joined"
-        )[:5]
-
-        # Recent notifications
-        context["recent_notifications"] = PushNotification.objects.select_related(
-            "user"
-        ).order_by("-created")[:5]
-
+        context["island_props"] = {
+            "stats": [
+                {
+                    "label": "Total socios",
+                    "value": socios.count(),
+                    "description": "Usuarios registrados",
+                },
+                {
+                    "label": "Membresías activas",
+                    "value": UserMembership.objects.filter(is_active=True).count(),
+                    "description": "Con membresía vigente",
+                },
+                {
+                    "label": "Dispositivos",
+                    "value": Device.objects.filter(is_active=True).count(),
+                    "description": "Dispositivos activos",
+                },
+                {
+                    "label": "Notificaciones hoy",
+                    "value": PushNotification.objects.filter(created__date=today).count(),
+                    "description": "Enviadas hoy",
+                },
+            ],
+            "users": [
+                {
+                    "id": u.pk,
+                    "name": display_name(u) or "Sin nombre",
+                    "initials": initials(u),
+                    "email": u.email,
+                    "joined": date_format(timezone.localtime(u.date_joined), "d M Y"),
+                }
+                for u in socios.order_by("-date_joined")[:5]
+            ],
+            "notifications": [
+                {
+                    "id": n.pk,
+                    "title": n.title,
+                    "userName": display_name(n.user) or "Sin nombre",
+                    "status": n.status,
+                    "statusLabel": n.get_status_display(),
+                }
+                for n in PushNotification.objects.select_related("user").order_by("-created")[:5]
+            ],
+            "usersUrl": str(reverse("manager:user_list")),
+            "notificationsUrl": str(reverse("manager:notification_list")),
+            "userDetailUrl": str(reverse("manager:user_detail", kwargs={"pk": 0})),
+        }
         return context
 
 
@@ -114,6 +209,8 @@ class UserListView(SuperStaffRequiredMixin, ListView):
     Buscar, filtrar y paginar pasaron al cliente: son ~740 filas, caben de
     sobra en una respuesta y asi cada tecla deja de recargar la pagina.
     """
+
+    page_title = "Usuarios"
 
     template_name = "manager/users/list.html"
     context_object_name = "users"
@@ -170,6 +267,8 @@ class UserListView(SuperStaffRequiredMixin, ListView):
 class UserDetailView(SuperStaffRequiredMixin, DetailView):
     """Detail view for a single user."""
 
+    page_title = "Detalle de usuario"
+
     template_name = "manager/users/detail.html"
     context_object_name = "user_obj"
 
@@ -180,8 +279,9 @@ class UserDetailView(SuperStaffRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         user = self.object
 
-        # Profile
-        context["profile"], _ = Profile.objects.get_or_create(user=user)
+        # Solo lectura: get_or_create convertia una visita en una escritura y
+        # llenaba la tabla de perfiles vacios de gente que solo fuiste a mirar.
+        context["profile"] = Profile.objects.filter(user=user).first()
 
         # Active membership
         context["membership"] = UserMembership.objects.filter(
@@ -204,27 +304,20 @@ class UserDetailView(SuperStaffRequiredMixin, DetailView):
         return context
 
 
-class NotificationListView(SuperStaffRequiredMixin, ListView):
-    """List view for all notifications."""
+class NotificationFilterMixin:
+    """Filtros compartidos por la pagina y por el endpoint que la alimenta."""
 
-    template_name = "manager/notifications/list.html"
-    context_object_name = "notifications"
-    paginate_by = 30
-
-    def get_queryset(self):
+    def filtered_notifications(self):
         queryset = PushNotification.objects.select_related("user").order_by("-created")
 
-        # Filter by type
         notification_type = self.request.GET.get("type", "")
         if notification_type:
             queryset = queryset.filter(notification_type=notification_type)
 
-        # Filter by status
         status = self.request.GET.get("status", "")
         if status:
             queryset = queryset.filter(status=status)
 
-        # Search by user
         search = self.request.GET.get("q", "").strip()
         if search:
             queryset = queryset.filter(
@@ -236,18 +329,80 @@ class NotificationListView(SuperStaffRequiredMixin, ListView):
 
         return queryset
 
+
+class NotificationListView(SuperStaffRequiredMixin, NotificationFilterMixin, TemplateView):
+    """Historial de notificaciones. La tabla es una isla.
+
+    Son miles de filas, asi que a diferencia de la de socios esta se pagina en
+    el servidor: la isla pide cada pagina a NotificationFeedView.
+    """
+
+    page_title = "Notificaciones"
+
+    template_name = "manager/notifications/list.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("q", "")
-        context["type_filter"] = self.request.GET.get("type", "")
-        context["status_filter"] = self.request.GET.get("status", "")
-        context["notification_types"] = PushNotification.NotificationType.choices
-        context["notification_statuses"] = PushNotification.Status.choices
+        context["island_props"] = {
+            "feedUrl": str(reverse("manager:notification_feed")),
+            "userDetailUrl": str(reverse("manager:user_detail", kwargs={"pk": 0})),
+            "types": [
+                {"value": v, "label": label}
+                for v, label in PushNotification.NotificationType.choices
+            ],
+            "statuses": [
+                {"value": v, "label": label}
+                for v, label in PushNotification.Status.choices
+            ],
+        }
         return context
+
+
+class NotificationFeedView(SuperStaffRequiredMixin, NotificationFilterMixin, View):
+    """Pagina de notificaciones en JSON, para la isla."""
+
+    PAGE_SIZE = 30
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.filtered_notifications()
+        total = queryset.count()
+
+        try:
+            page = max(1, int(request.GET.get("page", 1)))
+        except (TypeError, ValueError):
+            page = 1
+        offset = (page - 1) * self.PAGE_SIZE
+
+        rows = [
+            {
+                "id": n.pk,
+                "userId": n.user_id,
+                "userName": display_name(n.user) or "Sin nombre",
+                "userInitials": initials(n.user),
+                "title": n.title,
+                "body": n.body,
+                "type": n.get_notification_type_display(),
+                "status": n.status,
+                "statusLabel": n.get_status_display(),
+                "created": date_format(timezone.localtime(n.created), "d M Y, H:i"),
+            }
+            for n in queryset[offset : offset + self.PAGE_SIZE]
+        ]
+
+        return JsonResponse(
+            {
+                "results": rows,
+                "page": page,
+                "pages": max(1, math.ceil(total / self.PAGE_SIZE)),
+                "total": total,
+            }
+        )
 
 
 class SendNotificationView(SuperStaffRequiredMixin, FormView):
     """View to send push notifications."""
+
+    page_title = "Enviar notificación"
 
     template_name = "manager/notifications/send.html"
     form_class = SendNotificationForm
@@ -263,9 +418,35 @@ class SendNotificationView(SuperStaffRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user_id = self.kwargs.get("user_id")
-        if user_id:
-            context["target_user"] = get_object_or_404(User, pk=user_id)
+        target = get_object_or_404(User, pk=user_id) if user_id else None
+        if target:
+            context["target_user"] = target
+
+        def card(user):
+            return {
+                "id": user.pk,
+                "name": display_name(user) or "Sin nombre",
+                "initials": initials(user),
+                "email": user.email,
+            }
+
+        # Son ~140 con dispositivo activo: caben en la pagina, y asi el
+        # buscador responde sin ir al servidor ni cargar jQuery y Select2.
+        context["island_props"] = {
+            "users": [card(u) for u in self.fields_queryset()],
+            "types": [
+                {"value": v, "label": label}
+                for v, label in PushNotification.NotificationType.choices
+            ],
+            "lockedUser": card(target) if target else None,
+            "defaultType": PushNotification.NotificationType.GENERAL,
+            "cancelUrl": str(reverse("manager:notification_list")),
+            "csrfToken": get_token(self.request),
+        }
         return context
+
+    def fields_queryset(self):
+        return self.get_form().fields["user"].queryset
 
     def form_valid(self, form):
         user = form.cleaned_data["user"]
@@ -306,6 +487,8 @@ class SendNotificationView(SuperStaffRequiredMixin, FormView):
 
 class DeviceEditView(SuperStaffRequiredMixin, UpdateView):
     """View to edit a device token."""
+
+    page_title = "Dispositivo"
 
     model = Device
     form_class = DeviceForm

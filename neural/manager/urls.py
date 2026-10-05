@@ -9,6 +9,7 @@ from neural.manager.views import (
     UserListView,
     UserDetailView,
     NotificationListView,
+    NotificationFeedView,
     SendNotificationView,
     DeviceEditView,
 )
@@ -28,6 +29,12 @@ urlpatterns = [
     path("devices/<int:pk>/edit/", DeviceEditView.as_view(), name="device_edit"),
     # Notifications
     path("notifications/", NotificationListView.as_view(), name="notification_list"),
+    # Alimenta la isla de la tabla: son miles de filas, se paginan aca.
+    path(
+        "notifications/data/",
+        NotificationFeedView.as_view(),
+        name="notification_feed",
+    ),
     path(
         "notifications/send/", SendNotificationView.as_view(), name="send_notification"
     ),

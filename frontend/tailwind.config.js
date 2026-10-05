@@ -1,44 +1,65 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./src/**/*.{ts,tsx}", "../neural/manager/templates/**/*.html"],
+    darkMode: ["class"],
+    content: ["./src/**/*.{ts,tsx}", "../neural/manager/templates/**/*.html"],
   // manager.css sigue vistiendo las pantallas que todavia no son islas, asi
   // que el reset de Tailwind no puede entrar a pisarlas.
   corePlugins: { preflight: false },
   theme: {
-    extend: {
-      colors: {
-        border: "hsl(var(--mgr-border))",
-        input: "hsl(var(--mgr-input))",
-        ring: "hsl(var(--mgr-ring))",
-        background: "hsl(var(--mgr-background))",
-        foreground: "hsl(var(--mgr-foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--mgr-primary))",
-          foreground: "hsl(var(--mgr-primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--mgr-secondary))",
-          foreground: "hsl(var(--mgr-secondary-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--mgr-muted))",
-          foreground: "hsl(var(--mgr-muted-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--mgr-destructive))",
-          foreground: "hsl(var(--mgr-destructive-foreground))",
-        },
-        success: {
-          DEFAULT: "hsl(var(--mgr-success))",
-          foreground: "hsl(var(--mgr-success-foreground))",
-        },
-      },
-      borderRadius: {
-        lg: "var(--mgr-radius)",
-        md: "calc(var(--mgr-radius) - 2px)",
-        sm: "calc(var(--mgr-radius) - 4px)",
-      },
-    },
+  	extend: {
+  		colors: {
+  			border: 'hsl(var(--border))',
+  			input: 'hsl(var(--input))',
+  			ring: 'hsl(var(--ring))',
+  			background: 'hsl(var(--background))',
+  			foreground: 'hsl(var(--foreground))',
+  			primary: {
+  				DEFAULT: 'hsl(var(--primary))',
+  				foreground: 'hsl(var(--primary-foreground))'
+  			},
+  			secondary: {
+  				DEFAULT: 'hsl(var(--secondary))',
+  				foreground: 'hsl(var(--secondary-foreground))'
+  			},
+  			muted: {
+  				DEFAULT: 'hsl(var(--muted))',
+  				foreground: 'hsl(var(--muted-foreground))'
+  			},
+  			destructive: {
+  				DEFAULT: 'hsl(var(--destructive))',
+  				foreground: 'hsl(var(--destructive-foreground))'
+  			},
+  			accent: {
+  				DEFAULT: 'hsl(var(--accent))',
+  				foreground: 'hsl(var(--accent-foreground))'
+  			},
+  			card: {
+  				DEFAULT: 'hsl(var(--card))',
+  				foreground: 'hsl(var(--card-foreground))'
+  			},
+  			popover: {
+  				DEFAULT: 'hsl(var(--popover))',
+  				foreground: 'hsl(var(--popover-foreground))'
+  			},
+  			sidebar: {
+  				DEFAULT: 'hsl(var(--sidebar-background))',
+  				foreground: 'hsl(var(--sidebar-foreground))',
+  				primary: 'hsl(var(--sidebar-primary))',
+  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+  				accent: 'hsl(var(--sidebar-accent))',
+  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+  				border: 'hsl(var(--sidebar-border))',
+  				ring: 'hsl(var(--sidebar-ring))',
+  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))'
+  			}
+  		},
+  		borderRadius: {
+  			lg: 'var(--radius)',
+  			md: 'calc(var(--radius) - 2px)',
+  			sm: 'calc(var(--radius) - 4px)'
+  		}
+  	}
   },
   plugins: [],
 };

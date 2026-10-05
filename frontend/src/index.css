@@ -2,24 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Los tokens salen de docs/DESIGN_SYSTEM.md, no del tema por defecto de
-   shadcn: el panel ya tenia identidad y las islas tienen que heredarla.
-   Van prefijados con --mgr- para no chocar con manager.css. */
-:root {
-  --mgr-background: 0 0% 100%;          /* #ffffff */
-  --mgr-foreground: 222.2 47.4% 11.2%;  /* #0f172a */
-  --mgr-muted: 210 40% 96.1%;           /* #f1f5f9 */
-  --mgr-muted-foreground: 215.4 16.3% 46.9%; /* #64748b */
-  --mgr-border: 214.3 31.8% 91.4%;      /* #e2e8f0 */
-  --mgr-input: 214.3 31.8% 91.4%;
-  --mgr-ring: 222.2 47.4% 11.2%;
-  --mgr-primary: 222.2 47.4% 11.2%;     /* #0f172a */
-  --mgr-primary-foreground: 0 0% 100%;
-  --mgr-secondary: 210 40% 98%;         /* #f8fafc */
-  --mgr-secondary-foreground: 222.2 47.4% 11.2%;
-  --mgr-destructive: 0 84.2% 60.2%;     /* #ef4444 */
-  --mgr-destructive-foreground: 0 0% 100%;
-  --mgr-success: 142.1 70.6% 45.3%;     /* #22c55e */
-  --mgr-success-foreground: 144.9 80.4% 10%;
-  --mgr-radius: 0.75rem;                /* radio de tarjetas del sistema */
+/* Nombres estandar de shadcn para que los bloques oficiales entren sin
+   tocarlos, pero con los valores de docs/DESIGN_SYSTEM.md: el panel ya tenia
+   identidad y las islas la heredan. manager.css usa otros nombres
+   (--bg-primary, --text-primary), asi que no hay choque. */
+@layer base {
+  :root {
+    --background: 0 0% 100%;              /* #ffffff */
+    --foreground: 222.2 47.4% 11.2%;      /* #0f172a */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --primary: 222.2 47.4% 11.2%;         /* #0f172a */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 98%;             /* #f8fafc */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;               /* #f1f5f9 */
+    --muted-foreground: 215.4 16.3% 46.9%; /* #64748b */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;         /* #ef4444 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 214.3 31.8% 91.4%;          /* #e2e8f0 */
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 47.4% 11.2%;
+    --radius: 0.75rem;                    /* radio de tarjetas del sistema */
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
 }
