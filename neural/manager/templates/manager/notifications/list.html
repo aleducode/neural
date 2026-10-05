@@ -3,17 +3,7 @@
 {% block title %}Notificaciones{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <div>
-    <h1>Notificaciones</h1>
-    <p>Historial de notificaciones push enviadas</p>
-  </div>
-  <a href="{% url 'manager:send_notification' %}" class="btn-primary">
-    <i class="ti ti-plus"></i>
-    Nueva Notificación
-  </a>
-</div>
-
+{# La isla pinta su propia cabecera y su boton de enviar. #}
 {% comment %} Isla de React. A diferencia de la de usuarios, los datos no vienen en la
    pagina: son miles de filas y se piden por pagina a notification_feed. {% endcomment %}
 {{ island_props|json_script:"notifications-table-props" }}

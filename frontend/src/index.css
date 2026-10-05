@@ -151,3 +151,18 @@ body.manager-body,
 body {
   color: hsl(var(--foreground));
 }
+
+/* Las variables del manager.css heredado solo tienen valores claros, y las
+   pantallas que siguen en el panel viejo --enviar notificacion, el listado
+   antiguo-- pintan titulos con ellas. Sin esto, en modo oscuro el <h1> sale
+   casi negro sobre fondo oscuro. Se reapuntan a los tokens del tema. */
+:root[data-theme="dark"] {
+  --text-primary: hsl(var(--foreground));
+  --text-secondary: hsl(var(--muted-foreground));
+  --text-muted: hsl(var(--faint));
+  --border-default: hsl(var(--border));
+  --border-hover: hsl(var(--border));
+  --bg-primary: hsl(var(--card));
+  --bg-secondary: hsl(var(--background));
+  --bg-tertiary: hsl(var(--secondary));
+}
