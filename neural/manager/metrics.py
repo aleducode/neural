@@ -323,7 +323,7 @@ def recent_payments(limit=6):
     Bold and does not store the method, so that column shows the date instead,
     which does exist."""
     payments = (
-        UserPaymentReference.objects.select_related("user", "plan")
+        UserPaymentReference.objects.select_related("user", "user__profile", "plan")
         .order_by("-created")[:limit]
     )
     out = []
@@ -587,7 +587,7 @@ def bookings_page(today, days=30):
 
     bookings = (
         UserTraining.objects.filter(slot__date__gte=since, slot__date__lte=until)
-        .select_related("user", "slot", "slot__class_training__training_type")
+        .select_related("user", "user__profile", "slot", "slot__class_training__training_type")
         .order_by("-slot__date", "-created")
     )
 
@@ -1140,7 +1140,7 @@ def class_detail(class_id, today, days=30):
     if next_slot:
         for r in (
             UserTraining.objects.filter(slot=next_slot)
-            .select_related("user")
+            .select_related("user", "user__profile")
             .prefetch_related("user__memberships__plan")
             .order_by("created")
         ):
