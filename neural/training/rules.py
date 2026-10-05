@@ -50,12 +50,16 @@ def check_booking(user, day):
     """
     membresia = active_membership(user, day)
     if membresia is None:
+        # La ultima que ya vencio. Filtrar por fecha en la consulta y no mirar
+        # solo la mas reciente: con una membresia futura desactivada --algo que
+        # pasa al renovar-- la mas reciente no esta vencida y el socio recibia
+        # "no tenemos membresia a tu nombre" en vez de la fecha en que vencio.
         vencida = (
-            user.memberships.filter(expiration_date__isnull=False)
+            user.memberships.filter(expiration_date__lt=day)
             .order_by("-expiration_date")
             .first()
         )
-        if vencida and vencida.expiration_date < day:
+        if vencida:
             return False, VENCIDA.format(fecha=_fecha(vencida.expiration_date))
         return False, SIN_MEMBRESIA
 
