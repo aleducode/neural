@@ -59,8 +59,8 @@ export function DataTableCard({
   return (
     <Widget>
       <WidgetHeader icon={icon} title={title}>
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="relative flex-1 sm:flex-none">
             <Search
               className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
@@ -71,7 +71,7 @@ export function DataTableCard({
               onChange={(event) => onQuery(event.target.value)}
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
-              className="h-8 w-64 rounded-md pl-9 text-xs"
+              className="h-8 w-full rounded-md pl-9 text-xs sm:w-64"
             />
           </div>
           {actions}

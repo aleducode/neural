@@ -38,14 +38,21 @@ export function DetailHero({
         </div>
         <ul className="flex flex-wrap items-center gap-x-4 gap-y-1">
           {meta.map(({ icon: Icon, value }) => (
-            <li key={value} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <li
+              key={value}
+              className="flex min-w-0 max-w-full items-center gap-1.5 text-sm text-muted-foreground"
+            >
               <Icon className="size-4 flex-none text-faint" aria-hidden="true" />
-              {value}
+              {/* Un email largo no tiene donde cortar y se salia de su caja, hasta
+                  quedar pintado debajo del boton de accion. */}
+              <span className="min-w-0 [overflow-wrap:anywhere]">{value}</span>
             </li>
           ))}
         </ul>
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">{actions}</div>
+      )}
     </section>
   );
 }

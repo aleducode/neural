@@ -35,8 +35,10 @@ export function WidgetHeader({
   title: string;
   children?: ReactNode;
 }) {
+  // min-h en vez de h: en escritorio sigue midiendo 64, pero en un telefono el
+  // buscador baja a su propia linea en lugar de salirse de la tarjeta.
   return (
-    <header className="flex h-16 flex-none items-center justify-between gap-4 border-b border-border px-5">
+    <header className="flex min-h-16 flex-none flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border px-5 py-3">
       <h2 className="flex items-center gap-2 text-base font-medium text-muted-foreground">
         <span className="flex size-5 flex-none items-center justify-center" aria-hidden="true">
           {icon}
