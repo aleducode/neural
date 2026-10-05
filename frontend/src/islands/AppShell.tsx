@@ -46,7 +46,7 @@ type Props = {
   user: { name: string; initials: string; role: string };
   logoutUrl: string;
   csrfToken: string;
-  logoUrl: string;
+  logoUrl?: string;
 };
 
 const ICONS = {
@@ -81,7 +81,15 @@ export default function AppShell({ title, nav, user, logoutUrl, csrfToken, logoU
         <SidebarHeader className="h-20 flex-row items-center justify-between px-6 py-5 group-data-[collapsible=icon]:px-4">
           <a href="/manager/" className="flex items-center gap-2.5 no-underline">
             <span className="flex size-7 flex-none items-center justify-center overflow-hidden rounded-full bg-primary shadow-icon-box">
-              <img src={logoUrl} alt="" className="size-4 object-contain" />
+              {/* Sin logo real, el monograma. Un <img> sin src pinta el icono
+                  de imagen rota del navegador, que es lo que se veia. */}
+              {logoUrl ? (
+                <img src={logoUrl} alt="" className="size-4 object-contain" />
+              ) : (
+                <span className="text-xs font-semibold leading-none text-primary-foreground">
+                  N
+                </span>
+              )}
             </span>
             <span className="truncate text-base font-semibold text-sidebar-foreground group-data-[collapsible=icon]:hidden">
               Neural

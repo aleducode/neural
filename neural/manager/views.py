@@ -3,6 +3,8 @@
 import math
 
 from django.contrib.auth import login, logout
+from django.contrib.staticfiles import finders
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.middleware.csrf import get_token
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
@@ -141,6 +143,7 @@ class SuperStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
                 "role": "Superusuario" if user.is_superuser else "Staff",
             },
             "logoutUrl": str(reverse("manager:logout")),
+            "logoUrl": brand_logo_url(),
             "csrfToken": get_token(self.request),
         }
         return context
@@ -148,6 +151,26 @@ class SuperStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     @property
     def shell_title(self):
         return getattr(self, "page_title", "Manager")
+
+
+BRAND_LOGO = "manager/img/logo.svg"
+
+
+def brand_logo_url():
+    """The Neural logo for the shell and the login, or "" when there is none.
+
+    assets/img/ still holds the Bootstrap template's logo, not Neural's, so the
+    panel draws a monogram instead. Dropping the real file at
+    static/manager/img/logo.svg is all it takes to light this up; asking the
+    manifest for a file that was never collected raises ValueError under
+    WhiteNoise, hence the guard.
+    """
+    if not finders.find(BRAND_LOGO):
+        return ""
+    try:
+        return staticfiles_storage.url(BRAND_LOGO)
+    except ValueError:
+        return ""
 
 
 class ManagerLoginView(FormView):
@@ -172,6 +195,7 @@ class ManagerLoginView(FormView):
             "csrfToken": get_token(self.request),
             "errors": [str(e) for errors in form.errors.values() for e in errors],
             "email": form.data.get("email", ""),
+            "logoUrl": brand_logo_url(),
         }
         return context
 
