@@ -1,12 +1,16 @@
 {% comment %}
-Puerta de entrada a las apps nativas.
+Puerta de entrada a las apps nativas. Las dos estan publicadas.
 
-  iOS      -> bloquea la web y manda a la App Store (la app ya esta publicada).
-  Android  -> bloquea la web y manda a activar la prueba cerrada, con salida
-              para quien todavia no este autorizado como probador.
+  iOS      -> bloquea la web y manda a la App Store.
+  Android  -> manda a la ficha de Play Store, y por ahora deja seguir en la
+              web: «Seguir en la web por ahora». Esa salida venia de cuando
+              Android estaba en prueba cerrada y no todos podian entrar; ya no
+              hace falta, pero quitarla deja sin web a quien no quiera
+              instalar la app, asi que es una decision del negocio y no del
+              codigo.
 
-Cuando Android salga a produccion: apuntar ANDROID_URL a la ficha de Play y
-quitar el enlace de salida.
+La llave de localStorage lleva sufijo de version: al cambiar el mensaje hay
+que cambiarla, o quien cerro el aviso viejo no ve nunca el nuevo.
 {% endcomment %}
 <style>
   .neural-gate { font-family: "SUSE", "Open Sans", -apple-system, system-ui, sans-serif; }
@@ -48,10 +52,9 @@ quitar el enlace de salida.
 <script>
   (function () {
     var IOS_URL = "https://apps.apple.com/co/app/neural-consciente/id6756985459";
-    var ANDROID_URL = "https://play.google.com/apps/testing/com.ducode.neural";
     var ANDROID_STORE_URL = "https://play.google.com/store/apps/details?id=com.ducode.neural";
     var ICON = "/static/images/brain.png";
-    var DISMISS_KEY = "neural_android_banner";
+    var DISMISS_KEY = "neural_android_banner_v2";
 
     var ua = navigator.userAgent || "";
     var isIOS = /iPhone|iPad|iPod/.test(ua) ||
@@ -103,29 +106,23 @@ quitar el enlace de salida.
     }
 
     function androidGate() {
-      // Android sigue en prueba cerrada, asi que quien todavia no este
-      // autorizado necesita poder volver a la web. La eleccion se recuerda.
+      // La app ya esta publicada: se acabaron los dos pasos de la prueba
+      // cerrada. Queda un solo destino, la ficha de la Play Store.
       try {
         if (localStorage.getItem(DISMISS_KEY) === "off") return;
       } catch (e) {}
 
       lock();
-      var g = shell("Ya tenemos app para Android y está en pruebas. Actívala con tu cuenta de Gmail y descárgala de la Play Store.");
+      var g = shell("Agenda tus entrenos, sigue tu racha y conecta con la comunidad desde la app.");
 
-      var cta = el("a", "neural-gate__cta", "Activar mi prueba");
-      cta.href = ANDROID_URL;
+      var cta = el("a", "neural-gate__cta", "Abrir en Play Store");
+      cta.href = ANDROID_STORE_URL;
       cta.target = "_blank";
       cta.rel = "noopener";
       g.appendChild(cta);
 
       g.appendChild(el("p", "neural-gate__hint",
-        "Paso 1: dale a «Become a tester». Paso 2: descárgala de la Play Store."));
-
-      var store = el("a", "neural-gate__second", "Ya activé mi prueba &middot; Descargar");
-      store.href = ANDROID_STORE_URL;
-      store.target = "_blank";
-      store.rel = "noopener";
-      g.appendChild(store);
+        "¿Ya la tienes instalada? Ábrela desde tu pantalla de inicio."));
 
       var skip = el("button", "neural-gate__skip", "Seguir en la web por ahora");
       skip.type = "button";
