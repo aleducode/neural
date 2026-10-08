@@ -1549,6 +1549,7 @@ def _video_row(video):
         "sourceLabel": video.get_source_display(),
         "poster": video.poster,
         "playback": video.playback,
+        "posterSecond": video.poster_second,
         "duration": _duracion(video.duration_seconds),
         "seconds": video.duration_seconds,
         "level": video.get_level_display(),

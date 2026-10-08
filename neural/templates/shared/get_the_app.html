@@ -1,69 +1,139 @@
 {% load static %}{% comment %}
 La web de socios se mudó a la app. Esta es la única página que queda.
 
-Se sirve desde AppOnlyMiddleware, así que cubre cualquier ruta de socios, hoy
-y las que se agreguen. Quedan fuera el panel del equipo, el admin, la API, los
-estáticos, recuperar contraseña y las páginas de borrado de datos --esas dos
-las exigen públicas Google Play y App Store--.
+La sirve AppOnlyMiddleware para cualquier ruta de socios, hoy y las que se
+agreguen. Quedan fuera el panel, el admin, la API, los estáticos, recuperar
+contraseña y las páginas de borrado --esas dos las exigen públicas Google Play
+y App Store--.
+
+Usa el mismo CSS que el panel: de ahí salen Geist y los tokens de color, así
+que esto y el panel se ven de la misma familia sin mantener dos paletas.
+
+Los badges son los oficiales de Apple y Google, descargados de sus propias
+fuentes y sin modificar: son marcas registradas y se usan tal cual vienen.
 
 No detecta el sistema operativo: desde un escritorio no se sabe qué teléfono
-tiene la persona, así que se ofrecen las dos tiendas y que elija.
+tiene la persona, así que se ofrecen las dos.
 {% endcomment %}<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Neural Consciente · Descargá la app</title>
+  <meta name="description" content="Agendá tus entrenos, seguí tu racha y hacé tus rutinas en video desde la app de Neural Consciente.">
   <link rel="icon" type="image/png" href="{% static 'assets/img/favicon.ico' %}">
+  <link rel="stylesheet" href="{% static 'manager/bundle/manager.css' %}">
   <style>
-    * { box-sizing: border-box; }
     body {
-      margin: 0; min-height: 100svh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 2rem 1.5rem;
-      font-family: "SUSE", "Open Sans", -apple-system, system-ui, sans-serif;
-      background: radial-gradient(120% 90% at 50% 0%, #2a2a4a 0%, #1a1a2e 55%, #12121f 100%);
-      color: #fff;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 2rem 1.25rem;
+      background: hsl(var(--secondary));
+      color: hsl(var(--foreground));
     }
-    /* brain.png es negro: sin fondo claro se pierde contra el degradado */
-    .icon {
-      width: 92px; height: 92px; margin-bottom: 1.25rem; padding: 12px;
-      border-radius: 22px; background: #fff;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+
+    /* Tarjeta, no un bloque flotando en el medio: le da borde a la pagina y
+       es el mismo contenedor que usa el panel. */
+    .wrap {
+      width: 100%; max-width: 30rem; text-align: center;
+      padding: 3rem 2rem 2.25rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: 16px;
+      background: hsl(var(--card));
+      box-shadow: 0 1px 2px rgb(0 0 0 / .04), 0 24px 48px -28px rgb(0 0 0 / .25);
     }
-    .brand {
-      margin: 0; font-size: 1.05rem; letter-spacing: .18em;
-      text-transform: uppercase; color: #f5a623;
+
+    .mark {
+      width: 72px; height: 72px; margin: 0 auto 1.75rem;
+      display: grid; place-items: center;
+      border: 1px solid hsl(var(--border));
+      border-radius: 18px;
+      background: hsl(var(--card));
+      box-shadow: 0 1px 2px rgb(0 0 0 / .04), 0 8px 24px -12px rgb(0 0 0 / .18);
     }
-    h1 { margin: .15rem 0 1rem; font-size: 2.1rem; font-weight: 700; line-height: 1.1; }
-    .text { margin: 0 0 2rem; max-width: 22rem; font-size: 1rem; line-height: 1.5; color: #c8c8d4; }
-    .stores { display: flex; flex-wrap: wrap; gap: .9rem; justify-content: center; }
-    .cta {
-      display: inline-block; padding: 15px 30px; border-radius: 14px;
-      background: #f5a623; color: #1a1a2e; font-size: 1.02rem; font-weight: 700;
-      text-decoration: none; box-shadow: 0 10px 26px rgba(245, 166, 35, .32);
+    .mark img { width: 42px; height: 42px; }
+
+    .eyebrow {
+      margin: 0 0 .6rem;
+      font-size: .75rem; font-weight: 500; letter-spacing: .12em;
+      text-transform: uppercase; color: hsl(var(--muted-foreground));
     }
-    .cta:active { transform: translateY(1px); }
-    .hint { margin: 1.75rem 0 0; max-width: 21rem; font-size: .82rem; line-height: 1.5; color: #7c7c92; }
-    .hint a { color: #a8a8bd; }
+
+    h1 {
+      margin: 0 0 .75rem;
+      font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.15;
+    }
+
+    .lead {
+      margin: 0 auto 2.25rem; max-width: 26rem;
+      font-size: 1rem; line-height: 1.6; color: hsl(var(--muted-foreground));
+    }
+
+    /* Los dos badges vienen con proporciones distintas: el de Google trae un
+       margen propio dentro del PNG, así que necesita algo más de alto para
+       que los dos se vean del mismo tamaño. */
+    .stores {
+      display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center;
+      align-items: center;
+    }
+    .stores a { display: inline-flex; border-radius: 10px; }
+    .stores a:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
+    .stores img { display: block; }
+    .badge-apple { height: 48px; }
+    .badge-google { height: 64px; margin: -8px; }
+
+    .divider {
+      margin: 2.5rem 0 1.25rem;
+      border: 0; border-top: 1px solid hsl(var(--border));
+    }
+
+    .note {
+      margin: 0; font-size: .8125rem; line-height: 1.6;
+      color: hsl(var(--faint));
+    }
+    .note a { color: hsl(var(--muted-foreground)); text-underline-offset: 3px; }
+    .note a:hover { color: hsl(var(--foreground)); }
+
+    @media (max-width: 420px) {
+      .wrap { padding: 2.25rem 1.25rem 1.75rem; border-radius: 14px; }
+      h1 { font-size: 1.6rem; }
+      .stores { flex-direction: column; gap: .25rem; }
+    }
   </style>
 </head>
 <body>
-  <img class="icon" src="{% static 'images/brain.png' %}" alt="Neural">
-  <p class="brand">Neural</p>
-  <h1>Consciente</h1>
-  <p class="text">
-    Agendá tus entrenos, seguí tu racha y conectá con la comunidad desde la app.
-  </p>
+  <main class="wrap">
+    <div class="mark">
+      <img src="{% static 'images/brain.png' %}" alt="" width="42" height="42">
+    </div>
 
-  <div class="stores">
-    <a class="cta" href="https://apps.apple.com/co/app/neural-consciente/id6756985459">App Store</a>
-    <a class="cta" href="https://play.google.com/store/apps/details?id=com.ducode.neural">Play Store</a>
-  </div>
+    <p class="eyebrow">Neural Consciente</p>
+    <h1>La app ya está disponible</h1>
+    <p class="lead">
+      Agendá tus entrenos, seguí tu racha y hacé tus rutinas en video.
+      Todo lo que antes hacías acá, ahora desde el teléfono.
+    </p>
 
-  <p class="hint">
-    ¿Ya la tenés instalada? Abrila desde tu pantalla de inicio.<br>
-    ¿Sos del equipo? Entrá al <a href="/manager/">panel</a>.
-  </p>
+    <div class="stores">
+      <a href="https://apps.apple.com/co/app/neural-consciente/id6756985459"
+         aria-label="Descargar en el App Store">
+        <img class="badge-apple" src="{% static 'images/stores/app-store.svg' %}"
+             alt="Descargar en el App Store">
+      </a>
+      <a href="https://play.google.com/store/apps/details?id=com.ducode.neural"
+         aria-label="Disponible en Google Play">
+        <img class="badge-google" src="{% static 'images/stores/google-play.png' %}"
+             alt="Disponible en Google Play">
+      </a>
+    </div>
+
+    <hr class="divider">
+
+    <p class="note">
+      ¿Ya la tenés instalada? Abrila desde tu pantalla de inicio.<br>
+      ¿Sos del equipo? Entrá al <a href="/manager/">panel</a>.
+    </p>
+  </main>
 </body>
 </html>

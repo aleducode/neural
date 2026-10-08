@@ -28,6 +28,7 @@ type Row = {
   playback: string | null;
   duration: string;
   seconds: number;
+  posterSecond: number;
   level: string;
   type: string | null;
   published: boolean;
@@ -212,6 +213,15 @@ export default function Videos({
                 defaultValue={editando.seconds}
                 hint="Si subiste el archivo, ponela a mano hasta que Cloudflare la informe."
                 error={err("duration_seconds")}
+              />
+              <TextField
+                name="poster_second"
+                label="Miniatura (segundo)"
+                type="number"
+                min={1}
+                defaultValue={editando.posterSecond}
+                hint="En el segundo 1 casi nadie empezó: elegí uno donde se vea el movimiento."
+                error={err("poster_second")}
               />
               <SelectField name="level" label="Nivel" defaultValue={editando.levelValue} options={levelChoices} error={err("level")} />
             </div>

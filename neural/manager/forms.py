@@ -283,7 +283,8 @@ class VideoForm(forms.ModelForm):
         model = Video
         fields = [
             "name", "description", "source", "url", "file", "thumbnail",
-            "duration_seconds", "training_type", "level", "is_published",
+            "duration_seconds", "poster_second", "training_type", "level",
+            "is_published",
         ]
 
     def clean(self):
@@ -296,6 +297,15 @@ class VideoForm(forms.ModelForm):
         # De Cloudflare la sacamos solos; de un enlace de YouTube no hay forma.
         # Sin duracion la app no puede calcular el 95% de completado, ni el
         # "quedan 2:30", ni la barra: se rompe en silencio.
+        # Fuera del video, Cloudflare devuelve 400 y la miniatura no carga.
+        segundo = data.get("poster_second") or 1
+        duracion = data.get("duration_seconds") or 0
+        if duracion and segundo >= duracion:
+            self.add_error(
+                "poster_second",
+                f"El video dura {duracion} s: elegí un segundo menor.",
+            )
+
         if fuente != Video.Source.STREAM and not data.get("duration_seconds"):
             self.add_error(
                 "duration_seconds",

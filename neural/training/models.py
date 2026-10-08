@@ -195,6 +195,14 @@ class Video(NeuralBaseModel):
         "Miniatura", upload_to="videos/thumbs/", blank=True, null=True
     )
     duration_seconds = models.PositiveIntegerField("Duración (s)", default=0)
+    poster_second = models.PositiveIntegerField(
+        "Segundo de la miniatura",
+        default=1,
+        help_text=(
+            "De qué momento del video sale la miniatura. En el segundo 1 "
+            "casi nadie empezó todavía: elegí uno donde se vea el movimiento."
+        ),
+    )
     training_type = models.ForeignKey(
         TrainingType,
         on_delete=models.SET_NULL,
@@ -273,7 +281,12 @@ class Video(NeuralBaseModel):
         if self.source == self.Source.STREAM and self.stream_uid:
             from neural.services import cloudflare_stream
 
-            return cloudflare_stream.thumbnail_url(self.stream_uid)
+            # Cloudflare responde 400 si el segundo cae fuera del video, y
+            # entonces la miniatura no carga en ningun lado.
+            tope = max(self.duration_seconds - 1, 1) if self.duration_seconds else 1
+            return cloudflare_stream.thumbnail_url(
+                self.stream_uid, second=min(self.poster_second or 1, tope)
+            )
         return (
             f"https://i.ytimg.com/vi/{self.youtube_id}/hqdefault.jpg"
             if self.youtube_id
