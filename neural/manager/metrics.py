@@ -753,24 +753,92 @@ def calendar_month(today, year=None, month=None):
     }
 
 
+def _es_recepcion(pago):
+    return (pago.data or {}).get("method") == "recepcion"
+
+
+def unpaid_attempts(today, days=90, limit=30):
+    """Quién quiso pagar en la app y no pudo, agrupado por persona.
+
+    La app genera la referencia y ahí se corta: el checkout de Bold nunca se
+    construyó. Así que estas filas no son abandonos, son gente que intentó
+    pagar contra una pared. Agrupadas por persona, porque el mismo socio
+    reintenta --hay uno con 26-- y verlo 26 veces no dice nada.
+    """
+    desde = today - timedelta(days=days)
+    filas = {}
+    intentos = (
+        UserPaymentReference.objects.filter(is_paid=False, created__date__gte=desde)
+        .select_related("user", "user__profile", "plan")
+        .order_by("created")
+    )
+    for intento in intentos:
+        fila = filas.setdefault(
+            intento.user_id,
+            {
+                "id": intento.user_id,
+                "name": display_name(intento.user) or intento.user.email,
+                "initials": initials(intento.user),
+                "photo": photo_url(intento.user),
+                "email": intento.user.email,
+                "phone": intento.user.phone_number or "",
+                "plan": intento.plan.name if intento.plan else "Sin plan",
+                "attempts": 0,
+                "last": None,
+            },
+        )
+        fila["attempts"] += 1
+        fila["last"] = _fecha(timezone.localtime(intento.created).date())
+
+    # Quien ya tiene membresia se canso y fue a recepcion: no hay plata
+    # perdida, hay una molestia. Quien no la tiene, no esta entrenando.
+    activos = set(
+        UserMembership.objects.filter(
+            user_id__in=filas, is_active=True
+        ).values_list("user_id", flat=True)
+    )
+    for uid, fila in filas.items():
+        fila["solved"] = uid in activos
+
+    ordenadas = sorted(
+        filas.values(), key=lambda f: (f["solved"], -f["attempts"])
+    )
+    return ordenadas[:limit]
+
+
 def payments_page(today, limit=400):
-    """Payments: the «26. Transactions - List View» screen."""
+    """Pagos: la plata que entró, por dónde entró, y quién quiso pagar y no pudo.
+
+    Antes la pantalla listaba referencias de pago, que son intenciones y no
+    cobros: 754 sin pagar contra 66 pagadas. Mostraba el 5% del ingreso real
+    del gimnasio, porque lo que cobra recepción no pasaba por acá.
+    """
     this_month = month_start(today)
     last_month = month_start(today, 1)
 
-    paid_payments = UserPaymentReference.objects.filter(is_paid=True)
-    month_payments = paid_payments.filter(created__date__gte=this_month)
-    revenue_total = month_payments.aggregate(total=Sum("amount"))["total"] or Decimal(0)
-    previous_total = paid_payments.filter(
-        created__date__gte=last_month,
-        created__date__lt=last_month + timedelta(days=today.day),
-    ).aggregate(total=Sum("amount"))["total"] or Decimal(0)
+    cobros = list(
+        UserPaymentReference.objects.filter(
+            is_paid=True, created__date__gte=this_month
+        ).select_related("plan")
+    )
+    recepcion = [p for p in cobros if _es_recepcion(p)]
+    online = [p for p in cobros if not _es_recepcion(p)]
 
-    confirmed = month_payments.count()
-    pending = UserPaymentReference.objects.filter(
-        is_paid=False, created__date__gte=this_month
-    ).count()
-    ticket = _money(revenue_total) // confirmed if confirmed else 0
+    total = sum(int(p.amount) for p in cobros)
+    previo = int(
+        UserPaymentReference.objects.filter(
+            is_paid=True,
+            created__date__gte=last_month,
+            created__date__lt=last_month + timedelta(days=today.day),
+        ).aggregate(t=Sum("amount"))["t"]
+        or 0
+    )
+
+    atascados = unpaid_attempts(today)
+    sin_resolver = [f for f in atascados if not f["solved"]]
+
+    def plata(valor):
+        return f"$ {valor:,}".replace(",", ".")
 
     return {
         "kpis": [
@@ -778,22 +846,44 @@ def payments_page(today, limit=400):
                 "ingresos",
                 "wallet",
                 "Ingresos del mes",
-                f"$ {_money(revenue_total):,}".replace(",", "."),
-                pct_change(_money(revenue_total), _money(previous_total)),
+                plata(total),
+                pct_change(total, previo),
                 f"frente a los primeros {today.day} días del mes pasado",
             ),
-            _kpi("confirmed", "badge-check", "Pagos confirmados", confirmed, None, ""),
-            _kpi("pending", "circle-x", "Pendientes del mes", pending, None, ""),
             _kpi(
-                "ticket",
+                "recepcion",
                 "receipt",
-                "Ticket promedio",
-                f"$ {ticket:,}".replace(",", "."),
+                "Cobrado en recepción",
+                plata(sum(int(p.amount) for p in recepcion)),
                 None,
-                "",
+                f"{len(recepcion)} {'cobro' if len(recepcion) == 1 else 'cobros'}",
+            ),
+            _kpi(
+                "online",
+                "badge-check",
+                "Cobrado en línea",
+                plata(sum(int(p.amount) for p in online)),
+                None,
+                f"{len(online)} {'cobro' if len(online) == 1 else 'cobros'}",
+            ),
+            _kpi(
+                "atascados",
+                "circle-x",
+                "Quisieron pagar y no pudieron",
+                len(sin_resolver),
+                None,
+                "sin membresía, últimos 90 días",
             ),
         ],
         "rows": recent_payments(limit=limit),
+        "attempts": atascados,
+        "attemptsTotal": UserPaymentReference.objects.filter(is_paid=False).count(),
+        # La separacion por canal arranca hoy: antes recepcion no registraba
+        # nada, asi que los meses viejos figuran enteros como "en linea".
+        "sinceNote": (
+            "Los cobros de recepción se registran desde que el panel los pide "
+            "al activar un plan. Lo anterior a eso no está acá."
+        ),
     }
 
 

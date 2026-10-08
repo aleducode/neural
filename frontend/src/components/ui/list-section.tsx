@@ -40,7 +40,7 @@ type Props<T> = {
   emptyTitle: string;
   emptyDetail: string;
   /** Nota al pie de la tarjeta: de que periodo habla la tabla, por ejemplo. */
-  footnote?: string;
+  footnote?: ReactNode;
 };
 
 export function ListSection<T>({
