@@ -58,6 +58,16 @@ def client_users():
     return User.objects.filter(is_client=True, is_staff=False)
 
 
+def assignable_users():
+    """A quien se le puede asignar un modulo.
+
+    Incluye al equipo, a diferencia de `client_users()`: la gente del gimnasio
+    tambien entrena, y excluirla dejaba al dueno sin poder asignarse un modulo
+    a si mismo para probarlo. Las metricas siguen usando `client_users()`, que
+    no los cuenta --para eso se separaron."""
+    return User.objects.filter(is_client=True)
+
+
 def pct_change(current, previous):
     """Percent change, or None when there is no baseline to measure against.
 
@@ -1647,7 +1657,7 @@ def package_detail(package_id):
                 "initials": initials(u),
                 "photo": photo_url(u),
             }
-            for u in client_users()
+            for u in assignable_users()
             .select_related("profile")
             .order_by("first_name", "last_name")
         ],

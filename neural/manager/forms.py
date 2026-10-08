@@ -327,11 +327,13 @@ class AssignmentForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Choices come from the database, not the client: without this a
-        # handcrafted POST could assign the package to a staff account.
+        # Las opciones salen de la base y no del cliente: sin esto un POST
+        # armado a mano podria asignarle el modulo a una cuenta cualquiera.
+        # Se filtra por is_client y no por is_staff: la gente del equipo
+        # tambien entrena, y excluirlos dejaba al dueno fuera del selector de
+        # su propio panel.
         self.fields["users"].choices = [
-            (u.pk, u.pk)
-            for u in User.objects.filter(is_client=True, is_staff=False).only("pk")
+            (u.pk, u.pk) for u in User.objects.filter(is_client=True).only("pk")
         ]
 
     def clean(self):

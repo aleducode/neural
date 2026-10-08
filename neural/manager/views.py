@@ -723,6 +723,10 @@ class VideoListView(SectionView):
             return redirect("manager:video_list")
         context = self.get_context_data()
         context["island_props"]["errors"] = form.errors.get_json_data()
+        # Cual dialogo hay que volver a abrir: la pagina se re-renderiza y la
+        # isla pierde su estado, asi que sin esto el formulario rebotaba con el
+        # dialogo cerrado y el error no lo veia nadie.
+        context["island_props"]["errorId"] = int(pk) if pk else None
         return self.render_to_response(context)
 
 
@@ -809,6 +813,14 @@ class PackageDetailView(DetailBase):
                 form.save(package, assigned_by=request.user)
             else:
                 errors = form.errors.get_json_data()
+
+        elif action == "cover":
+            # Cambiar la portada desde la cabecera, que es donde la persona la
+            # busca. El mismo campo sigue estando en la ficha de mas abajo.
+            if request.FILES.get("cover"):
+                package.cover = request.FILES["cover"]
+                package.save(update_fields=["cover", "modified"])
+                messages.success(request, "Portada actualizada.")
 
         elif action == "note":
             # La indicacion del entrenador para ese video dentro de este modulo.

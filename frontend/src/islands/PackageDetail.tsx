@@ -8,9 +8,10 @@ import {
   Trash2,
   TrendingUp,
   Users,
+  ImagePlus,
   Video as VideoIcon,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -121,7 +122,7 @@ export default function PackageDetail({
       </Button>
 
       <DetailHero
-        portrait={<VideoThumb poster={paquete.cover} name={paquete.name} className="h-24 w-40" />}
+        portrait={<PortadaEditable cover={paquete.cover} name={paquete.name} csrfToken={csrfToken} />}
         title={paquete.name}
         badges={[
           { label: paquete.kindLabel, tone: paquete.kind === "individual" ? "warning" : "success" },
@@ -532,5 +533,54 @@ function EmptyCard({ icon, title, detail }: { icon: ReactNode; title: string; de
         <EmptyDescription>{detail}</EmptyDescription>
       </EmptyHeader>
     </Empty>
+  );
+}
+
+
+/**
+ * La portada, cambiable desde la cabecera.
+ *
+ * Estaba solo en la ficha, mas abajo: quien abria el modulo para cambiarle la
+ * imagen no encontraba donde, porque el lugar obvio es la imagen misma.
+ * Se envia sola al elegir el archivo; no hay un «guardar» aparte que olvidar.
+ */
+function PortadaEditable({
+  cover,
+  name,
+  csrfToken,
+}: {
+  cover: string | null;
+  name: string;
+  csrfToken: string;
+}) {
+  const form = useRef<HTMLFormElement>(null);
+
+  return (
+    <form
+      ref={form}
+      method="post"
+      encType="multipart/form-data"
+      className="group relative h-24 w-40 flex-none"
+    >
+      <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+      <input type="hidden" name="action" value="cover" />
+      <VideoThumb poster={cover} name={name} className="h-24 w-40" />
+      <label
+        className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-md bg-black/55 text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+        title="Cambiar la portada"
+      >
+        <span className="flex items-center gap-1.5">
+          <ImagePlus className="size-4" aria-hidden="true" />
+          {cover ? "Cambiar" : "Poner portada"}
+        </span>
+        <input
+          type="file"
+          name="cover"
+          accept="image/*"
+          className="sr-only"
+          onChange={() => form.current?.submit()}
+        />
+      </label>
+    </form>
   );
 }

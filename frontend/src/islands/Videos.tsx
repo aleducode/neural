@@ -47,6 +47,7 @@ type Props = {
   levelChoices: Choice[];
   trainingTypes: Choice[];
   errors?: Record<string, { message: string }[]>;
+  errorId?: number | null;
 };
 
 export default function Videos({
@@ -57,9 +58,16 @@ export default function Videos({
   levelChoices,
   trainingTypes,
   errors,
+  errorId,
 }: Props) {
-  const [abierto, setAbierto] = useState<"upload" | "link" | null>(null);
-  const [editando, setEditando] = useState<Row | null>(null);
+  // Si el formulario volvio con errores, hay que reabrir el dialogo del que
+  // salio: si no, el error viaja en las props y no lo ve nadie.
+  const [abierto, setAbierto] = useState<"upload" | "link" | null>(
+    errors && !errorId ? "link" : null,
+  );
+  const [editando, setEditando] = useState<Row | null>(
+    errors && errorId ? rows.find((r) => r.id === errorId) ?? null : null,
+  );
   const err = (campo: string) => errors?.[campo]?.[0]?.message;
 
   return (
