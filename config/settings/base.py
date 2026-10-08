@@ -129,6 +129,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "config.middleware.MembershipMiddleware",
+    # Va al final: lo que no sea panel, admin o API termina en la
+    # pagina de descarga. La web de socios se mudo a la app.
+    "config.middleware.AppOnlyMiddleware",
 ]
 
 # STATIC
