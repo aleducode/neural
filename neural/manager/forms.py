@@ -1,5 +1,6 @@
 """Manager app forms."""
 
+import secrets
 from datetime import timedelta
 
 from django import forms
@@ -12,6 +13,7 @@ from neural.users.models import (
     Device,
     NeuralPlan,
     Profile,
+    UserPaymentReference,
 )
 from neural.training.models import (
     Classes,
@@ -379,6 +381,12 @@ class ActivatePlanForm(forms.Form):
 
     plan = forms.IntegerField()
     init_date = forms.DateField(required=False)
+    # Recepcion cobra y hasta ahora eso no quedaba en ningun lado: el panel
+    # solo veia los pagos de Bold, que son el 8% de los reales. Se registra el
+    # cobro junto con la activacion, con el monto editable --hay descuentos--
+    # y la opcion de no cobrar nada, que existe para las cortesias.
+    charge = forms.BooleanField(required=False, initial=True)
+    amount = forms.DecimalField(required=False, max_digits=10, decimal_places=2)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -396,7 +404,7 @@ class ActivatePlanForm(forms.Form):
     def clean_init_date(self):
         return self.cleaned_data.get("init_date") or timezone.localdate()
 
-    def save(self, member):
+    def save(self, member, registrado_por=None):
         plan = self._plan
         inicio = self.cleaned_data["init_date"]
 
@@ -413,6 +421,25 @@ class ActivatePlanForm(forms.Form):
                 "sessions_total": plan.sessions,
             },
         )
+
+        if self.cleaned_data.get("charge"):
+            monto = self.cleaned_data.get("amount")
+            monto = plan.price if monto in (None, "") else monto
+            UserPaymentReference.objects.create(
+                user=member,
+                # El prefijo distingue a simple vista un cobro de recepcion de
+                # una referencia de Bold.
+                reference=f"REC-{secrets.token_hex(6).upper()}",
+                amount=monto,
+                is_paid=True,
+                plan=plan,
+                data={
+                    "source": "manager",
+                    "method": "recepcion",
+                    "by": registrado_por.email if registrado_por else None,
+                },
+            )
+
         return membresia
 
 

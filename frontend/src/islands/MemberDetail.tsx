@@ -59,7 +59,7 @@ type Props = {
   kpis: Kpi[];
   form: Record<string, string | number | boolean>;
   age: string | null;
-  planChoices: { value: string; label: string; days: number; sessions: number; price: string | null }[];
+  planChoices: { value: string; label: string; days: number; sessions: number; price: string | null; priceRaw: number }[];
   membership: {
     isTicketPack: boolean;
     sessionsTotal: number;
@@ -567,11 +567,12 @@ function ActivarPlan({
   planes,
   csrfToken,
 }: {
-  planes: { value: string; label: string; days: number; sessions: number; price: string | null }[];
+  planes: { value: string; label: string; days: number; sessions: number; price: string | null; priceRaw: number }[];
   csrfToken: string;
 }) {
   const [planId, setPlanId] = useState(planes[0]?.value ?? "");
   const [desde, setDesde] = useState(() => new Date().toISOString().slice(0, 10));
+  const [cobra, setCobra] = useState(true);
   const plan = planes.find((p) => p.value === planId);
 
   const vence = (() => {
@@ -612,6 +613,31 @@ function ActivarPlan({
         defaultValue={desde}
         onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDesde(event.target.value)}
       />
+
+      {/* Recepción cobra; si no se registra acá, esa plata no existe para el
+          panel. Por eso viene marcado, con el monto del plan ya puesto. */}
+      <label className="flex items-center gap-2 text-sm text-muted-foreground">
+        <input
+          type="checkbox"
+          name="charge"
+          defaultChecked
+          onChange={(event) => setCobra(event.target.checked)}
+          className="size-4 rounded-sm border-border accent-[hsl(var(--primary))]"
+        />
+        Registrar el cobro
+      </label>
+
+      {cobra && (
+        <TextField
+          name="amount"
+          label="Monto cobrado"
+          type="number"
+          min={0}
+          step={1000}
+          defaultValue={plan?.priceRaw ?? 0}
+          hint="Editalo si hubo descuento. En cero queda como cortesía."
+        />
+      )}
 
       {plan && vence && (
         <p className="rounded-md border border-border bg-secondary px-3 py-2 text-xs text-muted-foreground">

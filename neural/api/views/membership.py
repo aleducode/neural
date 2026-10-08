@@ -5,6 +5,8 @@ import random
 import string
 
 from django.conf import settings
+from datetime import timedelta
+
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -17,6 +19,10 @@ from neural.api.serializers.membership import (
 )
 from neural.training.rules import membership_summary
 from neural.users.models import NeuralPlan, UserMembership, UserPaymentReference
+
+
+# Dentro de esta ventana, volver a abrir el pago reusa la misma referencia.
+REUSE_WINDOW_HOURS = 24
 
 
 class MembershipView(APIView):
@@ -73,16 +79,35 @@ class CreatePaymentView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Generate unique reference
-        reference = "".join(random.choices(string.ascii_letters + string.digits, k=16))
-
-        # Create payment reference
-        UserPaymentReference.objects.create(
-            user=request.user,
-            reference=reference,
-            amount=plan.price,
-            plan=plan,
+        # Se reusa la referencia pendiente que ya tenga, en vez de crear una
+        # nueva en cada llamada. Antes cada apertura de la pantalla de pago
+        # dejaba una fila: hay 754 referencias sin pagar contra 66 pagadas, y
+        # socios con siete intentos del mismo plan. Bold firma sobre la
+        # referencia y el monto, asi que reusarla es valido mientras el precio
+        # no haya cambiado.
+        pendiente = (
+            UserPaymentReference.objects.filter(
+                user=request.user,
+                plan=plan,
+                amount=plan.price,
+                is_paid=False,
+                created__gte=timezone.now() - timedelta(hours=REUSE_WINDOW_HOURS),
+            )
+            .order_by("-created")
+            .first()
         )
+        if pendiente:
+            reference = pendiente.reference
+        else:
+            reference = "".join(
+                random.choices(string.ascii_letters + string.digits, k=16)
+            )
+            UserPaymentReference.objects.create(
+                user=request.user,
+                reference=reference,
+                amount=plan.price,
+                plan=plan,
+            )
 
         # Generate BOLD integrity signature
         amount = int(plan.price)

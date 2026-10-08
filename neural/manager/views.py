@@ -377,7 +377,7 @@ class MemberDetailView(DetailBase):
         if request.POST.get("action") == "activate-plan":
             form = ActivatePlanForm(request.POST)
             if form.is_valid():
-                membresia = form.save(member)
+                membresia = form.save(member, registrado_por=request.user)
                 # El formato lleva barras invertidas y un f-string no las admite
                 # en la expresion, asi que se arma antes.
                 vence = date_format(membresia.expiration_date, "j \\d\\e F \\d\\e Y")

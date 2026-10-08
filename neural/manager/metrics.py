@@ -329,9 +329,9 @@ def revenue_by_plan(today, months=12):
 def recent_payments(limit=6):
     """Latest payments.
 
-    The design has a «Payment Method» column. Neural charges everything through
-    Bold and does not store the method, so that column shows the date instead,
-    which does exist."""
+    El diseño pedía una columna «medio de pago». Antes no existía el dato
+    --todo pasaba por Bold-- pero ahora recepción registra sus cobros, que son
+    la mayoría, y la columna tiene sentido."""
     payments = (
         UserPaymentReference.objects.select_related("user", "user__profile", "plan")
         .order_by("-created")[:limit]
@@ -348,6 +348,11 @@ def recent_payments(limit=6):
                 "initials": initials(pago.user),
                 "photo": photo_url(pago.user),
                 "plan": pago.plan.name if pago.plan else "Sin plan",
+                "method": (
+                    "Recepción"
+                    if (pago.data or {}).get("method") == "recepcion"
+                    else "En línea"
+                ),
                 "amount": f"$ {_money(pago.amount):,}".replace(",", "."),
                 "date": f"{created_at.day} {MESES[created_at.month - 1]} {created_at.year}",
                 "paid": pago.is_paid,
@@ -897,6 +902,7 @@ def plan_choices():
             "days": p.duration,
             "sessions": p.sessions,
             "price": f"$ {_money(p.price):,}".replace(",", ".") if p.price else None,
+            "priceRaw": int(p.price),
         }
         for p in NeuralPlan.objects.order_by("sessions", "duration")
     ]

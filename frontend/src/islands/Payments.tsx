@@ -14,6 +14,7 @@ type Payment = {
   initials: string;
   photo: string | null;
   plan: string;
+  method: string;
   amount: string;
   date: string;
   paid: boolean;
@@ -40,13 +41,14 @@ export default function Payments({ kpis, rows, userDetailUrl }: Props) {
         { label: "Referencia" },
         { label: "Usuario" },
         { label: "Monto" },
+        { label: "Medio" },
         { label: "Fecha" },
         { label: "Estado" },
       ]}
       emptyIcon={<CreditCard />}
       emptyTitle="Sin pagos registrados"
       emptyDetail="Todavía no hay ninguna referencia de pago en el sistema."
-      footnote="El medio de pago no se guarda: todo entra por Bold, así que esa columna del diseño la ocupa la fecha."
+      footnote="«Recepción» son los cobros registrados al activar un plan en el panel; «En línea», los de Bold."
       renderRow={(row) => (
         <>
           <TableCell className="whitespace-nowrap text-sm font-medium tabular-nums text-foreground">
@@ -61,6 +63,11 @@ export default function Payments({ kpis, rows, userDetailUrl }: Props) {
           />
           <TableCell className="whitespace-nowrap text-sm font-medium tabular-nums text-foreground">
             {row.amount}
+          </TableCell>
+          <TableCell className="whitespace-nowrap">
+            <Badge variant={row.method === "Recepción" ? "neutral" : "info"}>
+              {row.method}
+            </Badge>
           </TableCell>
           <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
             {row.date}
