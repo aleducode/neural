@@ -102,3 +102,11 @@ class Command(BaseCommand):
                     f"{fallados} sin leer: ponelas a mano desde el panel."
                 )
             )
+            if fallados == len(candidatos):
+                # Comprobado: desde el servidor de produccion fallan los seis,
+                # desde una maquina de casa salen los seis. YouTube no le
+                # responde igual a una IP de datacenter.
+                self.stdout.write(
+                    "Fallaron todos. YouTube suele bloquear las IP de "
+                    "servidor: corré este comando desde una máquina común."
+                )
