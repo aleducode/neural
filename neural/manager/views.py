@@ -806,7 +806,7 @@ class PackageDetailView(DetailBase):
         elif action == "assign":
             form = AssignmentForm(request.POST)
             if form.is_valid():
-                form.save(package)
+                form.save(package, assigned_by=request.user)
             else:
                 errors = form.errors.get_json_data()
 

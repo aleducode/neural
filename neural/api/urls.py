@@ -42,6 +42,7 @@ from neural.api.views.notifications import (
 )
 from neural.api.views.videos import (
     MyPackagesView,
+    PackageDetailView,
     VideoProgressView,
 )
 from neural.api.views.community import (
@@ -99,6 +100,11 @@ urlpatterns = [
     path("training/types/", TrainingTypesView.as_view(), name="training_types"),
     # Videos
     path("videos/packages/", MyPackagesView.as_view(), name="my_video_packages"),
+    path(
+        "videos/packages/<int:pk>/",
+        PackageDetailView.as_view(),
+        name="video_package_detail",
+    ),
     path("videos/progress/", VideoProgressView.as_view(), name="video_progress"),
     # Membership
     path("membership/", MembershipView.as_view(), name="membership"),

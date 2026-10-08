@@ -291,6 +291,14 @@ class VideoForm(forms.ModelForm):
             self.add_error("url", "Un video de enlace necesita la URL.")
         if fuente == Video.Source.UPLOAD and not (data.get("file") or self.instance.file):
             self.add_error("file", "Un video subido necesita el archivo.")
+        # De Cloudflare la sacamos solos; de un enlace de YouTube no hay forma.
+        # Sin duracion la app no puede calcular el 95% de completado, ni el
+        # "quedan 2:30", ni la barra: se rompe en silencio.
+        if fuente != Video.Source.STREAM and not data.get("duration_seconds"):
+            self.add_error(
+                "duration_seconds",
+                "Poné la duración en segundos: sin ella la app no puede mostrar el avance.",
+            )
         return data
 
 
@@ -335,23 +343,30 @@ class AssignmentForm(forms.Form):
             self.add_error("plan", "Elegí qué plan.")
         return data
 
-    def save(self, package):
+    def save(self, package, assigned_by=None):
         target = self.cleaned_data["target"]
         # get_or_create, not create: the same assignment twice would inflate
         # the reach, and the database constraint does not cover duplicates.
+        # `assigned_by` solo se escribe al crearla: si ya existia, el credito es
+        # de quien la hizo la primera vez.
+        extra = {"assigned_by": assigned_by} if assigned_by else {}
         if target == "user":
             return [
-                PackageAssignment.objects.get_or_create(package=package, user_id=uid)[0]
+                PackageAssignment.objects.get_or_create(
+                    package=package, user_id=uid, defaults=extra
+                )[0]
                 for uid in self.cleaned_data["users"]
             ]
         if target == "plan":
             return [
                 PackageAssignment.objects.get_or_create(
-                    package=package, plan_id=self.cleaned_data["plan"]
+                    package=package, plan_id=self.cleaned_data["plan"], defaults=extra
                 )[0]
             ]
         return [
-            PackageAssignment.objects.get_or_create(package=package, everyone=True)[0]
+            PackageAssignment.objects.get_or_create(
+                package=package, everyone=True, defaults=extra
+            )[0]
         ]
 
 

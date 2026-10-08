@@ -15,7 +15,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from neural.training.models import Video, VideoPackage, VideoProgress
+from neural.training.models import (
+    PackageAssignment,
+    Video,
+    VideoPackage,
+    VideoProgress,
+)
+from neural.users.display import display_name
 from neural.users.models import UserMembership
 
 logger = logging.getLogger(__name__)
@@ -49,54 +55,126 @@ def assigned_packages(user):
     )
 
 
+def assignments_reaching(user, package_ids):
+    """La asignacion mas reciente que le hace llegar cada modulo.
+
+    Mismas tres vias que `assigned_packages`; si dos coinciden --le llega por
+    su plan y ademas se lo asignaron a el-- vale la ultima."""
+    if not package_ids:
+        return {}
+    plan_ids = list(
+        UserMembership.objects.filter(user=user, is_active=True).values_list(
+            "plan_id", flat=True
+        )
+    )
+    filas = (
+        PackageAssignment.objects.filter(
+            Q(user=user) | Q(plan_id__in=plan_ids) | Q(everyone=True),
+            package_id__in=package_ids,
+        )
+        .select_related("assigned_by")
+        .order_by("created")
+    )
+    # El orden ascendente deja la mas reciente al final, que es la que queda.
+    return {fila.package_id: fila for fila in filas}
+
+
+def serialize_package(package, progress, assignment):
+    """Un modulo tal como lo consume la app.
+
+    La usan la lista y el detalle: dos copias de esto se desincronizan en
+    cuanto alguien agrega un campo en una sola."""
+    videos = []
+    for item in package.items.all():
+        video = item.video
+        seen = progress.get(video.pk)
+        videos.append(
+            {
+                "id": video.pk,
+                "name": video.name,
+                "description": video.description,
+                "notes": item.notes,
+                "order": item.order,
+                "duration": video.duration_seconds,
+                "poster": video.poster,
+                "playback": video.playback,
+                "embed": video.embed,
+                "source": video.source,
+                # hls | youtube | file: con que reproductor se ve.
+                "player": video.player,
+                "seconds": seen.seconds if seen else 0,
+                "completed": bool(seen and seen.completed_at),
+            }
+        )
+    return {
+        "id": package.pk,
+        "name": package.name,
+        "description": package.description,
+        "cover": package.cover.url if package.cover else None,
+        "kind": package.kind,
+        "assigned_at": assignment.created.isoformat() if assignment else None,
+        "assigned_by": (
+            display_name(assignment.assigned_by)
+            if assignment and assignment.assigned_by
+            else None
+        ),
+        "videos": videos,
+        "completed": sum(1 for v in videos if v["completed"]),
+        "total": len(videos),
+    }
+
+
+def progress_map(user, packages):
+    """El progreso del socio, solo de los videos que estan en esos modulos."""
+    ids = [item.video_id for p in packages for item in p.items.all()]
+    return {
+        row.video_id: row
+        for row in VideoProgress.objects.filter(user=user, video_id__in=ids)
+    }
+
+
 class MyPackagesView(APIView):
     """The member's packages, with their own progress on each video."""
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        packages = assigned_packages(request.user)
-        progress = {
-            row.video_id: row
-            for row in VideoProgress.objects.filter(user=request.user)
-        }
+        packages = list(assigned_packages(request.user))
+        progress = progress_map(request.user, packages)
+        # Cuando y quien se lo asigno. Un modulo puede llegarle por tres vias
+        # --a el, a su plan, o a todos-- y puede haber mas de una: gana la mas
+        # reciente, que es la que el socio vive como "esto es nuevo".
+        reach = assignments_reaching(request.user, [p.pk for p in packages])
+        return Response(
+            {
+                "packages": [
+                    serialize_package(p, progress, reach.get(p.pk)) for p in packages
+                ]
+            }
+        )
 
-        payload = []
-        for package in packages:
-            videos = []
-            for item in package.items.all():
-                video = item.video
-                seen = progress.get(video.pk)
-                videos.append(
-                    {
-                        "id": video.pk,
-                        "name": video.name,
-                        "description": video.description,
-                        "notes": item.notes,
-                        "order": item.order,
-                        "duration": video.duration_seconds,
-                        "poster": video.poster,
-                        "playback": video.playback,
-                        "embed": video.embed,
-                        "source": video.source,
-                        "seconds": seen.seconds if seen else 0,
-                        "completed": bool(seen and seen.completed_at),
-                    }
-                )
-            done = sum(1 for v in videos if v["completed"])
-            payload.append(
-                {
-                    "id": package.pk,
-                    "name": package.name,
-                    "description": package.description,
-                    "cover": package.cover.url if package.cover else None,
-                    "kind": package.kind,
-                    "videos": videos,
-                    "completed": done,
-                    "total": len(videos),
-                }
+
+class PackageDetailView(APIView):
+    """Un modulo solo.
+
+    Sin esto, abrir un video se bajaba el catalogo entero --todos los modulos
+    con todos sus videos-- para quedarse con uno.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        # Se busca dentro de los que le llegan: pedir el id de un modulo ajeno
+        # tiene que dar 404, no el modulo.
+        package = assigned_packages(request.user).filter(pk=pk).first()
+        if package is None:
+            return Response(
+                {"detail": "Ese módulo no está entre los tuyos."},
+                status=status.HTTP_404_NOT_FOUND,
             )
-        return Response({"packages": payload})
+        progress = progress_map(request.user, [package])
+        reach = assignments_reaching(request.user, [package.pk])
+        return Response(serialize_package(package, progress, reach.get(package.pk)))
 
 
 class VideoProgressView(APIView):

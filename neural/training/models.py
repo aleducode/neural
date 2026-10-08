@@ -252,6 +252,17 @@ class Video(NeuralBaseModel):
         return match.group(1) if match else None
 
     @property
+    def player(self):
+        """Con que reproductor se ve. La app no tiene que deducirlo de `source`:
+        un enlace que no sea de YouTube es un archivo directo, y `embed` en ese
+        caso es igual a `playback`, asi que no sirve para distinguirlos."""
+        if self.source == self.Source.STREAM and self.stream_uid:
+            return "hls"
+        if self.youtube_id:
+            return "youtube"
+        return "file"
+
+    @property
     def poster(self):
         """Its own thumbnail; failing that, the one the host generates."""
         if self.thumbnail:
@@ -333,6 +344,16 @@ class PackageAssignment(NeuralBaseModel):
 
     package = models.ForeignKey(
         VideoPackage, on_delete=models.CASCADE, related_name="assignments"
+    )
+    # Para firmar la nota en la app: "Nota de Juan" en vez de un rotulo frio.
+    # Nulo en lo ya asignado, que se hizo antes de que existiera el campo.
+    assigned_by = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        related_name="packages_assigned",
+        blank=True,
+        null=True,
+        verbose_name="Asignado por",
     )
     user = models.ForeignKey(
         "users.User",
