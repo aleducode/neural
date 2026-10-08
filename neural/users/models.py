@@ -107,6 +107,7 @@ class UserMembership(NeuralBaseModel):
         QUARTER = "QUARTER", "Trimestre"
         SEMESTER = "SEMESTER", "Semestre"
         TICKETS = "TICKETS", "Tiquetera"
+        OTHER = "OTHER", "Otro plan"
 
     # Los tres planes historicos tienen un tipo propio; cualquier otro plan
     # --las tiqueteras-- cae en TICKETS.
@@ -209,8 +210,13 @@ class UserMembership(NeuralBaseModel):
         # 365. Ahora manda el plan cuando viene, y el tipo se deduce de el; sin
         # plan se conserva el camino viejo.
         if self.plan_id:
-            self.membership_type = self.TYPE_BY_PLAN.get(
-                self.plan.name, self.MembershipType.TICKETS
+            # Los tres historicos tienen tipo propio. Un plan nuevo es
+            # tiquetera si trae sesiones, y si no, "otro": etiquetar de
+            # "Tiquetera" a un plan de 15 dias sin sesiones era mentir.
+            self.membership_type = self.TYPE_BY_PLAN.get(self.plan.name) or (
+                self.MembershipType.TICKETS
+                if self.plan.sessions
+                else self.MembershipType.OTHER
             )
         else:
             self.plan = NeuralPlan.objects.filter(

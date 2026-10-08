@@ -827,6 +827,10 @@ def plans_page(today, months=12):
                 "perMonth": f"$ {round(_money(plan.price) / max(plan.duration / 30, 1)):,}".replace(
                     ",", "."
                 ),
+                # Crudos, para el formulario de edicion.
+                "priceRaw": int(plan.price),
+                "durationDays": plan.duration,
+                "sessions": plan.sessions,
                 "members": plan.users,
                 "revenue": f"$ {revenue:,}".replace(",", "."),
                 "revenueRaw": revenue,

@@ -414,3 +414,47 @@ class ActivatePlanForm(forms.Form):
             },
         )
         return membresia
+
+
+class PlanForm(forms.ModelForm):
+    """Un plan del catálogo.
+
+    La duración manda: es de donde sale la fecha de vencimiento cuando
+    recepción activa el plan. Las sesiones en cero significan "por tiempo".
+    """
+
+    class Meta:
+        model = NeuralPlan
+        fields = ["name", "description", "price", "duration", "sessions"]
+
+    def clean_name(self):
+        nombre = (self.cleaned_data.get("name") or "").strip()
+        choque = NeuralPlan.objects.filter(name__iexact=nombre)
+        if self.instance.pk:
+            choque = choque.exclude(pk=self.instance.pk)
+        if choque.exists():
+            raise forms.ValidationError("Ya hay un plan con ese nombre.")
+        return nombre
+
+    def clean_duration(self):
+        dias = self.cleaned_data.get("duration") or 0
+        if dias < 1:
+            raise forms.ValidationError("La duración tiene que ser de al menos un día.")
+        return dias
+
+
+def plan_en_uso(plan):
+    """Qué quedaría colgando si se borra ese plan.
+
+    Las membresías y los pagos pierden la etiqueta (SET_NULL), pero las
+    asignaciones de módulos se borran en cascada: alguien perdería sus
+    ejercicios sin que nadie lo note. Por eso no se borra un plan en uso.
+    """
+    from neural.training.models import PackageAssignment
+    from neural.users.models import UserMembership, UserPaymentReference
+
+    return {
+        "memberships": UserMembership.objects.filter(plan=plan).count(),
+        "payments": UserPaymentReference.objects.filter(plan=plan).count(),
+        "packages": PackageAssignment.objects.filter(plan=plan).count(),
+    }

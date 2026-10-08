@@ -33,6 +33,7 @@ from django.views.generic import (
 )
 
 from neural.users.models import (
+    NeuralPlan,
     PushNotificationLog,
     User,
     UserMembership,
@@ -47,6 +48,8 @@ from neural.users.display import display_name, initials, photo_url
 from neural.manager import metrics
 from neural.manager.forms import (
     ActivatePlanForm,
+    PlanForm,
+    plan_en_uso,
     VideoForm,
     VideoPackageForm,
     AssignmentForm,
@@ -925,6 +928,55 @@ class PlanListView(SectionView):
     page_title = "Planes"
     island = "plans"
     metric = staticmethod(metrics.plans_page)
+
+    def post(self, request, *args, **kwargs):
+        """Crear, editar o borrar un plan. Las separa el campo `action`."""
+        accion = request.POST.get("action", "save")
+        pk = request.POST.get("id")
+        plan = NeuralPlan.objects.filter(pk=pk).first() if pk else None
+
+        if accion == "delete":
+            if plan is None:
+                messages.error(request, "Ese plan ya no existe.")
+            else:
+                uso = plan_en_uso(plan)
+                if any(uso.values()):
+                    # Borrarlo arrastraria las asignaciones de modulos en
+                    # cascada: alguien se quedaria sin sus ejercicios y nadie
+                    # se enteraria.
+                    partes = []
+                    if uso["memberships"]:
+                        partes.append(f"{uso['memberships']} membresías")
+                    if uso["payments"]:
+                        partes.append(f"{uso['payments']} pagos")
+                    if uso["packages"]:
+                        partes.append(f"{uso['packages']} módulos asignados")
+                    messages.error(
+                        request,
+                        f"No se puede borrar «{plan.name}»: tiene "
+                        f"{', '.join(partes)}. Cambiale el precio o la "
+                        f"duración, o dejá de ofrecerlo.",
+                    )
+                else:
+                    nombre = plan.name
+                    plan.delete()
+                    messages.success(request, f"Plan «{nombre}» borrado.")
+            return redirect("manager:plan_list")
+
+        form = PlanForm(request.POST, instance=plan)
+        if form.is_valid():
+            guardado = form.save()
+            messages.success(
+                request,
+                f"Plan «{guardado.name}» "
+                f"{'actualizado' if plan else 'creado'}.",
+            )
+            return redirect("manager:plan_list")
+
+        context = self.get_context_data()
+        context["island_props"]["errors"] = form.errors.get_json_data()
+        context["island_props"]["errorId"] = int(pk) if pk else None
+        return self.render_to_response(context)
 
 
 class CalendarView(SectionView):
