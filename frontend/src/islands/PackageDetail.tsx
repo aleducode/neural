@@ -157,7 +157,7 @@ export default function PackageDetail({
             ) : (
               <ol className="flex flex-col divide-y divide-border">
                 {items.map((item, index) => (
-                  <li key={item.id} className="flex items-center gap-3 px-5 py-3">
+                  <li key={item.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
                     <span className="w-6 flex-none text-sm font-medium tabular-nums text-muted-foreground">
                       {index + 1}
                     </span>
@@ -206,6 +206,27 @@ export default function PackageDetail({
                         <Trash2 />
                       </Accion>
                     </span>
+
+                    {/* La indicacion del entrenador para este video en este
+                        modulo. Es lo que el socio lee arriba del reproductor. */}
+                    <form method="post" className="flex w-full items-center gap-2 pl-9">
+                      <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+                      <input type="hidden" name="action" value="note" />
+                      <input type="hidden" name="item" value={item.id} />
+                      <input
+                        name="notes"
+                        defaultValue={item.notes}
+                        maxLength={500}
+                        placeholder="Nota para el socio: «3 series de 12»"
+                        className="h-8 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-xs text-foreground outline-none placeholder:text-faint focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                      <button
+                        type="submit"
+                        className="h-8 flex-none rounded-md border border-border px-3 text-xs font-medium text-foreground hover:bg-secondary"
+                      >
+                        Guardar nota
+                      </button>
+                    </form>
                   </li>
                 ))}
               </ol>

@@ -810,6 +810,15 @@ class PackageDetailView(DetailBase):
             else:
                 errors = form.errors.get_json_data()
 
+        elif action == "note":
+            # La indicacion del entrenador para ese video dentro de este modulo.
+            # La app la pinta en la fila, en el reproductor y en la tarjeta del
+            # inicio; sin esto el campo existia en la base y en la API, pero no
+            # habia por donde escribirlo.
+            package.items.filter(pk=request.POST.get("item")).update(
+                notes=(request.POST.get("notes") or "").strip()[:500]
+            )
+
         elif action == "unassign":
             package.assignments.filter(pk=request.POST.get("assignment")).delete()
 

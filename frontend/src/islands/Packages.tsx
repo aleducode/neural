@@ -141,7 +141,7 @@ export default function Packages({
             se lo asignás.
           </DialogDescription>
         </DialogHeader>
-        <form method="post" className="flex flex-col gap-4">
+        <form method="post" encType="multipart/form-data" className="flex flex-col gap-4">
           <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
           <TextField name="name" label="Nombre" error={err("name")} required />
           <Field name="description" label="Descripción" error={err("description")}>
@@ -158,6 +158,20 @@ export default function Packages({
             options={kindChoices}
             error={err("kind")}
           />
+          <Field
+            name="cover"
+            label="Portada"
+            error={err("cover")}
+            hint="Apaisada, 1080px de ancho o más. Sin portada la app muestra una foto genérica igual para todos los módulos."
+          >
+            <input
+              id="cover"
+              name="cover"
+              type="file"
+              accept="image/*"
+              className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground file:mr-3 file:rounded file:border-0 file:bg-secondary file:px-2 file:py-1 file:text-xs file:text-foreground"
+            />
+          </Field>
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <input
               type="checkbox"
