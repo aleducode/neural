@@ -505,6 +505,7 @@ class PushNotification(NeuralBaseModel):
         ACHIEVEMENT = "achievement", "Logro desbloqueado"
         PROMOTION = "promotion", "Promoción"
         COMMUNITY = "community", "Comunidad"
+        VIDEO_PACKAGE = "video_package", "Módulo de videos"
 
     class Status(models.TextChoices):
         PENDING = "pending", "Pendiente"

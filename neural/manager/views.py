@@ -1,5 +1,6 @@
 """Manager app views."""
 
+import logging
 import math
 
 from django.contrib.auth import login, logout
@@ -15,6 +16,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.core.exceptions import ValidationError
+from neural.training.tasks import notify_packages_assigned
 from neural.training.models import (
     Classes,
     PackageVideo,
@@ -54,6 +56,9 @@ from neural.manager.forms import (
     MemberProfileForm,
     ClassForm,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class SuperStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -810,7 +815,28 @@ class PackageDetailView(DetailBase):
         elif action == "assign":
             form = AssignmentForm(request.POST)
             if form.is_valid():
-                form.save(package, assigned_by=request.user)
+                creadas = form.save(package, assigned_by=request.user)
+                # Solo las nuevas: reasignar lo mismo no tiene que volver a
+                # sonarle al socio. Va por Celery porque un «a todos» son
+                # cientos de envios y quien asigno no tiene que esperarlos.
+                nuevas = [a.pk for a in creadas if a._nueva]
+                if nuevas:
+                    # El aviso es accesorio: si la cola no responde, la
+                    # asignación ya quedó hecha y no se puede tumbar la
+                    # pantalla por un push. Se avisa que no salió y listo.
+                    try:
+                        notify_packages_assigned.delay(nuevas)
+                    except Exception:
+                        logger.exception("No se pudo encolar el aviso del módulo")
+                        messages.warning(
+                            request,
+                            "Módulo asignado, pero el aviso al teléfono no salió.",
+                        )
+                    else:
+                        messages.success(
+                            request,
+                            "Módulo asignado. Les llega un aviso al teléfono.",
+                        )
             else:
                 errors = form.errors.get_json_data()
 

@@ -352,24 +352,21 @@ class AssignmentForm(forms.Form):
         # `assigned_by` solo se escribe al crearla: si ya existia, el credito es
         # de quien la hizo la primera vez.
         extra = {"assigned_by": assigned_by} if assigned_by else {}
+
+        def crear(**clave):
+            # `_nueva` le dice a la vista a quien hay que avisarle: volver a
+            # asignar lo mismo no tiene que mandar otro push.
+            obj, nueva = PackageAssignment.objects.get_or_create(
+                package=package, defaults=extra, **clave
+            )
+            obj._nueva = nueva
+            return obj
+
         if target == "user":
-            return [
-                PackageAssignment.objects.get_or_create(
-                    package=package, user_id=uid, defaults=extra
-                )[0]
-                for uid in self.cleaned_data["users"]
-            ]
+            return [crear(user_id=uid) for uid in self.cleaned_data["users"]]
         if target == "plan":
-            return [
-                PackageAssignment.objects.get_or_create(
-                    package=package, plan_id=self.cleaned_data["plan"], defaults=extra
-                )[0]
-            ]
-        return [
-            PackageAssignment.objects.get_or_create(
-                package=package, everyone=True, defaults=extra
-            )[0]
-        ]
+            return [crear(plan_id=self.cleaned_data["plan"])]
+        return [crear(everyone=True)]
 
 
 class ActivatePlanForm(forms.Form):
