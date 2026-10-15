@@ -31,8 +31,14 @@ def setup_periodic_tasks(sender, **kwargs):
 
 
 @celery_app.task
-def create_schedule_day():
-    """Create slot available with delta 7 days"""
+def create_schedule_day(target=None):
+    """Abre los horarios reservables de un día.
+
+    Sin argumento hace el de dentro de siete días, que es como corre a diario.
+    Con `target` (ISO) hace ese: sirve para tapar un hueco sin escribir una
+    segunda versión de esto, que es como se terminan generando días con cupos
+    distintos a los del resto.
+    """
     wrapper_days = {
         0: "MONDAY",
         1: "TUESDAY",
@@ -42,15 +48,20 @@ def create_schedule_day():
         5: "SATURDAY",
         6: "SUNDAY",
     }
-    now = datetime.now().date()
-    delta_day = now + timedelta(days=7)
+    if target:
+        delta_day = datetime.fromisoformat(str(target)).date()
+    else:
+        delta_day = datetime.now().date() + timedelta(days=7)
     day_name = wrapper_days.get(delta_day.weekday())
     classes = Classes.objects.filter(day=day_name)
+    creados = 0
     for session in classes:
-        Slot.objects.update_or_create(
+        _, nuevo = Slot.objects.update_or_create(
             date=delta_day, class_training=session, defaults={"max_places": 20}
         )
-    print("Finish")
+        creados += int(nuevo)
+    logger.info("create_schedule_day %s: %s slots nuevos", delta_day, creados)
+    return {"date": str(delta_day), "created": creados, "total": classes.count()}
 
 
 def users_reached_by(assignment):
