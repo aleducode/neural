@@ -1,16 +1,56 @@
-"""Tareas de fondo del módulo de videos."""
+"""Tareas de fondo de entrenamientos y del módulo de videos.
+
+Ojo al editar: `create_schedule_day` es lo que genera los horarios que el
+socio puede reservar, con siete días de anticipación. Si deja de correr, la
+app se queda sin clases una semana después, sin ningún error a la vista.
+"""
 
 import logging
+from datetime import datetime, timedelta
+
+from celery.schedules import crontab
 
 from config import celery_app
 from neural.services.push_notifications import (
     NotificationPayload,
     PushNotificationService,
 )
-from neural.training.models import PackageAssignment, VideoPackage
-from neural.users.models import PushNotification, UserMembership, User
+from neural.training.models import Classes, PackageAssignment, Slot, VideoPackage
+from neural.users.models import PushNotification, User, UserMembership
 
 logger = logging.getLogger(__name__)
+
+
+@celery_app.on_after_finalize.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(
+        crontab(day_of_week="*", hour=00, minute=00),
+        create_schedule_day,
+        name="create_schedule_day",
+    )
+
+
+@celery_app.task
+def create_schedule_day():
+    """Create slot available with delta 7 days"""
+    wrapper_days = {
+        0: "MONDAY",
+        1: "TUESDAY",
+        2: "WEDNESDAY",
+        3: "THURSDAY",
+        4: "FRIDAY",
+        5: "SATURDAY",
+        6: "SUNDAY",
+    }
+    now = datetime.now().date()
+    delta_day = now + timedelta(days=7)
+    day_name = wrapper_days.get(delta_day.weekday())
+    classes = Classes.objects.filter(day=day_name)
+    for session in classes:
+        Slot.objects.update_or_create(
+            date=delta_day, class_training=session, defaults={"max_places": 20}
+        )
+    print("Finish")
 
 
 def users_reached_by(assignment):
