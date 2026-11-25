@@ -9,6 +9,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.middleware.csrf import get_token
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
+from django.db import transaction
+from rest_framework.authtoken.models import Token
 from django.db.models import Q, Count, Max, Prefetch
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
@@ -57,8 +59,11 @@ from neural.manager.forms import (
     SendNotificationForm,
     DeviceForm,
     MemberProfileForm,
+    MemberCreateForm,
+    MemberEmailForm,
     ClassForm,
 )
+from neural.users.accounts import create_member, send_password_email
 
 
 logger = logging.getLogger(__name__)
@@ -355,6 +360,46 @@ class MemberDetailView(DetailBase):
             User.objects.filter(is_client=True, is_staff=False), pk=self.kwargs["pk"]
         )
 
+    ACCOUNT_ACTIONS = ("approve", "revoke", "deactivate", "reactivate", "change-email", "send-password")
+
+    def account_action(self, request, member, action):
+        """Approve, deactivate, change the email or resend the password link."""
+        if action == "approve":
+            member.is_verified = True
+            member.save(update_fields=["is_verified"])
+            messages.success(request, "Cuenta aprobada. Ya puede reservar desde la app.")
+        elif action == "revoke":
+            member.is_verified = False
+            member.save(update_fields=["is_verified"])
+            messages.success(request, "Aprobación quitada. No puede reservar hasta que la aprueben de nuevo.")
+        elif action == "deactivate":
+            member.is_active = False
+            member.save(update_fields=["is_active"])
+            # Without this the app keeps a valid token until it next asks for one.
+            Token.objects.filter(user=member).delete()
+            messages.success(request, "Cuenta desactivada. Ya no puede entrar a la app.")
+        elif action == "reactivate":
+            member.is_active = True
+            member.save(update_fields=["is_active"])
+            messages.success(request, "Cuenta reactivada. Puede volver a entrar con su contraseña.")
+        elif action == "change-email":
+            form = MemberEmailForm(request.POST, member=member)
+            if not form.is_valid():
+                return self.render_to_response(
+                    self.get_context_data(obj=member, errors=form.errors.get_json_data())
+                )
+            member.email = form.cleaned_data["email"]
+            member.save(update_fields=["email"])
+            messages.success(request, f"Correo cambiado. Ahora entra con {member.email}.")
+        elif action == "send-password":
+            if not member.is_active:
+                messages.error(request, "La cuenta está desactivada: reactivala antes de mandar el enlace.")
+            elif send_password_email(request, member, welcome=not member.has_usable_password()):
+                messages.success(request, f"Le mandamos a {member.email} el enlace para elegir contraseña.")
+            else:
+                messages.error(request, "El correo no salió. Probá de nuevo en un rato.")
+        return redirect("manager:user_detail", pk=member.pk)
+
     def build_props(self, member):
         return {
             **metrics.member_detail(member.pk, timezone.localdate()),
@@ -373,8 +418,12 @@ class MemberDetailView(DetailBase):
         """La ficha y la activacion de plan comparten pantalla, asi que comparten
         endpoint: las separa el campo `action`."""
         member = self.get_object()
+        action = request.POST.get("action")
 
-        if request.POST.get("action") == "activate-plan":
+        if action in self.ACCOUNT_ACTIONS:
+            return self.account_action(request, member, action)
+
+        if action == "activate-plan":
             form = ActivatePlanForm(request.POST)
             if form.is_valid():
                 membresia = form.save(member, registrado_por=request.user)
@@ -891,11 +940,58 @@ class PackageDetailView(DetailBase):
 
 
 class MemberListView(SectionView):
-    """«14. Member - List View» with Neural's members."""
+    """«14. Member - List View» with Neural's members, and «15. Member - Add
+    New Member» as the dialog that creates one."""
 
     page_title = "Usuarios"
     island = "members"
     metric = staticmethod(metrics.members_page)
+
+    def build_props(self, today):
+        return {**self.metric(today), "planChoices": metrics.plan_choices()}
+
+    def post(self, request, *args, **kwargs):
+        form = MemberCreateForm(request.POST)
+        plan_form = ActivatePlanForm(request.POST) if request.POST.get("with_plan") else None
+        valid = form.is_valid()
+        # Both are validated before anything is written: a bad plan must not
+        # leave behind an account with no plan that reception thinks it saved.
+        if plan_form is not None:
+            valid = plan_form.is_valid() and valid
+        if not valid:
+            context = self.get_context_data()
+            errors = form.errors.get_json_data()
+            if plan_form is not None:
+                errors.update(plan_form.errors.get_json_data())
+            context["island_props"]["errors"] = errors
+            context["island_props"]["values"] = {
+                key: request.POST.get(key, "") for key in request.POST if key != "csrfmiddlewaretoken"
+            }
+            return self.render_to_response(context)
+
+        data = form.cleaned_data
+        with transaction.atomic():
+            member = create_member(
+                email=data["email"],
+                first_name=data["first_name"],
+                last_name=data["last_name"],
+                phone_number=data["phone_number"],
+                birthdate=data["birthdate"],
+            )
+            if plan_form is not None:
+                plan_form.save(member, registrado_por=request.user)
+
+        if send_password_email(request, member, welcome=True):
+            messages.success(
+                request,
+                f"Cuenta creada. Le mandamos a {member.email} el enlace para elegir su contraseña.",
+            )
+        else:
+            messages.warning(
+                request,
+                "Cuenta creada, pero el correo no salió. Reenvialo desde «Cuenta» en su ficha.",
+            )
+        return redirect("manager:user_detail", pk=member.pk)
 
 
 class ClassListView(SectionView):

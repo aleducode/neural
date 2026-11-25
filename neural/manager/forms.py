@@ -226,6 +226,57 @@ class MemberProfileForm(forms.Form):
         return user
 
 
+def _clean_unique_email(value, exclude_pk=None):
+    email = (value or "").strip().lower()
+    clash = User.objects.filter(email__iexact=email)
+    if exclude_pk:
+        clash = clash.exclude(pk=exclude_pk)
+    if clash.exists():
+        raise forms.ValidationError("Ese correo ya tiene una cuenta.")
+    return email
+
+
+class MemberCreateForm(forms.Form):
+    """«15. Member - Add New Member»: the account the team opens for someone.
+
+    The plan is optional and goes through ActivatePlanForm, the same path the
+    member page uses, so a membership created here is identical to one
+    activated later."""
+
+    first_name = forms.CharField(max_length=150)
+    last_name = forms.CharField(max_length=150)
+    email = forms.EmailField()
+    phone_number = forms.CharField(max_length=17, required=False)
+    birthdate = forms.DateField(required=False)
+    with_plan = forms.BooleanField(required=False)
+
+    def clean_email(self):
+        return _clean_unique_email(self.cleaned_data["email"])
+
+    def clean_phone_number(self):
+        phone = (self.cleaned_data.get("phone_number") or "").strip()
+        if not phone:
+            return None
+        if not User.phone_regex.regex.match(phone):
+            raise forms.ValidationError("Escribilo solo con números, por ejemplo 3001234567.")
+        if User.objects.filter(phone_number=phone).exists():
+            raise forms.ValidationError("Ese teléfono ya está en otra cuenta.")
+        return phone
+
+
+class MemberEmailForm(forms.Form):
+    """Change the email a member logs in with."""
+
+    email = forms.EmailField()
+
+    def __init__(self, *args, member=None, **kwargs):
+        self.member = member
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        return _clean_unique_email(self.cleaned_data["email"], exclude_pk=self.member.pk)
+
+
 class ClassForm(forms.Form):
     """The class record: the schedule and its training type."""
 

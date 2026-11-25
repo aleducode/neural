@@ -2,7 +2,13 @@ import { useState, type ReactNode } from "react";
 
 import {
   ArrowLeft,
+  Ban,
   BadgeCheck,
+  KeyRound,
+  RotateCcw,
+  Send,
+  UserCheck,
+  UserX,
   BellPlus,
   CalendarCheck,
   CalendarDays,
@@ -18,6 +24,7 @@ import {
 import { MemberAvatar } from "@/components/ui/member-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DateField } from "@/components/ui/date-field";
 import {
   DetailHero,
@@ -52,6 +59,9 @@ type Props = {
     email: string;
     phone: string;
     verified: boolean;
+    active: boolean;
+    hasPassword: boolean;
+    lastLogin: string | null;
     joined: string | null;
     status: string;
     tone: Tone;
@@ -157,7 +167,11 @@ export default function MemberDetail({
         }
         title={member.name}
         badges={[
-          ...(member.verified ? [{ label: "Verificado", tone: "success" as Tone }] : []),
+          ...(!member.active
+            ? [{ label: "Desactivada", tone: "error" as Tone }]
+            : member.verified
+              ? [{ label: "Verificado", tone: "success" as Tone }]
+              : [{ label: "Por aprobar", tone: "warning" as Tone }]),
           { label: member.status, tone: membership.tone },
         ]}
         meta={[
@@ -311,6 +325,8 @@ export default function MemberDetail({
         </div>
 
         <div className="flex flex-col gap-6">
+          <AccountWidget member={member} csrfToken={csrfToken} emailError={err(errors, "email")} />
+
           <Widget>
             <WidgetHeader icon={<BadgeCheck className="size-5" />} title="Membresía" />
             {membership.plan ? (
@@ -540,6 +556,162 @@ export default function MemberDetail({
         </div>
       </div>
     </div>
+  );
+}
+
+/** One-button form: every account action posts an `action` to this page. */
+function ActionForm({
+  action,
+  csrfToken,
+  children,
+  variant = "outline",
+}: {
+  action: string;
+  csrfToken: string;
+  children: ReactNode;
+  variant?: "default" | "outline" | "destructive";
+}) {
+  return (
+    <form method="post">
+      <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+      <input type="hidden" name="action" value={action} />
+      <Button type="submit" size="sm" variant={variant} className="w-full justify-start">
+        {children}
+      </Button>
+    </form>
+  );
+}
+
+/**
+ * The account itself, apart from the membership: whether the member may book,
+ * whether they can log in at all, and the email and password they log in with.
+ */
+function AccountWidget({
+  member,
+  csrfToken,
+  emailError,
+}: {
+  member: Props["member"];
+  csrfToken: string;
+  emailError?: string;
+}) {
+  const [editingEmail, setEditingEmail] = useState(Boolean(emailError));
+  const [confirmOff, setConfirmOff] = useState(false);
+
+  const state = !member.active
+    ? { label: "Desactivada", tone: "error" as Tone, detail: "No puede entrar a la app." }
+    : member.verified
+      ? { label: "Aprobada", tone: "success" as Tone, detail: "Puede entrar y reservar." }
+      : { label: "Por aprobar", tone: "warning" as Tone, detail: "Puede entrar a la app, pero no reservar hasta que la aprueben." };
+
+  return (
+    <Widget>
+      <WidgetHeader icon={<KeyRound className="size-5" />} title="Cuenta">
+        <Badge dot variant={state.tone}>{state.label}</Badge>
+      </WidgetHeader>
+
+      <div className="flex flex-col gap-4 p-5">
+        <p className="text-sm text-muted-foreground">{state.detail}</p>
+
+        <dl className="flex flex-col gap-2">
+          <KeyValue term="Correo de ingreso">
+            <span className="break-all">{member.email}</span>
+          </KeyValue>
+          <KeyValue term="Contraseña">{member.hasPassword ? "Elegida" : "Todavía no la eligió"}</KeyValue>
+          <KeyValue term="Último ingreso">{member.lastLogin ?? "Nunca"}</KeyValue>
+        </dl>
+
+        {editingEmail ? (
+          <form method="post" className="flex flex-col gap-3">
+            <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+            <input type="hidden" name="action" value="change-email" />
+            <TextField
+              name="email"
+              label="Correo nuevo"
+              type="email"
+              defaultValue={member.email}
+              error={emailError}
+              required
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <Button type="button" size="sm" variant="ghost" onClick={() => setEditingEmail(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" size="sm">
+                Guardar correo
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {member.active && !member.verified && (
+              <ActionForm action="approve" csrfToken={csrfToken} variant="default">
+                <UserCheck />
+                Aprobar cuenta
+              </ActionForm>
+            )}
+            {member.active && (
+              <ActionForm action="send-password" csrfToken={csrfToken}>
+                <Send />
+                {member.hasPassword ? "Mandar enlace para cambiar contraseña" : "Reenviar enlace para elegir contraseña"}
+              </ActionForm>
+            )}
+            <Button type="button" size="sm" variant="outline" className="w-full justify-start" onClick={() => setEditingEmail(true)}>
+              <Mail />
+              Cambiar correo
+            </Button>
+            {member.active && member.verified && (
+              <ActionForm action="revoke" csrfToken={csrfToken}>
+                <UserX />
+                Quitar aprobación
+              </ActionForm>
+            )}
+            {member.active ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="w-full justify-start text-destructive hover:text-destructive"
+                onClick={() => setConfirmOff(true)}
+              >
+                <Ban />
+                Desactivar cuenta
+              </Button>
+            ) : (
+              <ActionForm action="reactivate" csrfToken={csrfToken} variant="default">
+                <RotateCcw />
+                Reactivar cuenta
+              </ActionForm>
+            )}
+          </div>
+        )}
+      </div>
+
+      <Dialog open={confirmOff} onOpenChange={setConfirmOff}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>¿Desactivar la cuenta de {member.name}?</DialogTitle>
+            <DialogDescription>
+              Se cierra su sesión en la app y no puede volver a entrar. Su historial, pagos y plan se
+              conservan, y la podés reactivar cuando quieras.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setConfirmOff(false)}>
+              Cancelar
+            </Button>
+            <form method="post">
+              <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+              <input type="hidden" name="action" value="deactivate" />
+              <Button type="submit" variant="destructive" size="sm">
+                Desactivar
+              </Button>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </Widget>
   );
 }
 

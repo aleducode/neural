@@ -479,6 +479,13 @@ def members_page(today):
                 "joined": _fecha(timezone.localtime(user.date_joined).date()),
                 "expires": _fecha(expires),
                 "lastCheckin": _fecha(user.ultimo_checkin) or "Nunca",
+                # Account state, apart from the membership: a member can have a
+                # paid plan and still be waiting for approval.
+                "account": (
+                    "inactive"
+                    if not user.is_active
+                    else "pending" if not user.is_verified else "ok"
+                ),
             }
         )
 
@@ -1131,6 +1138,9 @@ def member_detail(user_id, today):
             "email": user.email,
             "phone": user.phone_number or "—",
             "verified": user.is_verified,
+            "active": user.is_active,
+            "hasPassword": user.has_usable_password(),
+            "lastLogin": _fecha(timezone.localtime(user.last_login).date()) if user.last_login else None,
             "joined": _fecha(timezone.localtime(user.date_joined).date()),
             "status": state,
             "tone": tone,

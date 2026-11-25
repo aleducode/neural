@@ -41,6 +41,8 @@ type Props<T> = {
   emptyDetail: string;
   /** Nota al pie de la tarjeta: de que periodo habla la tabla, por ejemplo. */
   footnote?: ReactNode;
+  /** Controls next to the table's search box, such as filter tabs. */
+  tableActions?: ReactNode;
 };
 
 export function ListSection<T>({
@@ -62,6 +64,7 @@ export function ListSection<T>({
   emptyTitle,
   emptyDetail,
   footnote,
+  tableActions,
 }: Props<T>) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -90,6 +93,7 @@ export function ListSection<T>({
       <DataTableCard
         icon={tableIcon}
         title={tableTitle}
+        actions={tableActions}
         searchPlaceholder={searchPlaceholder}
         query={query}
         onQuery={(value) => {
