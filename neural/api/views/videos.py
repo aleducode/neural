@@ -94,6 +94,8 @@ def serialize_package(package, progress, assignment):
                 "name": video.name,
                 "description": video.description,
                 "notes": item.notes,
+                # Sub-section; the app draws a header each time it changes.
+                "block": item.block,
                 "order": item.order,
                 "duration": video.duration_seconds,
                 "poster": video.poster,

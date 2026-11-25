@@ -334,6 +334,13 @@ class PackageVideo(NeuralBaseModel):
     notes = models.CharField(
         "Notas del entrenador", max_length=500, blank=True, default=""
     )
+    block = models.CharField(
+        "Bloque",
+        max_length=80,
+        blank=True,
+        default="",
+        help_text="Sub-section of the package (Calentamiento, Fuerza…). Consecutive videos with the same block are shown together.",
+    )
 
     class Meta:
         verbose_name = "Video del paquete"

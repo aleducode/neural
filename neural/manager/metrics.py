@@ -14,6 +14,7 @@ from django.utils import timezone
 
 from neural.training.models import (
     Classes,
+    PackageVideo,
     Slot,
     TrainingType,
     UserTraining,
@@ -1756,6 +1757,7 @@ def package_detail(package_id):
                 "videoId": item.video_id,
                 "order": item.order,
                 "notes": item.notes,
+                "block": item.block,
                 **_video_row(item.video),
             }
         )
@@ -1793,6 +1795,10 @@ def package_detail(package_id):
     completados = views.filter(completed_at__isnull=False).count()
 
     return {
+        # Blocks already used anywhere, so trainers reuse the same names.
+        "blockSuggestions": sorted(
+            set(PackageVideo.objects.exclude(block="").values_list("block", flat=True))
+        ),
         "package": {
             "id": package.pk,
             "name": package.name,

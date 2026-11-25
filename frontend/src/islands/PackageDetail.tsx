@@ -9,9 +9,10 @@ import {
   TrendingUp,
   Users,
   ImagePlus,
+  Layers,
   Video as VideoIcon,
 } from "lucide-react";
-import { useState, type ReactNode, useRef } from "react";
+import { Fragment, useState, type ReactNode, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -45,6 +46,7 @@ type Item = {
   videoId: number;
   order: number;
   notes: string;
+  block: string;
   name: string;
   poster: string | null;
   playback: string | null;
@@ -74,6 +76,7 @@ type Props = {
     userId: number | null;
     initials: string | null;
   }[];
+  blockSuggestions: string[];
   available: { id: number; name: string; duration: string; source: string; poster: string | null }[];
   drafts: number;
   progress: {
@@ -99,6 +102,7 @@ export default function PackageDetail({
   kpis,
   items,
   assignments,
+  blockSuggestions,
   available,
   drafts,
   progress,
@@ -168,7 +172,15 @@ export default function PackageDetail({
             ) : (
               <ol className="flex flex-col divide-y divide-border">
                 {items.map((item, index) => (
-                  <li key={item.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
+                  <Fragment key={item.id}>
+                  {/* A header each time the block changes: the same grouping the app shows. */}
+                  {item.block && item.block !== items[index - 1]?.block && (
+                    <li className="flex items-center gap-2 bg-secondary px-5 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <Layers className="size-3.5" aria-hidden="true" />
+                      {item.block}
+                    </li>
+                  )}
+                  <li className="flex flex-wrap items-center gap-3 px-5 py-3">
                     <span className="w-6 flex-none text-sm font-medium tabular-nums text-muted-foreground">
                       {index + 1}
                     </span>
@@ -238,10 +250,41 @@ export default function PackageDetail({
                         Guardar nota
                       </button>
                     </form>
+
+                    {/* Which sub-section of the package this video is in. */}
+                    <form method="post" className="flex w-full items-center gap-2 pl-9">
+                      <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+                      <input type="hidden" name="action" value="block" />
+                      <input type="hidden" name="item" value={item.id} />
+                      <label htmlFor={`block-${item.id}`} className="sr-only">
+                        Bloque
+                      </label>
+                      <input
+                        id={`block-${item.id}`}
+                        name="block"
+                        list="block-suggestions"
+                        defaultValue={item.block}
+                        maxLength={80}
+                        placeholder="Bloque: «Calentamiento», «Fuerza»…"
+                        className="h-8 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-xs text-foreground outline-none placeholder:text-faint focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                      <button
+                        type="submit"
+                        className="h-8 flex-none rounded-md border border-border px-3 text-xs font-medium text-foreground hover:bg-secondary"
+                      >
+                        Guardar bloque
+                      </button>
+                    </form>
                   </li>
+                  </Fragment>
                 ))}
               </ol>
             )}
+            <datalist id="block-suggestions">
+              {blockSuggestions.map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
           </Widget>
 
           <Widget>

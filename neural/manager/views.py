@@ -927,6 +927,12 @@ class PackageDetailView(DetailBase):
                 notes=(request.POST.get("notes") or "").strip()[:500]
             )
 
+        elif action == "block":
+            # The sub-section this video belongs to. Blank takes it out of any.
+            package.items.filter(pk=request.POST.get("item")).update(
+                block=" ".join((request.POST.get("block") or "").split())[:80]
+            )
+
         elif action == "unassign":
             package.assignments.filter(pk=request.POST.get("assignment")).delete()
 
