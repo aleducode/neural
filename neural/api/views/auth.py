@@ -1,5 +1,6 @@
 """Authentication views for API v1."""
 
+from django.contrib.auth.models import update_last_login
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -25,6 +26,9 @@ class LoginView(APIView):
 
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
+        # Token logins skip django.contrib.auth.login, so last_login (shown in
+        # the panel as «Último ingreso») was never set for app users.
+        update_last_login(None, user)
 
         return Response(
             {

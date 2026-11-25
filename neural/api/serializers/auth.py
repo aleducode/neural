@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from neural.users.accounts import unique_username
 from neural.users.models import User
 
 
@@ -53,6 +54,13 @@ class LoginSerializer(serializers.Serializer):
                 password=password,
             )
             if not user:
+                # ModelBackend returns None for an inactive account even with the
+                # right password; say why, but only to whoever knows the password.
+                blocked = User.objects.filter(email__iexact=email, is_active=False).first()
+                if blocked and blocked.check_password(password):
+                    raise serializers.ValidationError(
+                        {"detail": "Tu cuenta está desactivada. Escribinos o acercate a recepción."}
+                    )
                 raise serializers.ValidationError({"detail": "Credenciales inválidas"})
             if not user.is_active:
                 raise serializers.ValidationError({"detail": "Usuario desactivado"})
@@ -90,6 +98,10 @@ class RegisterSerializer(serializers.ModelSerializer):
             "password",
             "password_confirmation",
         ]
+        # The model's unique validators answer in English ("A user with that
+        # email already exist"); validate_email/validate_phone_number below
+        # check the same thing in Spanish.
+        extra_kwargs = {"email": {"validators": []}, "phone_number": {"validators": []}}
 
     def validate_email(self, value):
         if User.objects.filter(email__iexact=value).exists():
@@ -114,17 +126,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop("password_confirmation")
         password = validated_data.pop("password")
 
-        # Generate username from email
-        email = validated_data["email"]
-        username = email.split("@")[0]
-        base_username = username
-        counter = 1
-        while User.objects.filter(username=username).exists():
-            username = f"{base_username}{counter}"
-            counter += 1
-
         user = User.objects.create(
-            username=username,
+            username=unique_username(validated_data["email"]),
             **validated_data,
         )
         user.set_password(password)
