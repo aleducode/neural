@@ -1,7 +1,8 @@
-import { Check, ChevronsUpDown, Search, Send } from "lucide-react";
+import { Check, ChevronsUpDown, Search, Send, Users } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,8 @@ type Props = {
   types: { value: string; label: string }[];
   /** Cuando se entra desde el detalle de un usuario, ya viene elegido. */
   lockedUser: Candidate | null;
+  /** Members with the app installed: who «Todos» reaches. */
+  everyoneCount: number;
   defaultType: string;
   cancelUrl: string;
   csrfToken: string;
@@ -21,6 +24,7 @@ export default function SendNotification({
   users,
   types,
   lockedUser,
+  everyoneCount,
   defaultType,
   cancelUrl,
   csrfToken,
@@ -31,6 +35,10 @@ export default function SendNotification({
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [type, setType] = useState(defaultType);
+  const [audience, setAudience] = useState<"one" | "everyone">("one");
+  const [confirming, setConfirming] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const everyone = audience === "everyone";
 
   const box = useRef<HTMLDivElement>(null);
 
@@ -55,13 +63,25 @@ export default function SendNotification({
       .slice(0, 50);
   }, [users, search]);
 
-  const ready = Boolean(selected && title.trim() && body.trim());
+  const ready = Boolean((everyone || selected) && title.trim() && body.trim());
 
   return (
     <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-      <form method="post" className="rounded-lg border border-border bg-background">
+      <form
+        ref={formRef}
+        method="post"
+        className="rounded-lg border border-border bg-background"
+        onSubmit={(event) => {
+          // Sending to everyone cannot be undone: ask once before it goes.
+          if (everyone && !confirming) {
+            event.preventDefault();
+            setConfirming(true);
+          }
+        }}
+      >
         <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
-        <input type="hidden" name="user" value={selected?.id ?? ""} />
+        <input type="hidden" name="audience" value={audience} />
+        <input type="hidden" name="user" value={everyone ? "" : selected?.id ?? ""} />
         <input type="hidden" name="notification_type" value={type} />
 
         <div className="border-b border-border px-6 py-5">
@@ -71,6 +91,41 @@ export default function SendNotification({
         </div>
 
         <div className="flex flex-col gap-5 p-6">
+          {!lockedUser && (
+            <div>
+              <span className="mb-1.5 block text-sm font-medium text-foreground">Para quién</span>
+              <div role="radiogroup" aria-label="Para quién" className="inline-flex gap-1 rounded-lg bg-accent p-1">
+                {[
+                  { key: "one" as const, label: "Una persona" },
+                  { key: "everyone" as const, label: `Todos (${everyoneCount})` },
+                ].map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={audience === option.key}
+                    onClick={() => setAudience(option.key)}
+                    className={cn(
+                      "rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+                      audience === option.key && "bg-background text-foreground shadow-sm",
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {everyone ? (
+            <div className="flex items-start gap-3 rounded-md border border-border bg-secondary p-3 text-sm text-muted-foreground">
+              <Users className="mt-0.5 size-4 flex-none" />
+              <p>
+                Le llega a los <span className="font-medium text-foreground">{everyoneCount} usuarios</span> que tienen
+                la app instalada con las notificaciones activas.
+              </p>
+            </div>
+          ) : (
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">
               Usuario *
@@ -158,6 +213,7 @@ export default function SendNotification({
               </div>
             )}
           </div>
+          )}
 
           <div>
             <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-foreground">
@@ -210,7 +266,7 @@ export default function SendNotification({
           <div className="flex gap-3 pt-2">
             <Button type="submit" disabled={!ready}>
               <Send className="h-4 w-4" />
-              Enviar notificación
+              {everyone ? `Enviar a ${everyoneCount} usuarios` : "Enviar notificación"}
             </Button>
             <Button variant="outline" asChild>
               <a href={cancelUrl}>Cancelar</a>
@@ -246,11 +302,37 @@ export default function SendNotification({
 
           <ul className="mt-4 flex flex-col gap-1 border-t border-border pt-4 text-xs text-muted-foreground">
             <li>La notificación se enviará inmediatamente</li>
-            <li>El usuario debe tener un dispositivo registrado</li>
-            <li>Se enviará a todos los dispositivos activos del usuario</li>
+            {everyone ? (
+              <li>Solo llega a quien tiene la app con las notificaciones activas</li>
+            ) : (
+              <>
+                <li>El usuario debe tener un dispositivo registrado</li>
+                <li>Se enviará a todos los dispositivos activos del usuario</li>
+              </>
+            )}
           </ul>
         </div>
       </div>
+
+      <Dialog open={confirming} onOpenChange={setConfirming}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>¿Enviar a {everyoneCount} usuarios?</DialogTitle>
+            <DialogDescription>
+              «{title.trim()}» le llega ahora mismo a todos los que tienen la app. No se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setConfirming(false)}>
+              Cancelar
+            </Button>
+            <Button type="button" size="sm" onClick={() => formRef.current?.submit()}>
+              <Send className="h-4 w-4" />
+              Enviar a todos
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

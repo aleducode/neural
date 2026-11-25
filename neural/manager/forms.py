@@ -84,12 +84,26 @@ class ManagerLoginForm(forms.Form):
 
 
 class SendNotificationForm(forms.Form):
-    """Form to send push notifications."""
+    """Form to send push notifications, to one member or to everyone."""
 
+    ONE = "one"
+    EVERYONE = "everyone"
+
+    @staticmethod
+    def reachable_users():
+        """Who a push can reach: members with an active device."""
+        return (
+            User.objects.filter(is_active=True, devices__is_active=True)
+            .distinct()
+            .order_by("first_name", "last_name")
+        )
+
+    audience = forms.ChoiceField(
+        choices=[(ONE, "Una persona"), (EVERYONE, "Todos")], initial=ONE, required=False
+    )
     user = forms.ModelChoiceField(
-        queryset=User.objects.filter(is_client=True, devices__is_active=True)
-        .distinct()
-        .order_by("first_name", "last_name"),
+        queryset=User.objects.none(),
+        required=False,
         label="Usuario",
         widget=forms.Select(
             attrs={
@@ -131,10 +145,18 @@ class SendNotificationForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["user"].queryset = self.reachable_users()
         # Update queryset to show user info
         self.fields["user"].label_from_instance = (
             lambda obj: f"{obj.first_name} {obj.last_name} ({obj.email})"
         )
+
+    def clean(self):
+        data = super().clean()
+        data["audience"] = data.get("audience") or self.ONE
+        if data["audience"] == self.ONE and not data.get("user"):
+            self.add_error("user", "Elegí a quién se la mandás.")
+        return data
 
 
 class DeviceForm(forms.ModelForm):

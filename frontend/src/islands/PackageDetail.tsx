@@ -14,6 +14,7 @@ import {
 import { useState, type ReactNode, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DetailHero,
   Field,
@@ -132,6 +133,15 @@ export default function PackageDetail({
           { icon: VideoIcon, value: `${items.length} videos` },
           { icon: Users, value: `${assignments.length} asignaciones` },
         ]}
+        actions={
+          <BorrarPaquete
+            name={paquete.name}
+            videos={items.length}
+            assignments={assignments.length}
+            watching={progress.started}
+            csrfToken={csrfToken}
+          />
+        }
       />
 
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -582,5 +592,65 @@ function PortadaEditable({
         />
       </label>
     </form>
+  );
+}
+
+/**
+ * Delete the package. Its videos stay in the library and each member's
+ * progress on them is kept; what goes is the order and who it was assigned to.
+ */
+function BorrarPaquete({
+  name,
+  videos,
+  assignments,
+  watching,
+  csrfToken,
+}: {
+  name: string;
+  videos: number;
+  assignments: number;
+  watching: number;
+  csrfToken: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="text-destructive hover:text-destructive"
+        onClick={() => setOpen(true)}
+      >
+        <Trash2 />
+        Borrar paquete
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>¿Borrar «{name}»?</DialogTitle>
+            <DialogDescription>
+              {assignments > 0
+                ? `Tiene ${assignments} ${assignments === 1 ? "asignación" : "asignaciones"}${watching ? ` y ${watching} ${watching === 1 ? "persona lo está" : "personas lo están"} haciendo` : ""}: deja de aparecerles en la app. `
+                : ""}
+              {videos === 1 ? "El video sigue en la biblioteca. " : videos > 1 ? `Los ${videos} videos siguen en la biblioteca. ` : ""}
+              No se puede deshacer. Si solo querés esconderlo, desmarcá «Publicado» en la ficha.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <form method="post">
+              <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+              <input type="hidden" name="action" value="delete" />
+              <Button type="submit" variant="destructive" size="sm">
+                Borrar
+              </Button>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

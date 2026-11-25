@@ -1,5 +1,6 @@
 """Manager app views."""
 
+import csv
 import logging
 import math
 
@@ -12,13 +13,14 @@ from django.contrib import messages
 from django.db import transaction
 from rest_framework.authtoken.models import Token
 from django.db.models import Q, Count, Max, Prefetch
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.core.exceptions import ValidationError
 from neural.training.tasks import notify_packages_assigned
+from neural.users.tasks import send_push_notification_to_all
 from neural.training.models import (
     Classes,
     PackageVideo,
@@ -644,6 +646,7 @@ class SendNotificationView(SuperStaffRequiredMixin, FormView):
                 for v, label in PushNotification.NotificationType.choices
             ],
             "lockedUser": card(target) if target else None,
+            "everyoneCount": SendNotificationForm.reachable_users().count(),
             "defaultType": PushNotification.NotificationType.GENERAL,
             "cancelUrl": str(reverse("manager:notification_list")),
             "csrfToken": get_token(self.request),
@@ -658,6 +661,21 @@ class SendNotificationView(SuperStaffRequiredMixin, FormView):
         title = form.cleaned_data["title"]
         body = form.cleaned_data["body"]
         notification_type = form.cleaned_data["notification_type"]
+
+        if form.cleaned_data["audience"] == SendNotificationForm.EVERYONE:
+            # Hundreds of pushes: Celery sends them so the page does not wait.
+            reach = form.reachable_users().count()
+            try:
+                send_push_notification_to_all.delay(title, body, notification_type)
+            except Exception:
+                logger.exception("Could not queue the notification to everyone")
+                messages.error(self.request, "No se pudo enviar. Probá de nuevo en un rato.")
+                return self.form_invalid(form)
+            messages.success(
+                self.request,
+                f"Enviando la notificación a {reach} usuarios con la app instalada.",
+            )
+            return redirect(self.success_url)
 
         # Check if user has devices
         if not Device.objects.filter(user=user, is_active=True).exists():
@@ -912,6 +930,14 @@ class PackageDetailView(DetailBase):
         elif action == "unassign":
             package.assignments.filter(pk=request.POST.get("assignment")).delete()
 
+        elif action == "delete":
+            # Hard delete: its order and assignments go with it, the videos stay
+            # in the library and each member's progress on them is kept.
+            name = package.name
+            package.delete()
+            messages.success(request, f"Paquete «{name}» borrado. Sus videos siguen en la biblioteca.")
+            return redirect("manager:package_list")
+
         if errors:
             return self.render_to_response(
                 self.get_context_data(obj=package, errors=errors)
@@ -948,7 +974,11 @@ class MemberListView(SectionView):
     metric = staticmethod(metrics.members_page)
 
     def build_props(self, today):
-        return {**self.metric(today), "planChoices": metrics.plan_choices()}
+        return {
+            **self.metric(today),
+            "planChoices": metrics.plan_choices(),
+            "exportUrl": str(reverse("manager:member_export")),
+        }
 
     def post(self, request, *args, **kwargs):
         form = MemberCreateForm(request.POST)
@@ -992,6 +1022,28 @@ class MemberListView(SectionView):
                 "Cuenta creada, pero el correo no salió. Reenvialo desde «Cuenta» en su ficha.",
             )
         return redirect("manager:user_detail", pk=member.pk)
+
+
+class MemberExportView(SuperStaffRequiredMixin, View):
+    """Every member as CSV, for the gym's CRM."""
+
+    def get(self, request, *args, **kwargs):
+        today = timezone.localdate()
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="usuarios-neural-{today.isoformat()}.csv"'
+        # BOM so Excel opens the accents right.
+        response.write("\ufeff")
+        writer = csv.writer(response)
+        writer.writerow(metrics.MEMBER_EXPORT_HEADER)
+        for row in metrics.member_export_rows(today):
+            writer.writerow([_csv_safe(value) for value in row])
+        return response
+
+
+def _csv_safe(value):
+    """Neutralise cells a spreadsheet would run as a formula."""
+    text = "" if value is None else str(value)
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
 
 
 class ClassListView(SectionView):

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { BellPlus, Check, UserPlus, Users, X } from "lucide-react";
+import { BellPlus, Check, Download, UserPlus, Users, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ type Props = {
   userDetailUrl: string;
   sendUrl: string;
   planChoices: Plan[];
+  exportUrl: string;
   csrfToken: string;
   errors?: Errors;
   values?: Record<string, string>;
@@ -52,7 +53,7 @@ const FILTERS: { key: "all" | Account; label: string }[] = [
   { key: "inactive", label: "Desactivados" },
 ];
 
-export default function Members({ kpis, rows, userDetailUrl, sendUrl, planChoices, csrfToken, errors, values }: Props) {
+export default function Members({ kpis, rows, userDetailUrl, sendUrl, planChoices, exportUrl, csrfToken, errors, values }: Props) {
   const hasErrors = Boolean(errors && Object.keys(errors).length);
   const [creating, setCreating] = useState(hasErrors);
   const [filter, setFilter] = useState<"all" | Account>("all");
@@ -75,6 +76,12 @@ export default function Members({ kpis, rows, userDetailUrl, sendUrl, planChoice
         description="Todos los usuarios del gimnasio, su membresía y su actividad."
         actions={
           <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" asChild>
+              <a href={exportUrl} download>
+                <Download />
+                Exportar CSV
+              </a>
+            </Button>
             <Button size="sm" variant="outline" asChild>
               <a href={sendUrl}>
                 <BellPlus />

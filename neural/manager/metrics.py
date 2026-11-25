@@ -507,6 +507,66 @@ def members_page(today):
     }
 
 
+MEMBER_EXPORT_HEADER = [
+    "Nombre",
+    "Apellido",
+    "Correo",
+    "Teléfono",
+    "Fecha de nacimiento",
+    "Plan",
+    "Estado de la membresía",
+    "Vence",
+    "Cuenta aprobada",
+    "Cuenta activa",
+    "Fecha de registro",
+    "Última reserva",
+]
+
+
+def member_export_rows(today):
+    """One row per member for the CRM export, membership read like the list."""
+    active = UserMembership.objects.filter(is_active=True).select_related("plan")
+    users = (
+        client_users()
+        .select_related("profile")
+        .prefetch_related(Prefetch("memberships", queryset=active, to_attr="vigentes"))
+        .annotate(
+            ultimo=Max(
+                "trainings__slot__date",
+                filter=~Q(trainings__status=UserTraining.Status.CANCELLED),
+            )
+        )
+        .order_by("-date_joined")
+    )
+    week = today + timedelta(days=7)
+    for user in users:
+        membership = user.vigentes[0] if user.vigentes else None
+        expires = membership.expiration_date if membership else None
+        if not membership:
+            state = "Sin membresía"
+        elif expires and expires < today:
+            state = "Vencida"
+        elif expires and expires <= week:
+            state = "Por vencer"
+        else:
+            state = "Activa"
+        profile = getattr(user, "profile", None)
+        yield [
+            user.first_name,
+            user.last_name,
+            user.email,
+            user.phone_number or "",
+            profile.birthdate.isoformat() if profile and profile.birthdate else "",
+            membership.plan.name if membership and membership.plan else "",
+            state,
+            expires.isoformat() if expires else "",
+            "Sí" if user.is_verified else "No",
+            "Sí" if user.is_active else "No",
+            timezone.localtime(user.date_joined).date().isoformat(),
+            user.ultimo.isoformat() if user.ultimo else "",
+        ]
+
+
 def classes_page(today):
     """Classes: the «19. Class - List View» screen.
 

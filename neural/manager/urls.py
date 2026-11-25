@@ -16,6 +16,7 @@ from neural.manager.views import (
     SendNotificationView,
     DeviceEditView,
     MemberListView,
+    MemberExportView,
     ClassListView,
     BookingListView,
     CalendarView,
@@ -40,6 +41,7 @@ urlpatterns = [
     path("classes/<int:pk>/", ClassDetailView.as_view(), name="class_detail"),
     # Secciones del panel (diseno docs/design/manager.pen)
     path("members/", MemberListView.as_view(), name="member_list"),
+    path("members/export/", MemberExportView.as_view(), name="member_export"),
     path("classes/", ClassListView.as_view(), name="class_list"),
     path("bookings/", BookingListView.as_view(), name="booking_list"),
     path("calendar/", CalendarView.as_view(), name="calendar"),
