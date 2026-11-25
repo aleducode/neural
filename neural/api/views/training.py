@@ -1,6 +1,6 @@
 """Training views for API v1."""
 
-from datetime import timedelta
+from datetime import date, timedelta
 
 from django.db.models import F
 from django.utils import timezone
@@ -20,12 +20,29 @@ from neural.users.models import UserStats, UserStrike
 
 
 class CalendarView(APIView):
-    """Get calendar days for the next 7 days."""
+    """Calendar days and whether each has classes.
+
+    Seven days from today by default. The app asks for a whole month with
+    start_date/end_date; those were ignored, so days past the first week never
+    got their "has classes" dot."""
 
     permission_classes = [IsAuthenticated]
+    MAX_DAYS = 62
 
     def get(self, request):
         today = timezone.localdate()
+        try:
+            start = date.fromisoformat(request.query_params["start_date"])
+        except (KeyError, ValueError):
+            start = today
+        try:
+            end = date.fromisoformat(request.query_params["end_date"])
+        except (KeyError, ValueError):
+            end = start + timedelta(days=6)
+        end = min(max(end, start), start + timedelta(days=self.MAX_DAYS - 1))
+        with_slots = set(
+            Slot.objects.filter(date__gte=start, date__lte=end).values_list("date", flat=True)
+        )
         days = []
 
         day_names = {
@@ -38,22 +55,21 @@ class CalendarView(APIView):
             6: "Domingo",
         }
 
-        for i in range(7):
-            date = today + timedelta(days=i)
-            has_slots = Slot.objects.filter(date=date).exists()
+        for i in range((end - start).days + 1):
+            day = start + timedelta(days=i)
 
-            if i == 0:
+            if day == today:
                 day_name = "Hoy"
-            elif i == 1:
+            elif day == today + timedelta(days=1):
                 day_name = "Mañana"
             else:
-                day_name = day_names.get(date.weekday(), "")
+                day_name = day_names.get(day.weekday(), "")
 
             days.append(
                 {
-                    "date": date.isoformat(),
+                    "date": day.isoformat(),
                     "day_name": day_name,
-                    "has_slots": has_slots,
+                    "has_slots": day in with_slots,
                 }
             )
 

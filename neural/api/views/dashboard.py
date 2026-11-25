@@ -1,12 +1,14 @@
 """Dashboard views for API v1."""
 
+from datetime import timedelta
+
 from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from neural.training.models import UserTraining
-from neural.users.models import UserMembership, UserStats, UserStrike
+from neural.users.models import UserMembership, UserStrike
 
 
 class DashboardView(APIView):
@@ -82,18 +84,18 @@ class DashboardView(APIView):
                 "is_current": True,
             }
 
-        # Weekly stats
-        current_week = now.isocalendar()[1]
-        stats_data = {"trainings": 0, "calories": 0, "hours": 0}
-        weekly_stats = UserStats.objects.filter(
-            user=user, week=current_week, year=now.year
-        ).first()
-        if weekly_stats:
-            stats_data = {
-                "trainings": weekly_stats.trainings,
-                "calories": weekly_stats.calories,
-                "hours": weekly_stats.hours,
-            }
+        # This week's stats, from the classes already attended. UserStats is
+        # bumped at booking time, so it counted a class booked for Friday as
+        # done on Monday.
+        today = now.date()
+        week_start = today - timedelta(days=today.weekday())
+        done = UserTraining.objects.filter(
+            user=user,
+            slot__date__gte=week_start,
+            slot__date__lte=today,
+            status__in=(UserTraining.Status.CONFIRMED, UserTraining.Status.DONE),
+        ).count()
+        stats_data = {"trainings": done, "calories": done * 400, "hours": done}
 
         # Active membership
         membership_data = None
