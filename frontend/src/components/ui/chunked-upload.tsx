@@ -1,57 +1,141 @@
 import { CheckCircle2, CloudUpload, RotateCw, X } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as tus from "tus-js-client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * Sube un video, por partes, pensado para internet malo.
+ * Video uploads, built for bad internet and for many files at once.
  *
- * Dos caminos, y lo decide el servidor, no el navegador:
- *  - `stream`: Cloudflare da una URL de un solo uso y el archivo va **directo**
- *    allá por tus. Nunca pasa por Django: sin peticiones de diez minutos ni
- *    límite de body. Reanudable por el propio protocolo.
- *  - `fallback`: no hay token de Cloudflare, así que los trozos van a nuestro
- *    almacenamiento. También reanudable, preguntando qué partes ya llegaron.
+ * The server picks the route for each file, not the browser:
+ *  - `stream`: Cloudflare hands out a one-time URL and the file goes straight
+ *    there over tus. It never passes through Django. Resumable by the protocol.
+ *  - `fallback`: no Cloudflare token, so chunks go to our own storage. Also
+ *    resumable, by asking which parts already arrived.
  *
- * El componente es el mismo en los dos casos; lo que cambia es a dónde manda.
+ * Every file is its own upload with its own progress; the queue only decides
+ * how many run at the same time.
  */
 
-const CHUNK = 5 * 1024 * 1024; // 5 MB: el mínimo que Cloudflare acepta por parte
-const REINTENTOS = 3;
+const CHUNK = 5 * 1024 * 1024; // 5 MB: the smallest part Cloudflare accepts
+const RETRIES = 3;
+// Three at once keeps a gym's connection usable; more only splits the same
+// bandwidth into slower uploads.
+const PARALLEL = 3;
 
-type Estado = "idle" | "subiendo" | "pausada" | "listo" | "error";
-type Modo = "stream" | "fallback" | null;
+export type UploadStatus = "queued" | "uploading" | "done" | "error";
+export type QueuedFile = { key: string; file: File; status: UploadStatus };
 
-const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const mb = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
-export function ChunkedUpload({
+/** The queue lives in the page, so uploads keep going with the dialog closed. */
+export function useUploadQueue() {
+  const [items, setItems] = useState<QueuedFile[]>([]);
+
+  const add = useCallback((files: File[]) => {
+    const videos = files.filter((f) => f.type.startsWith("video/"));
+    setItems((current) => [
+      ...current,
+      ...videos.map((file) => ({
+        key: `${file.name}-${file.size}-${file.lastModified}-${Math.random()}`,
+        file,
+        status: "queued" as const,
+      })),
+    ]);
+    return videos.length;
+  }, []);
+
+  const setStatus = useCallback((key: string, status: UploadStatus) => {
+    setItems((current) => current.map((i) => (i.key === key ? { ...i, status } : i)));
+  }, []);
+
+  const remove = useCallback((key: string) => {
+    setItems((current) => current.filter((i) => i.key !== key));
+  }, []);
+
+  const clear = useCallback(() => setItems([]), []);
+
+  // A file starts when it is among the first PARALLEL still pending. A failed
+  // one gives up its slot until someone retries it.
+  const pending = items.filter((i) => i.status === "queued" || i.status === "uploading");
+  const active = new Set(pending.slice(0, PARALLEL).map((i) => i.key));
+  const done = items.filter((i) => i.status === "done").length;
+  const failed = items.filter((i) => i.status === "error").length;
+
+  // Closing the tab mid-upload loses whatever was not sent: warn first.
+  const busy = pending.length > 0;
+  useEffect(() => {
+    if (!busy) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [busy]);
+
+  return { items, add, setStatus, remove, clear, active, busy, done, failed };
+}
+
+export function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
+  return (
+    <label
+      className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border bg-secondary px-6 py-8 text-center transition-colors hover:border-primary"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        onFiles(Array.from(e.dataTransfer.files ?? []));
+      }}
+    >
+      <CloudUpload className="size-6 text-muted-foreground" aria-hidden="true" />
+      <span className="text-sm font-medium text-foreground">
+        Arrastrá los videos o hacé clic para elegirlos
+      </span>
+      <span className="text-xs text-muted-foreground">
+        Podés elegir varios. Se suben de a {PARALLEL} y, si se corta el internet,
+        siguen desde donde iban.
+      </span>
+      <input
+        type="file"
+        accept="video/*"
+        multiple
+        className="sr-only"
+        onChange={(event) => {
+          onFiles(Array.from(event.target.files ?? []));
+          event.target.value = "";
+        }}
+      />
+    </label>
+  );
+}
+
+/** One file's upload. It starts on its own once the queue makes it active. */
+export function UploadRow({
   uploadUrl,
   csrfToken,
-  onDone,
+  item,
+  active,
+  onStatus,
+  onRemove,
 }: {
   uploadUrl: string;
   csrfToken: string;
-  onDone?: (video: { videoId: number; name: string }) => void;
+  item: QueuedFile;
+  active: boolean;
+  onStatus: (status: UploadStatus) => void;
+  onRemove: () => void;
 }) {
-  const [file, setFile] = useState<File | null>(null);
-  const [estado, setEstado] = useState<Estado>("idle");
-  const [modo, setModo] = useState<Modo>(null);
+  const { file, status } = item;
   const [pct, setPct] = useState(0);
-  const [detalle, setDetalle] = useState("");
+  const [detail, setDetail] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const cancelado = useRef(false);
-  const subidaTus = useRef<tus.Upload | null>(null);
+  const cancelled = useRef(false);
+  const tusUpload = useRef<tus.Upload | null>(null);
 
-  const pedir = useCallback(
-    async (campos: Record<string, string | Blob>) => {
+  const request = useCallback(
+    async (fields: Record<string, string | Blob>) => {
       const body = new FormData();
       body.append("csrfmiddlewaretoken", csrfToken);
-      for (const [k, v] of Object.entries(campos)) body.append(k, v);
+      for (const [k, v] of Object.entries(fields)) body.append(k, v);
       const response = await fetch(uploadUrl, { method: "POST", body });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error ?? `Error ${response.status}`);
@@ -60,249 +144,180 @@ export function ChunkedUpload({
     [uploadUrl, csrfToken],
   );
 
-  /** Directo a Cloudflare con tus: él solo reanuda y reintenta. */
-  const aStream = useCallback(
-    (elegido: File, destino: string, uid: string) =>
+  /** Straight to Cloudflare with tus: it resumes and retries by itself. */
+  const toStream = useCallback(
+    (destination: string, uid: string) =>
       new Promise<void>((resolve, reject) => {
-        const upload = new tus.Upload(elegido, {
-          uploadUrl: destino,
+        const upload = new tus.Upload(file, {
+          uploadUrl: destination,
           chunkSize: CHUNK,
           retryDelays: [0, 3000, 6000, 12000],
-          metadata: { name: elegido.name, filetype: elegido.type },
-          onProgress: (subido, total) => {
-            setPct(Math.round((subido / total) * 100));
-            setDetalle(`${mb(subido)} de ${mb(total)}`);
+          metadata: { name: file.name, filetype: file.type },
+          onProgress: (sent, total) => {
+            setPct(Math.round((sent / total) * 100));
+            setDetail(`${mb(sent)} de ${mb(total)}`);
           },
           onError: reject,
           onSuccess: async () => {
-            // Los bytes ya llegaron, pero Cloudflare sigue codificando: la
-            // duración y el "listo" todavía no existen. Se vuelve a preguntar
-            // unas cuantas veces; si igual no alcanza, `sync_stream_videos` lo
-            // levanta después.
-            for (let intento = 0; intento < 6; intento++) {
-              setDetalle(`Procesando en Cloudflare… (${intento * 5}s)`);
-              const estado = await pedir({ action: "confirm", uid });
-              if (estado.ready) {
-                setDetalle(`Listo · ${Math.round(estado.duration)}s`);
+            // The bytes arrived but Cloudflare is still encoding, so the
+            // duration and "ready" do not exist yet. Ask a few times; if that
+            // is not enough, `sync_stream_videos` picks it up later.
+            for (let attempt = 0; attempt < 6; attempt++) {
+              setDetail("Procesando en Cloudflare…");
+              const state = await request({ action: "confirm", uid });
+              if (state.ready) {
+                setDetail(`Listo · ${Math.round(state.duration)} s`);
                 break;
               }
-              await espera(5000);
+              await wait(5000);
             }
             resolve();
           },
         });
-        subidaTus.current = upload;
+        tusUpload.current = upload;
         upload.start();
       }),
-    [pedir],
+    [file, request],
   );
 
-  /** A nuestro almacenamiento, preguntando qué partes ya llegaron. */
-  const aNuestro = useCallback(
-    async (elegido: File) => {
-      const sesion = await pedir({
-        action: "init",
-        filename: elegido.name,
-        size: String(elegido.size),
-        chunkSize: String(CHUNK),
-      });
-      const tam: number = sesion.chunkSize;
-      const cuantos: number = sesion.totalChunks;
-      const yaEstan = new Set<number>(sesion.received ?? []);
-      let hechos = yaEstan.size;
-      setPct(Math.round((hechos / cuantos) * 100));
+  /** To our own storage, asking which parts already arrived. */
+  const toOwnStorage = useCallback(async () => {
+    const session = await request({
+      action: "init",
+      filename: file.name,
+      size: String(file.size),
+      chunkSize: String(CHUNK),
+    });
+    const size: number = session.chunkSize;
+    const total: number = session.totalChunks;
+    const already = new Set<number>(session.received ?? []);
+    let sent = already.size;
+    setPct(Math.round((sent / total) * 100));
 
-      for (let i = 0; i < cuantos; i++) {
-        if (cancelado.current) {
-          setEstado("pausada");
-          return null;
+    for (let i = 0; i < total; i++) {
+      if (cancelled.current) return false;
+      if (already.has(i)) continue;
+
+      let last: unknown = null;
+      for (let attempt = 1; attempt <= RETRIES; attempt++) {
+        try {
+          await request({
+            action: "chunk",
+            token: session.token,
+            index: String(i),
+            chunk: file.slice(i * size, (i + 1) * size),
+          });
+          last = null;
+          break;
+        } catch (reason) {
+          last = reason;
+          // Back off: hammering a dead network only drains the battery.
+          if (attempt < RETRIES) await wait(attempt * 1500);
         }
-        if (yaEstan.has(i)) continue;
-
-        let ultimo: unknown = null;
-        for (let intento = 1; intento <= REINTENTOS; intento++) {
-          try {
-            await pedir({
-              action: "chunk",
-              token: sesion.token,
-              index: String(i),
-              chunk: elegido.slice(i * tam, (i + 1) * tam),
-            });
-            ultimo = null;
-            break;
-          } catch (reason) {
-            ultimo = reason;
-            // Espera creciente: insistir de inmediato con la red caída solo
-            // gasta batería.
-            if (intento < REINTENTOS) await espera(intento * 1500);
-          }
-        }
-        if (ultimo) throw ultimo;
-
-        hechos += 1;
-        setPct(Math.round((hechos / cuantos) * 100));
-        setDetalle(`parte ${hechos} de ${cuantos}`);
       }
+      if (last) throw last;
 
-      return pedir({ action: "complete", token: sesion.token });
-    },
-    [pedir],
-  );
+      sent += 1;
+      setPct(Math.round((sent / total) * 100));
+      setDetail(`parte ${sent} de ${total}`);
+    }
 
-  const subir = useCallback(
-    async (elegido: File) => {
-      cancelado.current = false;
-      setEstado("subiendo");
-      setError(null);
-      setPct(0);
-      setDetalle("Preparando…");
+    await request({ action: "complete", token: session.token });
+    return true;
+  }, [file, request]);
 
-      try {
-        const ruta = await pedir({
-          action: "direct",
-          filename: elegido.name,
-          size: String(elegido.size),
-        });
-
-        if (ruta.mode === "stream") {
-          setModo("stream");
-          await aStream(elegido, ruta.uploadUrl, ruta.uid);
-          setEstado("listo");
-          onDone?.({ videoId: ruta.videoId, name: elegido.name });
-          return;
-        }
-
-        setModo("fallback");
-        const listo = await aNuestro(elegido);
-        if (!listo) return;
-        setEstado("listo");
-        onDone?.(listo);
-      } catch (reason) {
-        setError(String((reason as Error)?.message ?? reason));
-        setEstado("error");
-      }
-    },
-    [pedir, aStream, aNuestro, onDone],
-  );
-
-  const limpiar = () => {
-    cancelado.current = true;
-    subidaTus.current?.abort();
-    setFile(null);
-    setEstado("idle");
-    setModo(null);
-    setPct(0);
-    setDetalle("");
+  const start = useCallback(async () => {
+    cancelled.current = false;
+    onStatus("uploading");
     setError(null);
-  };
+    setDetail("Preparando…");
+
+    try {
+      const route = await request({
+        action: "direct",
+        filename: file.name,
+        size: String(file.size),
+      });
+      if (route.mode === "stream") {
+        await toStream(route.uploadUrl, route.uid);
+      } else if (!(await toOwnStorage())) {
+        return;
+      }
+      setPct(100);
+      onStatus("done");
+    } catch (reason) {
+      if (cancelled.current) return;
+      setError(String((reason as Error)?.message ?? reason));
+      onStatus("error");
+    }
+  }, [file, request, toStream, toOwnStorage, onStatus]);
+
+  // Runs once per turn in the queue; a retry calls `start` directly.
+  useEffect(() => {
+    if (active && status === "queued") start();
+  }, [active, status, start]);
+
+  // Removing the row or leaving the page stops its transfer.
+  useEffect(
+    () => () => {
+      cancelled.current = true;
+      tusUpload.current?.abort();
+    },
+    [],
+  );
 
   return (
-    <div className="flex flex-col gap-3">
-      {!file && (
-        <label
-          className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border bg-secondary px-6 py-8 text-center transition-colors hover:border-primary"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            const soltado = e.dataTransfer.files?.[0];
-            if (soltado) {
-              setFile(soltado);
-              subir(soltado);
-            }
-          }}
-        >
-          <CloudUpload className="size-6 text-muted-foreground" aria-hidden="true" />
-          <span className="text-sm font-medium text-foreground">
-            Arrastrá un video o hacé clic para elegirlo
-          </span>
-          <span className="text-xs text-muted-foreground">
-            Se sube por partes: si se corta el internet, sigue desde donde iba.
-          </span>
-          <input
-            type="file"
-            accept="video/*"
-            className="sr-only"
-            onChange={(event) => {
-              const elegido = event.target.files?.[0];
-              if (!elegido) return;
-              setFile(elegido);
-              subir(elegido);
-            }}
-          />
-        </label>
-      )}
-
-      {file && (
-        <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
-              <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                {mb(file.size)}
-                {detalle && <>· {detalle}</>}
-                {modo && (
-                  <Badge variant={modo === "stream" ? "success" : "neutral"}>
-                    {modo === "stream" ? "Directo a Cloudflare" : "Almacenamiento propio"}
-                  </Badge>
-                )}
-              </p>
-            </div>
-            {estado === "listo" ? (
-              <CheckCircle2 className="size-5 flex-none text-positive" aria-hidden="true" />
-            ) : (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-8"
-                aria-label="Cancelar subida"
-                onClick={limpiar}
-              >
-                <X />
-              </Button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-accent">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-[width]",
-                  estado === "error" ? "bg-destructive" : "bg-primary",
-                )}
-                style={{ width: `${Math.max(pct, 2)}%` }}
-                role="progressbar"
-                aria-valuenow={pct}
-                aria-valuemin={0}
-                aria-valuemax={100}
-              />
-            </div>
-            <span className="text-xs tabular-nums text-muted-foreground">{pct}%</span>
-          </div>
-
-          {estado === "error" && (
-            <Alert variant="destructive">
-              <AlertTitle>La subida se cortó</AlertTitle>
-              <AlertDescription>
-                {error} — lo que ya se subió quedó guardado.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {(estado === "error" || estado === "pausada") && (
-            <Button type="button" size="sm" variant="outline" onClick={() => subir(file)}>
+    <li className="flex flex-col gap-2 py-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
+          <p className="text-xs text-muted-foreground">
+            {mb(file.size)}
+            {status === "queued" && " · En espera"}
+            {status !== "queued" && detail && ` · ${detail}`}
+          </p>
+        </div>
+        {status === "done" ? (
+          <CheckCircle2 className="size-5 flex-none text-positive" aria-label="Subido" />
+        ) : status === "error" ? (
+          <span className="flex flex-none items-center gap-1">
+            <Button type="button" variant="outline" size="sm" onClick={start}>
               <RotateCw />
-              Reanudar desde donde iba
+              Reintentar
             </Button>
-          )}
-
-          {estado === "listo" && (
-            <p className="text-sm text-positive">
-              Video subido. Ya está en la biblioteca.
-            </p>
-          )}
+            <Button type="button" variant="ghost" size="icon" className="size-8" aria-label={`Quitar ${file.name}`} onClick={onRemove}>
+              <X />
+            </Button>
+          </span>
+        ) : (
+          <Button type="button" variant="ghost" size="icon" className="size-8 flex-none" aria-label={`Cancelar ${file.name}`} onClick={onRemove}>
+            <X />
+          </Button>
+        )}
+      </div>
+      {status !== "done" && (
+        <div className="flex items-center gap-3">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-accent">
+            <div
+              className={cn(
+                "h-full rounded-full transition-[width]",
+                status === "error" ? "bg-destructive" : "bg-primary",
+              )}
+              style={{ width: `${Math.max(pct, status === "queued" ? 0 : 2)}%` }}
+              role="progressbar"
+              aria-valuenow={pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            />
+          </div>
+          <span className="w-9 text-right text-xs tabular-nums text-muted-foreground">{pct}%</span>
         </div>
       )}
-    </div>
+      {error && (
+        <p className="text-xs text-destructive">
+          {error}. Lo que ya se subió quedó guardado.
+        </p>
+      )}
+    </li>
   );
 }

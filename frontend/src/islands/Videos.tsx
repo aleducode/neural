@@ -1,9 +1,9 @@
-import { Link2, Pencil, Plus, Video as VideoIcon } from "lucide-react";
+import { Link2, Pencil, Plus, RotateCw, Video as VideoIcon, X } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChunkedUpload } from "@/components/ui/chunked-upload";
+import { DropZone, UploadRow, useUploadQueue } from "@/components/ui/chunked-upload";
 import { Field, SelectField, TextField } from "@/components/ui/detail";
 import {
   Dialog,
@@ -70,6 +70,7 @@ export default function Videos({
     errors && errorId ? rows.find((r) => r.id === errorId) ?? null : null,
   );
   const err = (campo: string) => errors?.[campo]?.[0]?.message;
+  const cola = useUploadQueue();
 
   return (
     <>
@@ -84,7 +85,7 @@ export default function Videos({
           </Button>
           <Button size="sm" onClick={() => setAbierto("upload")}>
             <Plus />
-            Subir video
+            Subir videos
           </Button>
         </>
       }
@@ -163,19 +164,69 @@ export default function Videos({
     <Dialog open={abierto === "upload"} onOpenChange={(v) => !v && setAbierto(null)}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Subir un video</DialogTitle>
+          <DialogTitle>Subir videos</DialogTitle>
           <DialogDescription>
-            El archivo se sube por partes. Cuando termine queda en la biblioteca como
-            borrador y le ponés nombre y nivel.
+            Elegí uno o varios. Se suben en segundo plano mientras seguís trabajando, y
+            cada uno queda en la biblioteca como borrador para ponerle nombre y nivel.
           </DialogDescription>
         </DialogHeader>
-        <ChunkedUpload
-          uploadUrl={uploadUrl}
-          csrfToken={csrfToken}
-          onDone={() => window.location.reload()}
+        <DropZone
+          onFiles={(files) => {
+            if (cola.add(files) > 0) setAbierto(null);
+          }}
         />
       </DialogContent>
     </Dialog>
+
+    {/* La cola vive fuera del diálogo: cerrarlo no corta ninguna subida. */}
+    {cola.items.length > 0 && (
+      <section
+        aria-label="Subidas de video"
+        className="fixed inset-x-4 bottom-4 z-40 flex max-h-[70vh] flex-col rounded-lg border border-border bg-card shadow-lg sm:left-auto sm:right-6 sm:w-96"
+      >
+        <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+          <p className="text-sm font-medium text-foreground">
+            {cola.busy
+              ? `Subiendo videos · ${cola.done} de ${cola.items.length}`
+              : cola.failed
+                ? `${cola.done} subidos, ${cola.failed} con error`
+                : `${cola.done} ${cola.done === 1 ? "video subido" : "videos subidos"}`}
+          </p>
+          <span className="flex items-center gap-1">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setAbierto("upload")}>
+              <Plus />
+              Más
+            </Button>
+            {!cola.busy && (
+              <Button type="button" variant="ghost" size="icon" className="size-8" aria-label="Cerrar" onClick={cola.clear}>
+                <X />
+              </Button>
+            )}
+          </span>
+        </header>
+        <ul className="divide-y divide-border overflow-y-auto px-4">
+          {cola.items.map((item) => (
+            <UploadRow
+              key={item.key}
+              uploadUrl={uploadUrl}
+              csrfToken={csrfToken}
+              item={item}
+              active={cola.active.has(item.key)}
+              onStatus={(status) => cola.setStatus(item.key, status)}
+              onRemove={() => cola.remove(item.key)}
+            />
+          ))}
+        </ul>
+        {!cola.busy && cola.done > 0 && (
+          <footer className="border-t border-border px-4 py-3">
+            <Button type="button" size="sm" className="w-full" onClick={() => window.location.reload()}>
+              <RotateCw />
+              Ver los videos nuevos en la biblioteca
+            </Button>
+          </footer>
+        )}
+      </section>
+    )}
 
     {/* Editar el video: es lo que saca un borrador recién subido del limbo. */}
     <Dialog open={editando !== null} onOpenChange={(v) => !v && setEditando(null)}>
